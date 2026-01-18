@@ -1,10 +1,11 @@
+import { getSessionCookie } from "better-auth/cookies"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 const guestOnlyPaths = ["/login", "/register"]
 
 export const middleware = (request: NextRequest) => {
-  const sessionCookie = request.cookies.get("better-auth.session_token")
+  const sessionCookie = getSessionCookie(request)
   const pathname = request.nextUrl.pathname
 
   const isGuestOnlyPath = guestOnlyPaths.some((path) => pathname.startsWith(path))

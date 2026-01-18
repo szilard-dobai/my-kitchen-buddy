@@ -32,8 +32,7 @@ function LoginForm() {
         setError(result.error.message || "Invalid email or password");
       } else {
         const callbackUrl = searchParams.get("callbackUrl") || "/recipes";
-        router.push(callbackUrl);
-        router.refresh();
+        router.replace(callbackUrl);
       }
     } catch {
       setError("An unexpected error occurred");

@@ -46,8 +46,7 @@ function RegisterForm() {
         setError(result.error.message || "Registration failed");
       } else {
         const callbackUrl = searchParams.get("callbackUrl") || "/recipes";
-        router.push(callbackUrl);
-        router.refresh();
+        router.replace(callbackUrl);
       }
     } catch {
       setError("An unexpected error occurred");
