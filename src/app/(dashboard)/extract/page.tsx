@@ -94,6 +94,11 @@ export default function ExtractPage() {
         throw new Error(data.error || "Failed to start extraction");
       }
 
+      if (data.existingRecipeId) {
+        router.push(`/recipes/${data.existingRecipeId}/edit`);
+        return;
+      }
+
       setJobId(data.jobId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");

@@ -96,3 +96,22 @@ export async function deleteRecipe(id: string, userId: string): Promise<boolean>
     return false;
   }
 }
+
+export async function findRecipeBySourceUrl(
+  userId: string,
+  normalizedUrl: string
+): Promise<Recipe | null> {
+  const collection = await getRecipesCollection();
+
+  const recipe = await collection.findOne({
+    userId,
+    "source.url": normalizedUrl,
+  });
+
+  if (!recipe) return null;
+
+  return {
+    ...recipe,
+    _id: recipe._id.toString(),
+  } as Recipe;
+}

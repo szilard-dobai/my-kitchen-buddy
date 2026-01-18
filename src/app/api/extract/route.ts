@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { createExtractionJob, getExtractionJobById } from "@/models/extraction-job";
+import { findRecipeBySourceUrl } from "@/models/recipe";
 import { processExtraction } from "@/services/extraction";
 import { detectPlatform, normalizeUrl } from "@/services/extraction/platform-detector";
 
@@ -27,6 +28,14 @@ export async function POST(request: Request) {
         { error: detection.error || "Invalid URL" },
         { status: 400 }
       );
+    }
+
+    const existingRecipe = await findRecipeBySourceUrl(session.user.id, normalizedUrl);
+    if (existingRecipe) {
+      return NextResponse.json({
+        existingRecipeId: existingRecipe._id,
+        message: "Recipe already exists",
+      });
     }
 
     // Create extraction job
