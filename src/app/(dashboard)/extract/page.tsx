@@ -91,7 +91,7 @@ export default function ExtractPage() {
       }
 
       if (data.existingRecipeId) {
-        router.push(`/recipes/${data.existingRecipeId}/edit`);
+        router.push(`/recipes/${data.existingRecipeId}`);
         return;
       }
 
