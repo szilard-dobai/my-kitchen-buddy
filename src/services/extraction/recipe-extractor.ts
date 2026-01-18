@@ -5,32 +5,53 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are an expert recipe extraction system. Given a transcript from a cooking video, extract the recipe information into a structured JSON format.
+const SYSTEM_PROMPT = `You are a recipe extraction system. Given a transcript from a cooking video, extract the recipe information.
 
-Extract the following information:
-- title: The recipe name (infer if not explicitly stated)
-- description: Brief description of the dish
-- cuisineType: Type of cuisine (e.g., Italian, Mexican, Asian)
-- difficulty: Easy, Medium, or Hard
-- prepTime: Preparation time (e.g., "10 minutes")
-- cookTime: Cooking time (e.g., "20 minutes")
-- totalTime: Total time (e.g., "30 minutes")
-- servings: Number of servings (e.g., "4 servings")
-- dietaryTags: Array of tags (e.g., ["vegetarian", "gluten-free"])
-- mealType: breakfast, lunch, dinner, snack, or dessert
-- ingredients: Array of {name, quantity, unit, notes, category}
-- instructions: Array of {stepNumber, description, duration, technique}
-- equipment: Array of equipment needed (e.g., ["oven", "mixing bowl"])
-- tipsAndNotes: Array of tips mentioned in the video
+RULES:
+1. Extract instructions that ARE verbally described - if someone says "slice the apple, add sugar, bake it", those ARE instructions to extract
+2. DO NOT invent specific quantities/measurements not mentioned - if they say "add sugar" without an amount, quantity should be null
+3. DO NOT add extra steps beyond what was described - stick to what was actually said
+4. DO NOT infer cooking times, temperatures, or serving sizes unless explicitly stated
 
-Guidelines:
-- If information is not mentioned, omit the field or use null
-- For ingredients, include ALL ingredients mentioned, even common ones like salt and oil
-- For instructions, create clear sequential steps even if the video doesn't explicitly number them
-- Infer reasonable values when possible (e.g., cuisine type from ingredients)
-- Use standard measurements when quantities are vague (e.g., "a pinch" -> "1/8 tsp")
+Extract into this JSON structure:
+{
+  "title": "Recipe name (from transcript, or brief description based on the dish)",
+  "description": "Brief description if mentioned or can be derived from context",
+  "cuisineType": "Only if mentioned or clearly evident",
+  "difficulty": "Only if mentioned",
+  "prepTime": "Only if explicitly mentioned",
+  "cookTime": "Only if explicitly mentioned",
+  "totalTime": "Only if explicitly mentioned",
+  "servings": "Only if explicitly mentioned",
+  "dietaryTags": ["Only tags explicitly mentioned or clearly evident (e.g., 'vegan' if all ingredients are plant-based)"],
+  "mealType": "Only if mentioned or clearly evident (e.g., 'dessert' for a sweet dish)",
+  "ingredients": [
+    {
+      "name": "ingredient name as mentioned",
+      "quantity": "ONLY if explicitly stated (e.g., '2', '1/2'), otherwise null",
+      "unit": "ONLY if explicitly stated (e.g., 'cups', 'tablespoons'), otherwise null",
+      "notes": "preparation notes if mentioned (e.g., 'sliced into rings', 'room temperature')"
+    }
+  ],
+  "instructions": [
+    {
+      "stepNumber": 1,
+      "description": "Step based on what was verbally described - extract the actions mentioned"
+    }
+  ],
+  "equipment": ["Equipment explicitly mentioned (e.g., 'oven', 'pan')"],
+  "tipsAndNotes": ["Only tips explicitly shared"],
+  "confidence": 0.0-1.0,
+  "extractionNotes": "Note what information was missing (e.g., 'No quantities specified', 'Cooking temperature not mentioned')"
+}
 
-Return ONLY valid JSON, no additional text.`;
+GUIDELINES:
+- Extract instructions from verbal descriptions of actions (e.g., "slice, coat, bake" = real steps)
+- Leave quantity/unit as null when amounts aren't specified - don't guess "1 cup" or "2 tablespoons"
+- Set confidence based on how complete the information is (high if detailed, lower if sparse)
+- Use extractionNotes to document what's missing so users know what to fill in
+
+Return ONLY valid JSON.`;
 
 interface ExtractionResult {
   recipe: Partial<CreateRecipeInput> | null;
