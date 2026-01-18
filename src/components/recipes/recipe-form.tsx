@@ -298,7 +298,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           ) : (
             instructions.map((instruction, index) => (
               <div key={index} className="flex gap-2 items-start">
-                <span className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-medium text-gray-600 mt-1">
+                <span className="shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-medium text-gray-600 mt-1">
                   {instruction.stepNumber}
                 </span>
                 <textarea

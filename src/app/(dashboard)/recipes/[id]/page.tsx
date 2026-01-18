@@ -50,17 +50,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <h1 className="text-3xl font-bold">{recipe.title}</h1>
           <div className="flex flex-wrap gap-2 mt-3">
             <span
-              className={`text-sm px-3 py-1 rounded-full ${
-                platformColors[recipe.source.platform]
-              }`}
+              className={`text-sm px-3 py-1 rounded-full ${platformColors[recipe.source.platform]
+                }`}
             >
               {recipe.source.platform}
             </span>
             {recipe.difficulty && (
               <span
-                className={`text-sm px-3 py-1 rounded-full ${
-                  difficultyColors[recipe.difficulty]
-                }`}
+                className={`text-sm px-3 py-1 rounded-full ${difficultyColors[recipe.difficulty]
+                  }`}
               >
                 {recipe.difficulty}
               </span>
@@ -160,7 +158,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
               <ol className="space-y-4">
                 {recipe.instructions.map((instruction) => (
                   <li key={instruction.stepNumber} className="flex gap-4">
-                    <span className="flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-medium text-gray-600">
+                    <span className="shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-medium text-gray-600">
                       {instruction.stepNumber}
                     </span>
                     <div className="flex-1">
