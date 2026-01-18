@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const publicPaths = ["/login", "/register", '/']
+const guestOnlyPaths = ["/login", "/register"]
 
 export const middleware = (request: NextRequest) => {
   const sessionCookie = request.cookies.get("better-auth.session_token")
-  const isPublicPath = publicPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  )
+  const pathname = request.nextUrl.pathname
 
-  if (!sessionCookie && !isPublicPath) {
-    return NextResponse.redirect(new URL("/", request.url))
+  const isGuestOnlyPath = guestOnlyPaths.some((path) => pathname.startsWith(path))
+  const isHomePage = pathname === "/"
+
+  if (!sessionCookie && !isGuestOnlyPath && !isHomePage) {
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  if (sessionCookie && isPublicPath) {
+  if (sessionCookie && isGuestOnlyPath) {
     return NextResponse.redirect(new URL("/recipes", request.url))
   }
 
