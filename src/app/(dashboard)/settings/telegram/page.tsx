@@ -23,6 +23,8 @@ export default function TelegramSettingsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
   const [deepLink, setDeepLink] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchStatus();
@@ -44,6 +46,8 @@ export default function TelegramSettingsPage() {
     setActionLoading(true);
     setError("");
     setDeepLink(null);
+    setToken(null);
+    setCopied(false);
 
     try {
       const response = await fetch("/api/telegram-link", { method: "POST" });
@@ -54,11 +58,20 @@ export default function TelegramSettingsPage() {
       }
 
       setDeepLink(data.deepLink);
+      setToken(data.token);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect");
     } finally {
       setActionLoading(false);
     }
+  }
+
+  async function copyCommand() {
+    if (!token) return;
+    const command = `/start ${token}`;
+    await navigator.clipboard.writeText(command);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleDisconnect() {
@@ -135,17 +148,37 @@ export default function TelegramSettingsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {deepLink ? (
+              {deepLink && token ? (
                 <>
                   <p className="text-sm text-gray-600">
                     Click the link below to open Telegram and complete the
-                    linking process. Press &quot;Start&quot; when the bot opens.
+                    linking process.
                   </p>
                   <Button asChild>
                     <a href={deepLink} target="_blank" rel="noopener noreferrer">
                       Open Telegram Bot
                     </a>
                   </Button>
+
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-gray-600 mb-2">
+                      If the link doesn&apos;t work, copy this command and paste
+                      it in the bot chat:
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 p-2 bg-gray-100 rounded text-sm font-mono break-all">
+                        /start {token}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={copyCommand}
+                      >
+                        {copied ? "Copied!" : "Copy"}
+                      </Button>
+                    </div>
+                  </div>
+
                   <p className="text-xs text-gray-500">
                     Link expires in 10 minutes.{" "}
                     <button
