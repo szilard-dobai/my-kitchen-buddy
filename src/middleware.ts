@@ -1,31 +1,27 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-const protectedRoutes = ["/recipes", "/extract"];
-const authRoutes = ["/login", "/register"];
+const publicPaths = ["/login", "/register", '/']
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get("better-auth.session_token");
-  const isAuthenticated = !!sessionCookie;
+export const middleware = (request: NextRequest) => {
+  const sessionCookie = request.cookies.get("better-auth.session_token")
+  const isPublicPath = publicPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  )
 
-  if (authRoutes.some((route) => pathname.startsWith(route))) {
-    if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/recipes", request.url));
-    }
+  if (!sessionCookie && !isPublicPath) {
+    return NextResponse.redirect(new URL("/", request.url))
   }
 
-  if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-    if (!isAuthenticated) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  if (sessionCookie && isPublicPath) {
+    return NextResponse.redirect(new URL("/recipes", request.url))
   }
 
-  return NextResponse.next();
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|$).*)"],
-};
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|manifest.webmanifest|icon.png|apple-icon.png|manifest-icon-.*\\.png|favicon-.*\\.png).*)",
+  ],
+}
