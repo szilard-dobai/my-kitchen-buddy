@@ -46,6 +46,31 @@ interface MetadataResult {
   error?: string;
 }
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+  baseDelay = 60000
+): Promise<Response> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(url, options);
+
+    if (response.status === 429 && attempt < maxRetries - 1) {
+      const delay = baseDelay * (attempt + 1);
+      await sleep(delay);
+      continue;
+    }
+
+    return response;
+  }
+
+  throw new Error("Max retries exceeded");
+}
+
 export async function getTranscript(url: string): Promise<TranscriptResult> {
   const apiKey = process.env.SUPADATA_API_KEY;
 
@@ -60,7 +85,7 @@ export async function getTranscript(url: string): Promise<TranscriptResult> {
     const apiUrl = new URL("https://api.supadata.ai/v1/transcript");
     apiUrl.searchParams.set("url", url);
 
-    const response = await fetch(apiUrl.toString(), {
+    const response = await fetchWithRetry(apiUrl.toString(), {
       method: "GET",
       headers: {
         "x-api-key": apiKey,
@@ -83,6 +108,13 @@ export async function getTranscript(url: string): Promise<TranscriptResult> {
         return {
           transcript: "",
           error: "Supadata API credits exhausted. Please try again later.",
+        };
+      }
+
+      if (response.status === 429) {
+        return {
+          transcript: "",
+          error: "Rate limit exceeded. Please wait a minute and try again.",
         };
       }
 
@@ -136,7 +168,7 @@ export async function getMetadata(url: string): Promise<MetadataResult> {
     const apiUrl = new URL("https://api.supadata.ai/v1/metadata");
     apiUrl.searchParams.set("url", url);
 
-    const response = await fetch(apiUrl.toString(), {
+    const response = await fetchWithRetry(apiUrl.toString(), {
       method: "GET",
       headers: {
         "x-api-key": apiKey,
@@ -151,6 +183,12 @@ export async function getMetadata(url: string): Promise<MetadataResult> {
       if (response.status === 402) {
         return {
           error: "Supadata API credits exhausted. Please try again later.",
+        };
+      }
+
+      if (response.status === 429) {
+        return {
+          error: "Rate limit exceeded. Please wait a minute and try again.",
         };
       }
 
