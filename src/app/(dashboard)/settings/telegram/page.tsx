@@ -22,6 +22,7 @@ export default function TelegramSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deepLink, setDeepLink] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStatus();
@@ -42,6 +43,7 @@ export default function TelegramSettingsPage() {
   async function handleConnect() {
     setActionLoading(true);
     setError("");
+    setDeepLink(null);
 
     try {
       const response = await fetch("/api/telegram-link", { method: "POST" });
@@ -51,7 +53,7 @@ export default function TelegramSettingsPage() {
         throw new Error(data.error || "Failed to generate link");
       }
 
-      window.open(data.deepLink, "_blank");
+      setDeepLink(data.deepLink);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect");
     } finally {
@@ -133,14 +135,38 @@ export default function TelegramSettingsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Click the button below to open Telegram and link your account.
-                After linking, you can send video URLs directly to the bot.
-              </p>
-
-              <Button onClick={handleConnect} disabled={actionLoading}>
-                {actionLoading ? "Opening Telegram..." : "Connect Telegram"}
-              </Button>
+              {deepLink ? (
+                <>
+                  <p className="text-sm text-gray-600">
+                    Click the link below to open Telegram and complete the
+                    linking process. Press &quot;Start&quot; when the bot opens.
+                  </p>
+                  <Button asChild>
+                    <a href={deepLink} target="_blank" rel="noopener noreferrer">
+                      Open Telegram Bot
+                    </a>
+                  </Button>
+                  <p className="text-xs text-gray-500">
+                    Link expires in 10 minutes.{" "}
+                    <button
+                      onClick={handleConnect}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Generate new link
+                    </button>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600">
+                    Click the button below to generate a link to connect your
+                    Telegram account.
+                  </p>
+                  <Button onClick={handleConnect} disabled={actionLoading}>
+                    {actionLoading ? "Generating..." : "Connect Telegram"}
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </CardContent>
