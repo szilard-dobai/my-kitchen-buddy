@@ -8,9 +8,41 @@ interface SupadataTranscriptResponse {
   error?: string;
 }
 
+interface SupadataMetadataResponse {
+  platform?: string;
+  type?: string;
+  id?: string;
+  url?: string;
+  title?: string | null;
+  description?: string | null;
+  author?: {
+    username?: string;
+    displayName?: string;
+    avatarUrl?: string;
+    verified?: boolean;
+  };
+  stats?: {
+    views?: number | null;
+    likes?: number | null;
+    comments?: number | null;
+    shares?: number | null;
+  };
+  tags?: string[];
+  createdAt?: string;
+  error?: string;
+}
+
 interface TranscriptResult {
   transcript: string;
   language?: string;
+  error?: string;
+}
+
+interface MetadataResult {
+  title?: string;
+  description?: string;
+  authorUsername?: string;
+  tags?: string[];
   error?: string;
 }
 
@@ -25,7 +57,6 @@ export async function getTranscript(url: string): Promise<TranscriptResult> {
   }
 
   try {
-    // Supadata API endpoint for transcripts
     const apiUrl = new URL("https://api.supadata.ai/v1/transcript");
     apiUrl.searchParams.set("url", url);
 
@@ -89,6 +120,64 @@ export async function getTranscript(url: string): Promise<TranscriptResult> {
     return {
       transcript: "",
       error: error instanceof Error ? error.message : "Failed to fetch transcript",
+    };
+  }
+}
+
+export async function getMetadata(url: string): Promise<MetadataResult> {
+  const apiKey = process.env.SUPADATA_API_KEY;
+
+  if (!apiKey) {
+    return {
+      error: "Supadata API key not configured",
+    };
+  }
+
+  try {
+    const apiUrl = new URL("https://api.supadata.ai/v1/metadata");
+    apiUrl.searchParams.set("url", url);
+
+    const response = await fetch(apiUrl.toString(), {
+      method: "GET",
+      headers: {
+        "x-api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Supadata metadata API error:", response.status, errorText);
+
+      if (response.status === 402) {
+        return {
+          error: "Supadata API credits exhausted. Please try again later.",
+        };
+      }
+
+      return {
+        error: `Failed to fetch metadata: ${response.status}`,
+      };
+    }
+
+    const data: SupadataMetadataResponse = await response.json();
+
+    if (data.error) {
+      return {
+        error: data.error,
+      };
+    }
+
+    return {
+      title: data.title || undefined,
+      description: data.description || undefined,
+      authorUsername: data.author?.username,
+      tags: data.tags,
+    };
+  } catch (error) {
+    console.error("Error fetching metadata:", error);
+    return {
+      error: error instanceof Error ? error.message : "Failed to fetch metadata",
     };
   }
 }

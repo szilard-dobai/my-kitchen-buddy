@@ -4,7 +4,7 @@ import {
   completeExtractionJob,
   failExtractionJob,
 } from "@/models/extraction-job";
-import { getTranscript } from "./supadata";
+import { getTranscript, getMetadata } from "./supadata";
 import { extractRecipeFromTranscript } from "./recipe-extractor";
 import type { ExtractionJob } from "@/types/extraction-job";
 
@@ -12,15 +12,18 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
   const { id, userId, sourceUrl, platform } = job;
 
   try {
-    // Step 1: Fetch transcript (30% progress)
+    // Step 1: Fetch transcript and metadata in parallel
     await updateExtractionJobStatus(
       id,
       "fetching_transcript",
       10,
-      "Fetching video transcript..."
+      "Fetching video data..."
     );
 
-    const transcriptResult = await getTranscript(sourceUrl);
+    const [transcriptResult, metadataResult] = await Promise.all([
+      getTranscript(sourceUrl),
+      getMetadata(sourceUrl),
+    ]);
 
     if (transcriptResult.error || !transcriptResult.transcript) {
       await failExtractionJob(
@@ -34,7 +37,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       id,
       "fetching_transcript",
       30,
-      "Transcript received"
+      "Video data received"
     );
 
     // Step 2: Extract recipe with AI (70% progress)
@@ -42,13 +45,14 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       id,
       "analyzing",
       50,
-      "Analyzing transcript with AI..."
+      "Analyzing with AI..."
     );
 
     const extractionResult = await extractRecipeFromTranscript(
       transcriptResult.transcript,
       sourceUrl,
-      platform
+      platform,
+      metadataResult.description
     );
 
     if (extractionResult.error || !extractionResult.recipe) {

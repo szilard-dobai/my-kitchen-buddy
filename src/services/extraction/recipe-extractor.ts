@@ -1,11 +1,11 @@
-import OpenAI from "openai";
 import type { CreateRecipeInput } from "@/types/recipe";
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are a recipe extraction system. Given a transcript from a cooking video, extract the recipe information.
+const SYSTEM_PROMPT = `You are a recipe extraction system. Given a transcript from a cooking video (and optionally the post description/caption), extract the recipe information.
 
 RULES:
 1. Extract instructions that ARE verbally described - if someone says "slice the apple, add sugar, bake it", those ARE instructions to extract
@@ -47,6 +47,7 @@ Extract into this JSON structure:
 
 GUIDELINES:
 - Extract instructions from verbal descriptions of actions (e.g., "slice, coat, bake" = real steps)
+- The post description often contains ingredient lists or recipe details - use this information
 - Leave quantity/unit as null when amounts aren't specified - don't guess "1 cup" or "2 tablespoons"
 - Set confidence based on how complete the information is (high if detailed, lower if sparse)
 - Use extractionNotes to document what's missing so users know what to fill in
@@ -62,13 +63,19 @@ interface ExtractionResult {
 export async function extractRecipeFromTranscript(
   transcript: string,
   sourceUrl: string,
-  platform: "tiktok" | "instagram" | "youtube" | "other"
+  platform: "tiktok" | "instagram" | "youtube" | "other",
+  postDescription?: string
 ): Promise<ExtractionResult> {
-  if (!transcript || transcript.trim().length < 50) {
+  if (!transcript || transcript.trim().length < 50 || (postDescription && postDescription.trim().length < 50)) {
     return {
       recipe: null,
       error: "Transcript is too short to extract a recipe",
     };
+  }
+
+  let userMessage = `Extract the recipe from this video transcript:\n\n${transcript}`;
+  if (postDescription) {
+    userMessage += `\n\n---\n\nPost description/caption:\n\n${postDescription}`;
   }
 
   try {
@@ -81,7 +88,7 @@ export async function extractRecipeFromTranscript(
         },
         {
           role: "user",
-          content: `Extract the recipe from this video transcript:\n\n${transcript}`,
+          content: userMessage,
         },
       ],
       response_format: { type: "json_object" },

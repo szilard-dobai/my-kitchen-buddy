@@ -84,11 +84,9 @@ export function detectPlatform(url: string): PlatformDetectionResult {
 }
 
 export function normalizeUrl(url: string): string {
-  // Remove tracking parameters and normalize URL
   try {
     const parsedUrl = new URL(url);
 
-    // Remove common tracking parameters
     const trackingParams = ["utm_source", "utm_medium", "utm_campaign", "igshid", "fbclid"];
     trackingParams.forEach(param => parsedUrl.searchParams.delete(param));
 
