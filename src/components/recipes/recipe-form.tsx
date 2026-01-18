@@ -97,7 +97,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
 
   const removeInstruction = (index: number) => {
     const updated = instructions.filter((_, i) => i !== index);
-    // Renumber steps
     setInstructions(updated.map((inst, i) => ({ ...inst, stepNumber: i + 1 })));
   };
 

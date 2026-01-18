@@ -20,7 +20,6 @@ export async function GET(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
     }
 
-    // Ensure user owns this recipe
     if (recipe.userId !== session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }

@@ -92,7 +92,6 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       },
     });
 
-    // Complete the job
     await completeExtractionJob(id, recipe._id!);
   } catch (error) {
     console.error("Extraction processing error:", error);

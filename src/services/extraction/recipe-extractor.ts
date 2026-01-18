@@ -107,7 +107,6 @@ export async function extractRecipeFromTranscript(
 
     const extracted = JSON.parse(content);
 
-    // Validate that we got at least a title
     if (!extracted.title) {
       return {
         recipe: null,
@@ -115,7 +114,6 @@ export async function extractRecipeFromTranscript(
       };
     }
 
-    // Build the recipe object
     const recipe: Partial<CreateRecipeInput> = {
       title: extracted.title,
       description: extracted.description || undefined,

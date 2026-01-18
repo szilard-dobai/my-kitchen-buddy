@@ -26,7 +26,6 @@ const PLATFORM_PATTERNS: Record<Platform, RegExp[]> = {
 };
 
 export function detectPlatform(url: string): PlatformDetectionResult {
-  // Validate URL format
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(url);
@@ -38,7 +37,6 @@ export function detectPlatform(url: string): PlatformDetectionResult {
     };
   }
 
-  // Check each platform
   for (const [platform, patterns] of Object.entries(PLATFORM_PATTERNS)) {
     if (platform === "other") continue;
 
@@ -52,7 +50,6 @@ export function detectPlatform(url: string): PlatformDetectionResult {
     }
   }
 
-  // Check if it's at least a valid video URL from a known domain
   const hostname = parsedUrl.hostname.toLowerCase();
 
   if (hostname.includes("tiktok.com")) {

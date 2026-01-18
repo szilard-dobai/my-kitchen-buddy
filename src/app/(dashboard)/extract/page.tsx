@@ -35,7 +35,6 @@ export default function ExtractPage() {
       setExtractionStatus(status);
 
       if (status.status === "completed" && status.recipeId) {
-        // Redirect to the new recipe
         router.push(`/recipes/${status.recipeId}`);
         return true; // Stop polling
       }
@@ -63,10 +62,7 @@ export default function ExtractPage() {
       await pollStatus(jobId);
     };
 
-    // Initial poll
     poll();
-
-    // Set up polling every 2 seconds
     const intervalId = setInterval(poll, 2000);
 
     return () => {

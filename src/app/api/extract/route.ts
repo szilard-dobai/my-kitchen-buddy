@@ -19,7 +19,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
-    // Validate and detect platform
     const normalizedUrl = normalizeUrl(url);
     const detection = detectPlatform(normalizedUrl);
 
@@ -38,15 +37,12 @@ export async function POST(request: Request) {
       });
     }
 
-    // Create extraction job
     const job = await createExtractionJob({
       userId: session.user.id,
       sourceUrl: normalizedUrl,
       platform: detection.platform,
     });
 
-    // Start processing in the background
-    // We don't await this - it runs asynchronously
     processExtraction(job).catch((error) => {
       console.error("Background extraction failed:", error);
     });

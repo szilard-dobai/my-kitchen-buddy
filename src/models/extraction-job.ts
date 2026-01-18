@@ -44,10 +44,8 @@ export async function getExtractionJobById(
 ): Promise<ExtractionJob | null> {
   const collection = await getExtractionJobsCollection();
 
-  // Try finding by public ID first
   let job = await collection.findOne({ id });
 
-  // Fallback to MongoDB ObjectId
   if (!job) {
     try {
       job = await collection.findOne({ _id: new ObjectId(id) });

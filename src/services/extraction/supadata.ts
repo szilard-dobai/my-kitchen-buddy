@@ -108,7 +108,6 @@ export async function getTranscript(url: string): Promise<TranscriptResult> {
       };
     }
 
-    // Combine all transcript segments into a single string
     const transcript = data.content.map((segment) => segment.text).join(" ");
 
     return {
