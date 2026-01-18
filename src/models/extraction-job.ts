@@ -28,6 +28,7 @@ export async function createExtractionJob(
     status: "pending",
     progress: 0,
     telegramChatId: input.telegramChatId,
+    targetLanguage: input.targetLanguage || "original",
     createdAt: now,
     updatedAt: now,
   };

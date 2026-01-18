@@ -1,4 +1,5 @@
 import getDb from "@/lib/db";
+import type { TargetLanguage } from "@/types/extraction-job";
 import type { CreateTelegramLinkInput, TelegramLink } from "@/types/telegram-link";
 
 const COLLECTION_NAME = "telegramLinks";
@@ -15,6 +16,7 @@ export async function createTelegramLink(
 
   const doc = {
     ...input,
+    preferredLanguage: "original" as TargetLanguage,
     linkedAt: new Date(),
   };
 
@@ -40,6 +42,7 @@ export async function getTelegramLinkByUserId(
     telegramUserId: doc.telegramUserId,
     telegramUsername: doc.telegramUsername,
     telegramFirstName: doc.telegramFirstName,
+    preferredLanguage: doc.preferredLanguage || "original",
     linkedAt: doc.linkedAt,
   };
 }
@@ -58,8 +61,21 @@ export async function getTelegramLinkByTelegramUserId(
     telegramUserId: doc.telegramUserId,
     telegramUsername: doc.telegramUsername,
     telegramFirstName: doc.telegramFirstName,
+    preferredLanguage: doc.preferredLanguage || "original",
     linkedAt: doc.linkedAt,
   };
+}
+
+export async function updateTelegramLinkLanguage(
+  telegramUserId: number,
+  preferredLanguage: TargetLanguage
+): Promise<boolean> {
+  const collection = await getTelegramLinksCollection();
+  const result = await collection.updateOne(
+    { telegramUserId },
+    { $set: { preferredLanguage } }
+  );
+  return result.modifiedCount === 1;
 }
 
 export async function deleteTelegramLink(userId: string): Promise<boolean> {

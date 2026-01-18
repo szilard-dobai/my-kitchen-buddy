@@ -4,6 +4,7 @@ import { createExtractionJob, getExtractionJobById } from "@/models/extraction-j
 import { findRecipeBySourceUrl } from "@/models/recipe";
 import { processExtraction } from "@/services/extraction";
 import { detectPlatform, normalizeUrl } from "@/services/extraction/platform-detector";
+import type { TargetLanguage } from "@/types/extraction-job";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +14,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { url } = body;
+    const { url, targetLanguage = "original" } = body as {
+      url: string;
+      targetLanguage?: TargetLanguage;
+    };
 
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -41,6 +45,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       sourceUrl: normalizedUrl,
       platform: detection.platform,
+      targetLanguage,
     });
 
     processExtraction(job).catch((error) => {

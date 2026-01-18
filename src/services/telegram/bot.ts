@@ -5,12 +5,14 @@ import { findRecipeBySourceUrl } from "@/models/recipe";
 import {
   createTelegramLink,
   getTelegramLinkByTelegramUserId,
+  updateTelegramLinkLanguage,
 } from "@/models/telegram-link";
 import { processExtraction } from "@/services/extraction";
 import {
   detectPlatform,
   normalizeUrl,
 } from "@/services/extraction/platform-detector";
+import type { TargetLanguage } from "@/types/extraction-job";
 import { sendRecipePreview } from "./notifications";
 
 export function setupBotHandlers(): void {
@@ -18,6 +20,7 @@ export function setupBotHandlers(): void {
 
   bot.command("start", handleStart);
   bot.command("help", handleHelp);
+  bot.command("lang", handleLang);
   bot.on("message:text", handleMessage);
 }
 
@@ -74,8 +77,59 @@ async function handleHelp(ctx: Context): Promise<void> {
       "- Instagram Reels\n" +
       "- YouTube / Shorts\n\n" +
       "I'll extract the recipe and send you a link to view and edit it.\n\n" +
+      "Commands:\n" +
+      "/lang - Set output language (original or English)\n" +
+      "/help - Show this help message\n\n" +
       "Make sure your account is linked in the app settings first."
   );
+}
+
+async function handleLang(ctx: Context): Promise<void> {
+  const telegramUserId = ctx.from?.id;
+  if (!telegramUserId) return;
+
+  const link = await getTelegramLinkByTelegramUserId(telegramUserId);
+  if (!link) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    await ctx.reply(
+      `Your Telegram account is not linked. Please link it first:\n${appUrl}/settings/telegram`
+    );
+    return;
+  }
+
+  const text = ctx.message?.text || "";
+  const parts = text.split(" ");
+
+  if (parts.length < 2) {
+    const currentLang = link.preferredLanguage === "en" ? "English" : "Original";
+    await ctx.reply(
+      `Current language: ${currentLang}\n\n` +
+        "Usage:\n" +
+        "/lang original - Keep the source language\n" +
+        "/lang en - Translate to English"
+    );
+    return;
+  }
+
+  const langArg = parts[1].toLowerCase();
+  let newLang: TargetLanguage;
+
+  if (langArg === "en" || langArg === "english") {
+    newLang = "en";
+  } else if (langArg === "original" || langArg === "orig") {
+    newLang = "original";
+  } else {
+    await ctx.reply(
+      "Invalid language. Use:\n" +
+        "/lang original - Keep the source language\n" +
+        "/lang en - Translate to English"
+    );
+    return;
+  }
+
+  await updateTelegramLinkLanguage(telegramUserId, newLang);
+  const langName = newLang === "en" ? "English" : "Original (source language)";
+  await ctx.reply(`Language set to: ${langName}`);
 }
 
 async function handleMessage(ctx: Context): Promise<void> {
@@ -129,6 +183,7 @@ async function handleMessage(ctx: Context): Promise<void> {
     sourceUrl: normalizedUrl,
     platform: detection.platform,
     telegramChatId: ctx.chat?.id,
+    targetLanguage: link.preferredLanguage,
   });
 
   processExtraction(job).catch((error) => {

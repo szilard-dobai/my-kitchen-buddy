@@ -1,11 +1,20 @@
 import OpenAI from "openai";
+import type { TargetLanguage } from "@/types/extraction-job";
 import type { CreateRecipeInput } from "@/types/recipe";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are a recipe extraction system. Given a transcript from a cooking video (and optionally the post description/caption), extract the recipe information.
+function buildSystemPrompt(targetLanguage: TargetLanguage): string {
+  const languageInstruction =
+    targetLanguage === "en"
+      ? "LANGUAGE: Translate ALL text output (title, description, ingredients, instructions, tips, etc.) to English, regardless of the source language."
+      : "LANGUAGE: Preserve the ORIGINAL language of the video. Output all text (title, description, ingredients, instructions, tips, etc.) in the SAME language as the transcript. DO NOT translate to any other language.";
+
+  return `You are a recipe extraction system. Given a transcript from a cooking video (and optionally the post description/caption), extract the recipe information.
+
+${languageInstruction}
 
 RULES:
 1. Extract instructions that ARE verbally described - if someone says "slice the apple, add sugar, bake it", those ARE instructions to extract
@@ -53,6 +62,7 @@ GUIDELINES:
 - Use extractionNotes to document what's missing so users know what to fill in
 
 Return ONLY valid JSON.`;
+}
 
 interface ExtractionResult {
   recipe: Partial<CreateRecipeInput> | null;
@@ -64,7 +74,8 @@ export async function extractRecipeFromTranscript(
   transcript: string,
   sourceUrl: string,
   platform: "tiktok" | "instagram" | "youtube" | "other",
-  postDescription?: string
+  postDescription?: string,
+  targetLanguage: TargetLanguage = "original"
 ): Promise<ExtractionResult> {
   if (!transcript || transcript.trim().length < 50 || (postDescription && postDescription.trim().length < 50)) {
     return {
@@ -84,7 +95,7 @@ export async function extractRecipeFromTranscript(
       messages: [
         {
           role: "system",
-          content: SYSTEM_PROMPT,
+          content: buildSystemPrompt(targetLanguage),
         },
         {
           role: "user",
@@ -92,7 +103,7 @@ export async function extractRecipeFromTranscript(
         },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3, // Lower temperature for more consistent extraction
+      temperature: 0.3,
       max_tokens: 4096,
     });
 

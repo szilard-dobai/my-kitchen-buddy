@@ -20,7 +20,7 @@ import { extractRecipeFromTranscript } from "./recipe-extractor";
 import { getMetadata, getTranscript } from "./supadata";
 
 export async function processExtraction(job: ExtractionJob): Promise<void> {
-  const { id, userId, sourceUrl, platform, telegramChatId } = job;
+  const { id, userId, sourceUrl, platform, telegramChatId, targetLanguage } = job;
   const normalizedUrl = normalizeUrl(sourceUrl);
 
   async function notifyTelegram(message: string) {
@@ -65,7 +65,8 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         transcriptResult.transcript,
         sourceUrl,
         platform,
-        metadataResult.description
+        metadataResult.description,
+        targetLanguage
       );
 
       if (extractionResult.error || !extractionResult.recipe) {

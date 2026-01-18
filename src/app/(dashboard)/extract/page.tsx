@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { TargetLanguage } from "@/types/extraction-job";
 
 interface ExtractionStatus {
   id: string;
@@ -19,6 +20,7 @@ interface ExtractionStatus {
 export default function ExtractPage() {
   const router = useRouter();
   const [url, setUrl] = useState("");
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("original");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
@@ -81,7 +83,7 @@ export default function ExtractPage() {
       const response = await fetch("/api/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, targetLanguage }),
       });
 
       const data = await response.json();
@@ -157,6 +159,20 @@ export default function ExtractPage() {
                 required
                 disabled={loading}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="language">Output Language</Label>
+              <select
+                id="language"
+                value={targetLanguage}
+                onChange={(e) => setTargetLanguage(e.target.value as TargetLanguage)}
+                disabled={loading}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="original">Original (keep source language)</option>
+                <option value="en">English (translate to English)</option>
+              </select>
             </div>
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? (

@@ -5,6 +5,8 @@ export type ExtractionStatus =
   | "completed"
   | "failed";
 
+export type TargetLanguage = "original" | "en";
+
 export interface ExtractionJob {
   _id?: string;
   id: string;
@@ -17,6 +19,7 @@ export interface ExtractionJob {
   recipeId?: string;
   error?: string;
   telegramChatId?: number;
+  targetLanguage: TargetLanguage;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,4 +29,5 @@ export type CreateExtractionJobInput = {
   sourceUrl: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
   telegramChatId?: number;
+  targetLanguage?: TargetLanguage;
 };
