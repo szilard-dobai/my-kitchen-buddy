@@ -10,7 +10,8 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 
 - `recipes` - User's saved recipes with full recipe data
 - `raw_extractions` - Cached AI extraction results keyed by normalized URL (avoids redundant API calls)
-- `extractionJobs` - Tracks extraction job status for polling
+- `extractionJobs` - Tracks extraction job status for polling (includes optional `telegramChatId`)
+- `telegramLinks` - Links Telegram users to app accounts
 - `users`, `sessions` - Auth tables managed by better-auth
 
 ### Key Flows
@@ -26,6 +27,12 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 - Before starting extraction, checks if user already has a recipe from this URL
 - If yes, returns `existingRecipeId` and frontend redirects to edit page
 
+**Telegram Bot Flow** (`src/services/telegram/`):
+1. User links account via deep link from /settings/telegram
+2. Sends video URL to bot
+3. Bot creates extraction job with `telegramChatId`
+4. Extraction service sends status updates and recipe preview via Telegram
+
 ### URL Normalization
 
 `normalizeUrl()` in `platform-detector.ts` strips all query params and hash fragments for consistent cache lookups.
@@ -36,12 +43,14 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 src/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Login/register pages
-│   ├── (dashboard)/       # Protected pages (recipes, extract)
-│   └── api/               # API routes
+│   ├── (dashboard)/       # Protected pages (recipes, extract, settings)
+│   └── api/               # API routes (extract, telegram, telegram-link)
 ├── components/            # React components
-├── lib/                   # Utilities (db, auth, session)
+├── lib/                   # Utilities (db, auth, session, telegram)
 ├── models/                # Database operations
-├── services/extraction/   # Core extraction logic
+├── services/
+│   ├── extraction/        # Core extraction logic
+│   └── telegram/          # Bot handlers and notifications
 └── types/                 # TypeScript interfaces
 ```
 
@@ -56,3 +65,4 @@ src/
 
 - **Supadata** (`api.supadata.ai`): Video transcripts and metadata
 - **OpenAI**: GPT-4o for recipe extraction with JSON mode
+- **Telegram Bot API**: Via grammy library, webhook at `/api/telegram/webhook`

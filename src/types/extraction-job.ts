@@ -7,15 +7,16 @@ export type ExtractionStatus =
 
 export interface ExtractionJob {
   _id?: string;
-  id: string; // Public ID for polling
+  id: string;
   userId: string;
   sourceUrl: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
   status: ExtractionStatus;
-  progress: number; // 0-100
+  progress: number;
   statusMessage?: string;
-  recipeId?: string; // Set on completion
-  error?: string; // Set on failure
+  recipeId?: string;
+  error?: string;
+  telegramChatId?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,4 +25,5 @@ export type CreateExtractionJobInput = {
   userId: string;
   sourceUrl: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
+  telegramChatId?: number;
 };

@@ -8,6 +8,11 @@ import {
   findRawExtractionByUrl,
 } from "@/models/raw-extraction";
 import { createRecipe } from "@/models/recipe";
+import {
+  sendError,
+  sendRecipePreview,
+  sendStatusUpdate,
+} from "@/services/telegram/notifications";
 import type { ExtractionJob } from "@/types/extraction-job";
 import type { CreateRecipeInput } from "@/types/recipe";
 import { normalizeUrl } from "./platform-detector";
@@ -15,8 +20,14 @@ import { extractRecipeFromTranscript } from "./recipe-extractor";
 import { getMetadata, getTranscript } from "./supadata";
 
 export async function processExtraction(job: ExtractionJob): Promise<void> {
-  const { id, userId, sourceUrl, platform } = job;
+  const { id, userId, sourceUrl, platform, telegramChatId } = job;
   const normalizedUrl = normalizeUrl(sourceUrl);
+
+  async function notifyTelegram(message: string) {
+    if (telegramChatId) {
+      await sendStatusUpdate(telegramChatId, message);
+    }
+  }
 
   try {
     await updateExtractionJobStatus(id, "fetching_transcript", 10, "Checking cache...");
@@ -32,6 +43,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       confidence = cached.confidence;
     } else {
       await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
+      await notifyTelegram("Fetching video data...");
 
       const [transcriptResult, metadataResult] = await Promise.all([
         getTranscript(sourceUrl),
@@ -39,12 +51,15 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       ]);
 
       if (transcriptResult.error || !transcriptResult.transcript) {
-        await failExtractionJob(id, transcriptResult.error || "Could not fetch transcript");
+        const errorMsg = transcriptResult.error || "Could not fetch transcript";
+        await failExtractionJob(id, errorMsg);
+        if (telegramChatId) await sendError(telegramChatId, errorMsg);
         return;
       }
 
       await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
       await updateExtractionJobStatus(id, "analyzing", 50, "Analyzing with AI...");
+      await notifyTelegram("Analyzing recipe...");
 
       const extractionResult = await extractRecipeFromTranscript(
         transcriptResult.transcript,
@@ -54,7 +69,9 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       );
 
       if (extractionResult.error || !extractionResult.recipe) {
-        await failExtractionJob(id, extractionResult.error || "Could not extract recipe");
+        const errorMsg = extractionResult.error || "Could not extract recipe";
+        await failExtractionJob(id, errorMsg);
+        if (telegramChatId) await sendError(telegramChatId, errorMsg);
         return;
       }
 
@@ -93,11 +110,14 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
     });
 
     await completeExtractionJob(id, recipe._id!);
+
+    if (telegramChatId) {
+      await sendRecipePreview(telegramChatId, recipe);
+    }
   } catch (error) {
     console.error("Extraction processing error:", error);
-    await failExtractionJob(
-      id,
-      error instanceof Error ? error.message : "An unexpected error occurred"
-    );
+    const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred";
+    await failExtractionJob(id, errorMsg);
+    if (telegramChatId) await sendError(telegramChatId, errorMsg);
   }
 }

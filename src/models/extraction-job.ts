@@ -21,12 +21,13 @@ export async function createExtractionJob(
   const now = new Date();
 
   const job: Omit<ExtractionJob, "_id"> = {
-    id: nanoid(10), // Short public ID for polling
+    id: nanoid(10),
     userId: input.userId,
     sourceUrl: input.sourceUrl,
     platform: input.platform,
     status: "pending",
     progress: 0,
+    telegramChatId: input.telegramChatId,
     createdAt: now,
     updatedAt: now,
   };
