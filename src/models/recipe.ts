@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getDb } from "@/lib/db";
+import getDb from "@/lib/db";
 import type { Recipe, CreateRecipeInput, UpdateRecipeInput } from "@/types/recipe";
 
 const COLLECTION_NAME = "recipes";

@@ -1,36 +1,42 @@
-import { MongoClient, Db } from "mongodb";
+import { type Db, MongoClient } from "mongodb";
 
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please add your MongoDB URI to .env");
+const options = {
+  maxIdleTimeMS: 5000,
+};
+
+let dbPromise: Promise<Db> | null = null;
+
+declare global {
+  var _mongoDbPromise: Promise<Db> | undefined;
 }
 
-const uri = process.env.MONGODB_URI;
-const options = {};
-
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === "development") {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  const globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+const getDb = (): Promise<Db> => {
+  if (dbPromise) {
+    return dbPromise;
   }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
 
-export default clientPromise;
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error("Please add your MONGODB_URI env variable");
+  }
 
-export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
-  return client.db("my-kitchen-buddy");
-}
+  const dbName = process.env.MONGODB_DB;
+  if (!dbName) {
+    throw new Error("Please add your MONGODB_DB env variable");
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    if (!global._mongoDbPromise) {
+      const client = new MongoClient(uri, options);
+      global._mongoDbPromise = client.connect().then((c) => c.db(dbName));
+    }
+    dbPromise = global._mongoDbPromise;
+  } else {
+    const client = new MongoClient(uri, options);
+    dbPromise = client.connect().then((c) => c.db(dbName));
+  }
+
+  return dbPromise;
+};
+
+export default getDb;

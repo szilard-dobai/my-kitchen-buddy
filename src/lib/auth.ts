@@ -3,11 +3,15 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 
 if (!process.env.MONGODB_URI) {
-  throw new Error("Please add your MongoDB URI to .env");
+  throw new Error("Please add your MONGODB_URI env variable");
+}
+
+if (!process.env.MONGODB_DB) {
+  throw new Error("Please add your MONGODB_DB env variable");
 }
 
 const client = new MongoClient(process.env.MONGODB_URI);
-const db = client.db("my-kitchen-buddy");
+const db = client.db(process.env.MONGODB_DB);
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
