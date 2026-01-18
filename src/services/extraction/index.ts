@@ -1,104 +1,98 @@
 import {
-  updateExtractionJobStatus,
   completeExtractionJob,
   failExtractionJob,
+  updateExtractionJobStatus,
 } from "@/models/extraction-job";
+import {
+  createRawExtraction,
+  findRawExtractionByUrl,
+} from "@/models/raw-extraction";
 import { createRecipe } from "@/models/recipe";
 import type { ExtractionJob } from "@/types/extraction-job";
+import type { CreateRecipeInput } from "@/types/recipe";
+import { normalizeUrl } from "./platform-detector";
 import { extractRecipeFromTranscript } from "./recipe-extractor";
-import { getTranscript, getMetadata } from "./supadata";
+import { getMetadata, getTranscript } from "./supadata";
 
 export async function processExtraction(job: ExtractionJob): Promise<void> {
   const { id, userId, sourceUrl, platform } = job;
+  const normalizedUrl = normalizeUrl(sourceUrl);
 
   try {
-    // Step 1: Fetch transcript and metadata in parallel
-    await updateExtractionJobStatus(
-      id,
-      "fetching_transcript",
-      10,
-      "Fetching video data..."
-    );
+    await updateExtractionJobStatus(id, "fetching_transcript", 10, "Checking cache...");
 
-    const [transcriptResult, metadataResult] = await Promise.all([
-      getTranscript(sourceUrl),
-      getMetadata(sourceUrl),
-    ]);
+    const cached = await findRawExtractionByUrl(normalizedUrl);
 
-    if (transcriptResult.error || !transcriptResult.transcript) {
-      await failExtractionJob(
-        id,
-        transcriptResult.error || "Could not fetch transcript"
+    let extractedRecipe: Partial<CreateRecipeInput>;
+    let confidence: number;
+
+    if (cached) {
+      await updateExtractionJobStatus(id, "analyzing", 80, "Using cached extraction...");
+      extractedRecipe = cached.recipe;
+      confidence = cached.confidence;
+    } else {
+      await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
+
+      const [transcriptResult, metadataResult] = await Promise.all([
+        getTranscript(sourceUrl),
+        getMetadata(sourceUrl),
+      ]);
+
+      if (transcriptResult.error || !transcriptResult.transcript) {
+        await failExtractionJob(id, transcriptResult.error || "Could not fetch transcript");
+        return;
+      }
+
+      await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
+      await updateExtractionJobStatus(id, "analyzing", 50, "Analyzing with AI...");
+
+      const extractionResult = await extractRecipeFromTranscript(
+        transcriptResult.transcript,
+        sourceUrl,
+        platform,
+        metadataResult.description
       );
-      return;
+
+      if (extractionResult.error || !extractionResult.recipe) {
+        await failExtractionJob(id, extractionResult.error || "Could not extract recipe");
+        return;
+      }
+
+      extractedRecipe = extractionResult.recipe;
+      confidence = extractionResult.confidence || 0.8;
+
+      await createRawExtraction(normalizedUrl, extractedRecipe, confidence);
+      await updateExtractionJobStatus(id, "analyzing", 80, "Recipe extracted, saving...");
     }
 
-    await updateExtractionJobStatus(
-      id,
-      "fetching_transcript",
-      30,
-      "Video data received"
-    );
-
-    // Step 2: Extract recipe with AI (70% progress)
-    await updateExtractionJobStatus(
-      id,
-      "analyzing",
-      50,
-      "Analyzing with AI..."
-    );
-
-    const extractionResult = await extractRecipeFromTranscript(
-      transcriptResult.transcript,
-      sourceUrl,
-      platform,
-      metadataResult.description
-    );
-
-    if (extractionResult.error || !extractionResult.recipe) {
-      await failExtractionJob(
-        id,
-        extractionResult.error || "Could not extract recipe"
-      );
-      return;
-    }
-
-    await updateExtractionJobStatus(
-      id,
-      "analyzing",
-      80,
-      "Recipe extracted, saving..."
-    );
-
-    // Step 3: Save recipe to database
     const recipe = await createRecipe({
       userId,
-      title: extractionResult.recipe.title || "Untitled Recipe",
-      description: extractionResult.recipe.description,
-      cuisineType: extractionResult.recipe.cuisineType,
-      difficulty: extractionResult.recipe.difficulty,
-      prepTime: extractionResult.recipe.prepTime,
-      cookTime: extractionResult.recipe.cookTime,
-      totalTime: extractionResult.recipe.totalTime,
-      servings: extractionResult.recipe.servings,
-      caloriesPerServing: extractionResult.recipe.caloriesPerServing,
-      dietaryTags: extractionResult.recipe.dietaryTags || [],
-      mealType: extractionResult.recipe.mealType,
-      ingredients: extractionResult.recipe.ingredients || [],
-      instructions: extractionResult.recipe.instructions || [],
-      equipment: extractionResult.recipe.equipment || [],
-      tipsAndNotes: extractionResult.recipe.tipsAndNotes || [],
-      source: extractionResult.recipe.source || {
+      title: extractedRecipe.title || "Untitled Recipe",
+      description: extractedRecipe.description,
+      cuisineType: extractedRecipe.cuisineType,
+      difficulty: extractedRecipe.difficulty,
+      prepTime: extractedRecipe.prepTime,
+      cookTime: extractedRecipe.cookTime,
+      totalTime: extractedRecipe.totalTime,
+      servings: extractedRecipe.servings,
+      caloriesPerServing: extractedRecipe.caloriesPerServing,
+      dietaryTags: extractedRecipe.dietaryTags || [],
+      mealType: extractedRecipe.mealType,
+      ingredients: extractedRecipe.ingredients || [],
+      instructions: extractedRecipe.instructions || [],
+      equipment: extractedRecipe.equipment || [],
+      tipsAndNotes: extractedRecipe.tipsAndNotes || [],
+      source: extractedRecipe.source || {
         url: sourceUrl,
         platform,
       },
       extractionMetadata: {
         extractedAt: new Date(),
-        confidenceScore: extractionResult.confidence,
+        confidenceScore: confidence,
       },
     });
 
-    // Step 4: Complete the job
+    // Complete the job
     await completeExtractionJob(id, recipe._id!);
   } catch (error) {
     console.error("Extraction processing error:", error);
