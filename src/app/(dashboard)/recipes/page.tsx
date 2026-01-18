@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 import { RecipeCard } from "@/components/recipes/recipe-card";
+import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/session";
 import { getRecipesByUserId } from "@/models/recipe";
-import { redirect } from "next/navigation";
 
 export default async function RecipesPage() {
   const session = await getSession();

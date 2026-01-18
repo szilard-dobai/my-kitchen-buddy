@@ -1,12 +1,12 @@
-import { createRecipe } from "@/models/recipe";
 import {
   updateExtractionJobStatus,
   completeExtractionJob,
   failExtractionJob,
 } from "@/models/extraction-job";
-import { getTranscript, getMetadata } from "./supadata";
-import { extractRecipeFromTranscript } from "./recipe-extractor";
+import { createRecipe } from "@/models/recipe";
 import type { ExtractionJob } from "@/types/extraction-job";
+import { extractRecipeFromTranscript } from "./recipe-extractor";
+import { getTranscript, getMetadata } from "./supadata";
 
 export async function processExtraction(job: ExtractionJob): Promise<void> {
   const { id, userId, sourceUrl, platform } = job;

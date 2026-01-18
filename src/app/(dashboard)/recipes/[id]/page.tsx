@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSession } from "@/lib/session";
 import { getRecipeById } from "@/models/recipe";
-import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;

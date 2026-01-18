@@ -1,5 +1,5 @@
-import type { CreateRecipeInput } from "@/types/recipe";
 import OpenAI from "openai";
+import type { CreateRecipeInput } from "@/types/recipe";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

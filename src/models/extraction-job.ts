@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
-import getDb from "@/lib/db";
 import { nanoid } from "nanoid";
+import getDb from "@/lib/db";
 import type {
   ExtractionJob,
   CreateExtractionJobInput,

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { RecipeForm } from "@/components/recipes/recipe-form";
 import { getSession } from "@/lib/session";
 import { getRecipeById } from "@/models/recipe";
-import { RecipeForm } from "@/components/recipes/recipe-form";
 
 interface EditRecipePageProps {
   params: Promise<{ id: string }>;

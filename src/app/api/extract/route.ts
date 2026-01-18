@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { createExtractionJob, getExtractionJobById } from "@/models/extraction-job";
-import { detectPlatform, normalizeUrl } from "@/services/extraction/platform-detector";
 import { processExtraction } from "@/services/extraction";
+import { detectPlatform, normalizeUrl } from "@/services/extraction/platform-detector";
 
 export async function POST(request: Request) {
   try {
