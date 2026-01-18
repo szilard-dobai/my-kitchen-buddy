@@ -15,19 +15,16 @@ const db = client.db(process.env.MONGODB_DB);
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
-    client, // Required for transactions support
+    client,
   }),
+  trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") || [],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day - update session if older than this
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5, // 5 minutes
-    },
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
   },
 });
 
