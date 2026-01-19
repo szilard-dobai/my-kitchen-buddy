@@ -186,7 +186,9 @@ async function handleMessage(ctx: Context): Promise<void> {
     targetLanguage: link.preferredLanguage,
   });
 
-  processExtraction(job).catch((error) => {
-    console.error("Background extraction failed:", error);
-  });
+  try {
+    await processExtraction(job);
+  } catch (error) {
+    console.error("Extraction failed:", error);
+  }
 }
