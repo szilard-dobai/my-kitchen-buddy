@@ -7,13 +7,28 @@ import {
   getTelegramLinkByTelegramUserId,
   updateTelegramLinkLanguage,
 } from "@/models/telegram-link";
-import { processExtraction } from "@/services/extraction";
 import {
   detectPlatform,
   normalizeUrl,
 } from "@/services/extraction/platform-detector";
 import type { TargetLanguage } from "@/types/extraction-job";
 import { sendRecipePreview } from "./notifications";
+
+async function triggerJobProcessing(jobId: string): Promise<void> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const token = process.env.INTERNAL_API_TOKEN;
+
+  fetch(`${appUrl}/api/jobs/process`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify({ jobId }),
+  }).catch((error) => {
+    console.error("Failed to trigger job processing:", error);
+  });
+}
 
 export function setupBotHandlers(): void {
   const bot = getBot();
@@ -176,8 +191,6 @@ async function handleMessage(ctx: Context): Promise<void> {
     return;
   }
 
-  await ctx.reply("Starting extraction...");
-
   const job = await createExtractionJob({
     userId: link.userId,
     sourceUrl: normalizedUrl,
@@ -186,9 +199,7 @@ async function handleMessage(ctx: Context): Promise<void> {
     targetLanguage: link.preferredLanguage,
   });
 
-  try {
-    await processExtraction(job);
-  } catch (error) {
-    console.error("Extraction failed:", error);
-  }
+  await ctx.reply("Starting extraction... This may take a few minutes.");
+
+  await triggerJobProcessing(job.id);
 }

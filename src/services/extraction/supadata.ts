@@ -61,6 +61,7 @@ async function fetchWithRetry(
 
     if (response.status === 429 && attempt < maxRetries - 1) {
       const delay = baseDelay * (attempt + 1);
+      console.warn(`Rate limited, waiting ${delay / 1000}s before retry ${attempt + 1}...`);
       await sleep(delay);
       continue;
     }
