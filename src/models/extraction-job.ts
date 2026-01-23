@@ -24,6 +24,7 @@ export async function createExtractionJob(
     id: nanoid(10),
     userId: input.userId,
     sourceUrl: input.sourceUrl,
+    normalizedUrl: input.normalizedUrl,
     platform: input.platform,
     status: "pending",
     progress: 0,
@@ -122,4 +123,46 @@ export async function failExtractionJob(
       },
     }
   );
+}
+
+export async function findInProgressJobByUrl(
+  normalizedUrl: string
+): Promise<ExtractionJob | null> {
+  const collection = await getExtractionJobsCollection();
+
+  const job = await collection.findOne({
+    normalizedUrl,
+    status: { $in: ["pending", "fetching_transcript", "analyzing"] },
+  });
+
+  if (!job) return null;
+
+  return {
+    ...job,
+    _id: job._id.toString(),
+  } as ExtractionJob;
+}
+
+export async function waitForJobCompletion(
+  jobId: string,
+  timeoutMs: number
+): Promise<ExtractionJob> {
+  const startTime = Date.now();
+  const pollInterval = 2000;
+
+  while (Date.now() - startTime < timeoutMs) {
+    const job = await getExtractionJobById(jobId);
+
+    if (!job) {
+      throw new Error(`Job ${jobId} not found`);
+    }
+
+    if (job.status === "completed" || job.status === "failed") {
+      return job;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, pollInterval));
+  }
+
+  throw new Error(`Timeout waiting for job ${jobId} to complete`);
 }

@@ -194,6 +194,7 @@ async function handleMessage(ctx: Context): Promise<void> {
   const job = await createExtractionJob({
     userId: link.userId,
     sourceUrl: normalizedUrl,
+    normalizedUrl,
     platform: detection.platform,
     telegramChatId: ctx.chat?.id,
     targetLanguage: link.preferredLanguage,

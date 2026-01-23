@@ -12,6 +12,7 @@ export interface ExtractionJob {
   id: string;
   userId: string;
   sourceUrl: string;
+  normalizedUrl: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
   status: ExtractionStatus;
   progress: number;
@@ -27,6 +28,7 @@ export interface ExtractionJob {
 export type CreateExtractionJobInput = {
   userId: string;
   sourceUrl: string;
+  normalizedUrl: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
   telegramChatId?: number;
   targetLanguage?: TargetLanguage;

@@ -44,6 +44,7 @@ export async function POST(request: Request) {
     const job = await createExtractionJob({
       userId: session.user.id,
       sourceUrl: normalizedUrl,
+      normalizedUrl,
       platform: detection.platform,
       targetLanguage,
     });
