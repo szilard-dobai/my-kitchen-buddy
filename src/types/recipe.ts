@@ -13,6 +13,27 @@ export interface Instruction {
   technique?: string;
 }
 
+export interface NutritionInfo {
+  perServing?: {
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    fiber?: number;
+    sugar?: number;
+    sodium?: number;
+  };
+  per100g?: {
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+    fiber?: number;
+    sugar?: number;
+    sodium?: number;
+  };
+}
+
 export interface RecipeSource {
   url: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
@@ -36,6 +57,7 @@ export interface Recipe {
   totalTime?: string;
   servings?: string;
   caloriesPerServing?: number;
+  nutrition?: NutritionInfo;
   dietaryTags: string[];
   mealType?: string;
   ingredients: Ingredient[];

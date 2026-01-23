@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-My Kitchen Buddy extracts recipes from social media cooking videos using AI. Users paste a TikTok/Instagram/YouTube URL, and the app fetches the transcript via Supadata API, then uses OpenAI GPT-4o to extract structured recipe data.
+My Kitchen Buddy extracts recipes from social media cooking videos using AI. Users paste a TikTok/Instagram/YouTube URL, and the app fetches the transcript via Supadata API, then uses OpenAI GPT-4o to extract structured recipe data including nutrition information.
 
 ## Architecture
 
@@ -61,8 +61,25 @@ src/
 - Prettier for formatting
 - Type imports use `import type { X }`
 
+## Recipe Data Structure
+
+Recipes include optional nutrition information organized in a nested structure:
+
+```typescript
+nutrition?: {
+  perServing?: {
+    calories, protein, carbs, fat, fiber, sugar, sodium
+  };
+  per100g?: {
+    calories, protein, carbs, fat, fiber, sugar, sodium
+  };
+}
+```
+
+The AI extraction only populates nutrition fields when explicitly mentioned in the video transcript or post description. Users can also manually add/edit nutrition information via the recipe form.
+
 ## External APIs
 
 - **Supadata** (`api.supadata.ai`): Video transcripts and metadata
-- **OpenAI**: GPT-4o for recipe extraction with JSON mode
+- **OpenAI**: GPT-4o for recipe extraction with JSON mode (extracts nutrition info when mentioned)
 - **Telegram Bot API**: Via grammy library, webhook at `/api/telegram/webhook`

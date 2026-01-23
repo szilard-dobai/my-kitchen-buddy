@@ -62,6 +62,9 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             {recipe.ingredients.length > 0 && (
               <span>{recipe.ingredients.length} ingredients</span>
             )}
+            {(recipe.nutrition?.perServing?.calories || recipe.caloriesPerServing) && (
+              <span>{recipe.nutrition?.perServing?.calories || recipe.caloriesPerServing} cal</span>
+            )}
           </div>
           {recipe.dietaryTags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-3">

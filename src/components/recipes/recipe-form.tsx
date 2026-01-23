@@ -30,6 +30,54 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const [equipment, setEquipment] = useState<string[]>(recipe.equipment);
   const [tipsAndNotes, setTipsAndNotes] = useState<string[]>(recipe.tipsAndNotes);
 
+  const [nutritionPerServing, setNutritionPerServing] = useState({
+    calories: recipe.nutrition?.perServing?.calories?.toString() || "",
+    protein: recipe.nutrition?.perServing?.protein?.toString() || "",
+    carbs: recipe.nutrition?.perServing?.carbs?.toString() || "",
+    fat: recipe.nutrition?.perServing?.fat?.toString() || "",
+    fiber: recipe.nutrition?.perServing?.fiber?.toString() || "",
+    sugar: recipe.nutrition?.perServing?.sugar?.toString() || "",
+    sodium: recipe.nutrition?.perServing?.sodium?.toString() || "",
+  });
+
+  const [nutritionPer100g, setNutritionPer100g] = useState({
+    calories: recipe.nutrition?.per100g?.calories?.toString() || "",
+    protein: recipe.nutrition?.per100g?.protein?.toString() || "",
+    carbs: recipe.nutrition?.per100g?.carbs?.toString() || "",
+    fat: recipe.nutrition?.per100g?.fat?.toString() || "",
+    fiber: recipe.nutrition?.per100g?.fiber?.toString() || "",
+    sugar: recipe.nutrition?.per100g?.sugar?.toString() || "",
+    sodium: recipe.nutrition?.per100g?.sodium?.toString() || "",
+  });
+
+  const buildNutritionObject = () => {
+    const hasPerServing = Object.values(nutritionPerServing).some(v => v !== "");
+    const hasPer100g = Object.values(nutritionPer100g).some(v => v !== "");
+
+    if (!hasPerServing && !hasPer100g) return undefined;
+
+    return {
+      perServing: hasPerServing ? {
+        calories: nutritionPerServing.calories ? parseFloat(nutritionPerServing.calories) : undefined,
+        protein: nutritionPerServing.protein ? parseFloat(nutritionPerServing.protein) : undefined,
+        carbs: nutritionPerServing.carbs ? parseFloat(nutritionPerServing.carbs) : undefined,
+        fat: nutritionPerServing.fat ? parseFloat(nutritionPerServing.fat) : undefined,
+        fiber: nutritionPerServing.fiber ? parseFloat(nutritionPerServing.fiber) : undefined,
+        sugar: nutritionPerServing.sugar ? parseFloat(nutritionPerServing.sugar) : undefined,
+        sodium: nutritionPerServing.sodium ? parseFloat(nutritionPerServing.sodium) : undefined,
+      } : undefined,
+      per100g: hasPer100g ? {
+        calories: nutritionPer100g.calories ? parseFloat(nutritionPer100g.calories) : undefined,
+        protein: nutritionPer100g.protein ? parseFloat(nutritionPer100g.protein) : undefined,
+        carbs: nutritionPer100g.carbs ? parseFloat(nutritionPer100g.carbs) : undefined,
+        fat: nutritionPer100g.fat ? parseFloat(nutritionPer100g.fat) : undefined,
+        fiber: nutritionPer100g.fiber ? parseFloat(nutritionPer100g.fiber) : undefined,
+        sugar: nutritionPer100g.sugar ? parseFloat(nutritionPer100g.sugar) : undefined,
+        sodium: nutritionPer100g.sodium ? parseFloat(nutritionPer100g.sodium) : undefined,
+      } : undefined,
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -48,6 +96,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           cookTime: cookTime || undefined,
           totalTime: totalTime || undefined,
           servings: servings || undefined,
+          nutrition: buildNutritionObject(),
           ingredients,
           instructions,
           equipment,
@@ -228,6 +277,165 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                 onChange={(e) => setCookTime(e.target.value)}
                 placeholder="20 minutes"
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Nutrition Information (Optional)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Label className="text-base mb-3 block">Per Serving</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="caloriesPerServing">Calories</Label>
+                <Input
+                  id="caloriesPerServing"
+                  type="number"
+                  value={nutritionPerServing.calories}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, calories: e.target.value})}
+                  placeholder="e.g., 350"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="proteinPerServing">Protein (g)</Label>
+                <Input
+                  id="proteinPerServing"
+                  type="number"
+                  value={nutritionPerServing.protein}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, protein: e.target.value})}
+                  placeholder="e.g., 25"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="carbsPerServing">Carbs (g)</Label>
+                <Input
+                  id="carbsPerServing"
+                  type="number"
+                  value={nutritionPerServing.carbs}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, carbs: e.target.value})}
+                  placeholder="e.g., 30"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fatPerServing">Fat (g)</Label>
+                <Input
+                  id="fatPerServing"
+                  type="number"
+                  value={nutritionPerServing.fat}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, fat: e.target.value})}
+                  placeholder="e.g., 15"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fiberPerServing">Fiber (g)</Label>
+                <Input
+                  id="fiberPerServing"
+                  type="number"
+                  value={nutritionPerServing.fiber}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, fiber: e.target.value})}
+                  placeholder="e.g., 5"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sugarPerServing">Sugar (g)</Label>
+                <Input
+                  id="sugarPerServing"
+                  type="number"
+                  value={nutritionPerServing.sugar}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, sugar: e.target.value})}
+                  placeholder="e.g., 10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sodiumPerServing">Sodium (mg)</Label>
+                <Input
+                  id="sodiumPerServing"
+                  type="number"
+                  value={nutritionPerServing.sodium}
+                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, sodium: e.target.value})}
+                  placeholder="e.g., 400"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t">
+            <Label className="text-base mb-3 block">Per 100g</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="caloriesPer100g">Calories</Label>
+                <Input
+                  id="caloriesPer100g"
+                  type="number"
+                  value={nutritionPer100g.calories}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, calories: e.target.value})}
+                  placeholder="e.g., 200"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="proteinPer100g">Protein (g)</Label>
+                <Input
+                  id="proteinPer100g"
+                  type="number"
+                  value={nutritionPer100g.protein}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, protein: e.target.value})}
+                  placeholder="e.g., 15"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="carbsPer100g">Carbs (g)</Label>
+                <Input
+                  id="carbsPer100g"
+                  type="number"
+                  value={nutritionPer100g.carbs}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, carbs: e.target.value})}
+                  placeholder="e.g., 20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fatPer100g">Fat (g)</Label>
+                <Input
+                  id="fatPer100g"
+                  type="number"
+                  value={nutritionPer100g.fat}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, fat: e.target.value})}
+                  placeholder="e.g., 8"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fiberPer100g">Fiber (g)</Label>
+                <Input
+                  id="fiberPer100g"
+                  type="number"
+                  value={nutritionPer100g.fiber}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, fiber: e.target.value})}
+                  placeholder="e.g., 3"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sugarPer100g">Sugar (g)</Label>
+                <Input
+                  id="sugarPer100g"
+                  type="number"
+                  value={nutritionPer100g.sugar}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, sugar: e.target.value})}
+                  placeholder="e.g., 6"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sodiumPer100g">Sodium (mg)</Label>
+                <Input
+                  id="sodiumPer100g"
+                  type="number"
+                  value={nutritionPer100g.sodium}
+                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, sodium: e.target.value})}
+                  placeholder="e.g., 250"
+                />
+              </div>
             </div>
           </div>
         </CardContent>

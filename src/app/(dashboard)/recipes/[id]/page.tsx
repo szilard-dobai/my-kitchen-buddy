@@ -112,6 +112,115 @@ export default async function RecipePage({ params }: RecipePageProps) {
         )}
       </div>
 
+      {recipe.nutrition && (recipe.nutrition.perServing || recipe.nutrition.per100g) && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Nutrition Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recipe.nutrition.perServing && (
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-3">Per Serving</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {recipe.nutrition.perServing.calories !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.calories}</p>
+                      <p className="text-xs text-gray-500 mt-1">Calories</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.perServing.protein !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.protein}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Protein</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.perServing.carbs !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.carbs}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Carbs</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.perServing.fat !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.fat}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Fat</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.perServing.fiber !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.fiber}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Fiber</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.perServing.sugar !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.sugar}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Sugar</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.perServing.sodium !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.sodium}mg</p>
+                      <p className="text-xs text-gray-500 mt-1">Sodium</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {recipe.nutrition.per100g && (
+              <div className={recipe.nutrition.perServing ? "mt-4 pt-4 border-t" : ""}>
+                <p className="text-sm font-medium text-gray-600 mb-3">Per 100g</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {recipe.nutrition.per100g.calories !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.calories}</p>
+                      <p className="text-xs text-gray-500 mt-1">Calories</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.per100g.protein !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.protein}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Protein</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.per100g.carbs !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.carbs}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Carbs</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.per100g.fat !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.fat}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Fat</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.per100g.fiber !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.fiber}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Fiber</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.per100g.sugar !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.sugar}g</p>
+                      <p className="text-xs text-gray-500 mt-1">Sugar</p>
+                    </div>
+                  )}
+                  {recipe.nutrition.per100g.sodium !== undefined && (
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.sodium}mg</p>
+                      <p className="text-xs text-gray-500 mt-1">Sodium</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid md:grid-cols-3 gap-8">
         <Card className="md:col-span-1">
           <CardHeader>

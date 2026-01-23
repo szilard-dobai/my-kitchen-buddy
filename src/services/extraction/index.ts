@@ -1,7 +1,9 @@
 import {
   completeExtractionJob,
   failExtractionJob,
+  findInProgressJobByUrl,
   updateExtractionJobStatus,
+  waitForJobCompletion,
 } from "@/models/extraction-job";
 import {
   createRawExtraction,
@@ -32,55 +34,83 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
   try {
     await updateExtractionJobStatus(id, "fetching_transcript", 10, "Checking cache...");
 
-    const cached = await findRawExtractionByUrl(normalizedUrl);
+    let extractedRecipe: Partial<CreateRecipeInput> | undefined;
+    let confidence: number | undefined;
 
-    let extractedRecipe: Partial<CreateRecipeInput>;
-    let confidence: number;
+    const cached = await findRawExtractionByUrl(normalizedUrl);
 
     if (cached) {
       await updateExtractionJobStatus(id, "analyzing", 80, "Using cached extraction...");
       extractedRecipe = cached.recipe;
       confidence = cached.confidence;
     } else {
-      await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
-      await notifyTelegram("Fetching video data...");
+      const inProgressJob = await findInProgressJobByUrl(normalizedUrl);
 
-      const [transcriptResult, metadataResult] = await Promise.all([
-        getTranscript(sourceUrl),
-        getMetadata(sourceUrl),
-      ]);
+      if (inProgressJob && inProgressJob.id !== id) {
+        await updateExtractionJobStatus(id, "fetching_transcript", 10, "Waiting for in-progress extraction...");
+        await notifyTelegram("Another extraction is in progress, waiting...");
 
-      if (transcriptResult.error || !transcriptResult.transcript) {
-        const errorMsg = transcriptResult.error || "Could not fetch transcript";
-        await failExtractionJob(id, errorMsg);
-        if (telegramChatId) await sendError(telegramChatId, errorMsg);
-        return;
+        try {
+          const completedJob = await waitForJobCompletion(inProgressJob.id, 300000);
+
+          if (completedJob.status === "completed") {
+            const nowCached = await findRawExtractionByUrl(normalizedUrl);
+            if (nowCached) {
+              extractedRecipe = nowCached.recipe;
+              confidence = nowCached.confidence;
+              await updateExtractionJobStatus(id, "analyzing", 80, "Using completed extraction...");
+            } else {
+              throw new Error("Cache not found after job completion");
+            }
+          } else {
+            throw new Error("In-progress job failed, retrying extraction");
+          }
+        } catch (error) {
+          console.warn("Piggyback failed, falling back to normal extraction:", error);
+        }
       }
 
-      await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
-      await updateExtractionJobStatus(id, "analyzing", 50, "Analyzing with AI...");
-      await notifyTelegram("Analyzing recipe...");
+      if (!extractedRecipe) {
+        await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
+        await notifyTelegram("Fetching video data...");
 
-      const extractionResult = await extractRecipeFromTranscript(
-        transcriptResult.transcript,
-        sourceUrl,
-        platform,
-        metadataResult.description,
-        targetLanguage
-      );
+        const [transcriptResult, metadataResult] = await Promise.all([
+          getTranscript(sourceUrl),
+          getMetadata(sourceUrl),
+        ]);
 
-      if (extractionResult.error || !extractionResult.recipe) {
-        const errorMsg = extractionResult.error || "Could not extract recipe";
-        await failExtractionJob(id, errorMsg);
-        if (telegramChatId) await sendError(telegramChatId, errorMsg);
-        return;
+        if (transcriptResult.error || !transcriptResult.transcript) {
+          const errorMsg = transcriptResult.error || "Could not fetch transcript";
+          await failExtractionJob(id, errorMsg);
+          if (telegramChatId) await sendError(telegramChatId, errorMsg);
+          return;
+        }
+
+        await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
+        await updateExtractionJobStatus(id, "analyzing", 50, "Analyzing with AI...");
+        await notifyTelegram("Analyzing recipe...");
+
+        const extractionResult = await extractRecipeFromTranscript(
+          transcriptResult.transcript,
+          sourceUrl,
+          platform,
+          metadataResult.description,
+          targetLanguage
+        );
+
+        if (extractionResult.error || !extractionResult.recipe) {
+          const errorMsg = extractionResult.error || "Could not extract recipe";
+          await failExtractionJob(id, errorMsg);
+          if (telegramChatId) await sendError(telegramChatId, errorMsg);
+          return;
+        }
+
+        extractedRecipe = extractionResult.recipe;
+        confidence = extractionResult.confidence || 0.8;
+
+        await createRawExtraction(normalizedUrl, extractedRecipe, confidence);
+        await updateExtractionJobStatus(id, "analyzing", 80, "Recipe extracted, saving...");
       }
-
-      extractedRecipe = extractionResult.recipe;
-      confidence = extractionResult.confidence || 0.8;
-
-      await createRawExtraction(normalizedUrl, extractedRecipe, confidence);
-      await updateExtractionJobStatus(id, "analyzing", 80, "Recipe extracted, saving...");
     }
 
     const recipe = await createRecipe({
@@ -94,6 +124,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       totalTime: extractedRecipe.totalTime,
       servings: extractedRecipe.servings,
       caloriesPerServing: extractedRecipe.caloriesPerServing,
+      nutrition: extractedRecipe.nutrition,
       dietaryTags: extractedRecipe.dietaryTags || [],
       mealType: extractedRecipe.mealType,
       ingredients: extractedRecipe.ingredients || [],

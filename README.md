@@ -6,7 +6,9 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
 
 - Paste a video URL and get a structured recipe extracted via AI
 - Supports TikTok, Instagram Reels, and YouTube (including Shorts)
+- Automatically extracts nutrition information when mentioned in videos (per serving and per 100g)
 - Edit and organize your extracted recipes
+- Manually add/edit nutrition data (calories, protein, carbs, fat, fiber, sugar, sodium)
 - Caches extractions to avoid redundant API calls
 
 ## Tech Stack

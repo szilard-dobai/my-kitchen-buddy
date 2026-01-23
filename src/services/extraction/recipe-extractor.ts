@@ -34,6 +34,26 @@ Extract into this JSON structure:
   "servings": "Only if explicitly mentioned",
   "dietaryTags": ["Only tags explicitly mentioned or clearly evident (e.g., 'vegan' if all ingredients are plant-based)"],
   "mealType": "Only if mentioned or clearly evident (e.g., 'dessert' for a sweet dish)",
+  "nutrition": {
+    "perServing": {
+      "calories": "number (only if explicitly stated per serving)",
+      "protein": "number in grams (only if explicitly stated)",
+      "carbs": "number in grams (only if explicitly stated)",
+      "fat": "number in grams (only if explicitly stated)",
+      "fiber": "number in grams (only if explicitly stated)",
+      "sugar": "number in grams (only if explicitly stated)",
+      "sodium": "number in milligrams (only if explicitly stated)"
+    },
+    "per100g": {
+      "calories": "number (only if per 100g/100ml is stated)",
+      "protein": "number in grams (only if explicitly stated)",
+      "carbs": "number in grams (only if explicitly stated)",
+      "fat": "number in grams (only if explicitly stated)",
+      "fiber": "number in grams (only if explicitly stated)",
+      "sugar": "number in grams (only if explicitly stated)",
+      "sodium": "number in milligrams (only if explicitly stated)"
+    }
+  },
   "ingredients": [
     {
       "name": "ingredient name as mentioned",
@@ -58,6 +78,10 @@ GUIDELINES:
 - Extract instructions from verbal descriptions of actions (e.g., "slice, coat, bake" = real steps)
 - The post description often contains ingredient lists or recipe details - use this information
 - Leave quantity/unit as null when amounts aren't specified - don't guess "1 cup" or "2 tablespoons"
+- Extract nutrition information ONLY when explicitly mentioned in transcript or post description
+- Don't calculate or estimate nutrition values - only include what is verbally stated
+- Support both per-serving and per-100g nutrition labels - if creator says "per 100 grams" or "per 100ml", use per100g object
+- If nutrition units are ambiguous or unclear, note this in extractionNotes
 - Set confidence based on how complete the information is (high if detailed, lower if sparse)
 - Use extractionNotes to document what's missing so users know what to fill in
 
@@ -135,6 +159,7 @@ export async function extractRecipeFromTranscript(
       totalTime: extracted.totalTime || undefined,
       servings: extracted.servings || undefined,
       caloriesPerServing: extracted.caloriesPerServing || undefined,
+      nutrition: extracted.nutrition || undefined,
       dietaryTags: extracted.dietaryTags || [],
       mealType: extracted.mealType || undefined,
       ingredients: (extracted.ingredients || []).map(
