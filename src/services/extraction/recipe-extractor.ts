@@ -6,11 +6,62 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-function buildSystemPrompt(targetLanguage: TargetLanguage): string {
+function detectTranscriptLanguage(transcript: string): string {
+  const sample = transcript.slice(0, 500).toLowerCase();
+
+  const patterns: Array<{ lang: string; markers: string[] }> = [
+    { lang: "Hungarian", markers: ["és", "azt", "egy", "nem", "hogy", "van", "meg", "csak", "már", "ezt", "ő", "ű", "ö", "ü"] },
+    { lang: "German", markers: ["und", "der", "die", "das", "ist", "nicht", "ein", "eine", "auch", "mit", "für", "ß", "ä", "ö", "ü"] },
+    { lang: "French", markers: ["le", "la", "les", "de", "et", "est", "un", "une", "que", "pour", "dans", "avec", "ç", "é", "è", "ê", "à"] },
+    { lang: "Spanish", markers: ["el", "la", "los", "las", "de", "que", "es", "un", "una", "con", "para", "ñ", "á", "é", "í", "ó", "ú"] },
+    { lang: "Italian", markers: ["il", "la", "di", "che", "è", "un", "una", "per", "con", "non", "gli", "à", "ò", "ù"] },
+    { lang: "Portuguese", markers: ["de", "que", "o", "a", "os", "as", "um", "uma", "para", "com", "não", "ã", "õ", "ç"] },
+    { lang: "Dutch", markers: ["de", "het", "een", "van", "en", "dat", "is", "niet", "op", "te", "ij", "aan"] },
+    { lang: "Polish", markers: ["nie", "się", "że", "to", "jest", "na", "do", "jak", "tak", "za", "ą", "ę", "ć", "ł", "ń", "ó", "ś", "ź", "ż"] },
+    { lang: "Romanian", markers: ["de", "și", "la", "în", "cu", "nu", "pe", "un", "o", "că", "ă", "â", "î", "ș", "ț"] },
+    { lang: "Czech", markers: ["je", "že", "na", "to", "se", "ne", "ale", "tak", "jak", "ř", "ě", "š", "č", "ž", "ů", "ý"] },
+    { lang: "Russian", markers: ["и", "в", "не", "на", "что", "он", "с", "как", "это", "а", "но", "по", "она"] },
+    { lang: "Ukrainian", markers: ["і", "в", "не", "на", "що", "він", "з", "як", "це", "а", "але", "та", "ї", "є"] },
+    { lang: "Japanese", markers: ["の", "は", "を", "に", "が", "と", "で", "た", "し", "て", "も", "ます", "です"] },
+    { lang: "Korean", markers: ["은", "는", "이", "가", "을", "를", "에", "의", "로", "와", "과", "도", "하고"] },
+    { lang: "Chinese", markers: ["的", "是", "了", "在", "不", "有", "和", "人", "这", "我", "他", "们"] },
+    { lang: "Arabic", markers: ["في", "من", "على", "إلى", "أن", "هذا", "و", "ما", "لا", "التي", "الذي"] },
+    { lang: "Turkish", markers: ["ve", "bir", "bu", "için", "ile", "de", "da", "ne", "var", "ı", "ş", "ğ", "ü", "ö", "ç"] },
+    { lang: "Albanian", markers: ["dhe", "një", "për", "që", "në", "është", "me", "të", "ka", "ë"] },
+  ];
+
+  let bestMatch = { lang: "the same language as the transcript", score: 0 };
+
+  for (const { lang, markers } of patterns) {
+    let score = 0;
+    for (const marker of markers) {
+      if (sample.includes(marker)) {
+        score++;
+      }
+    }
+    if (score > bestMatch.score) {
+      bestMatch = { lang, score };
+    }
+  }
+
+  if (bestMatch.score >= 3) {
+    return bestMatch.lang;
+  }
+
+  return "the same language as the transcript";
+}
+
+function buildSystemPrompt(targetLanguage: TargetLanguage, detectedLanguage: string): string {
   const languageInstruction =
     targetLanguage === "en"
       ? "LANGUAGE: Translate ALL text output (title, description, ingredients, instructions, tips, etc.) to English, regardless of the source language."
-      : "LANGUAGE: Preserve the ORIGINAL language of the video. Output all text (title, description, ingredients, instructions, tips, etc.) in the SAME language as the transcript. DO NOT translate to any other language.";
+      : `CRITICAL LANGUAGE REQUIREMENT - THIS IS MANDATORY:
+- The transcript appears to be in ${detectedLanguage}.
+- You MUST output ALL text in ${detectedLanguage} ONLY.
+- DO NOT translate ANY part of the output to English, French, Albanian, or any other language.
+- Every single field (title, description, ALL ingredients, ALL instructions, ALL tips) MUST be in ${detectedLanguage}.
+- If you are uncertain, keep the EXACT original words from the transcript.
+- VIOLATION OF THIS RULE IS UNACCEPTABLE. Double-check your output before responding.`;
 
   return `You are a recipe extraction system. Given a transcript from a cooking video (and optionally the post description/caption), extract the recipe information.
 
@@ -113,13 +164,15 @@ export async function extractRecipeFromTranscript(
     userMessage += `\n\n---\n\nPost description/caption:\n\n${postDescription}`;
   }
 
+  const detectedLanguage = detectTranscriptLanguage(transcript);
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: buildSystemPrompt(targetLanguage),
+          content: buildSystemPrompt(targetLanguage, detectedLanguage),
         },
         {
           role: "user",
