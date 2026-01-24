@@ -1,8 +1,13 @@
+import { ArrowLeft, ChefHat, Clock, ExternalLink, Lightbulb, Timer, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
+import { NutritionCard } from "@/components/recipes/nutrition-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DietaryTag } from "@/components/ui/dietary-tag";
+import { DifficultyBadge } from "@/components/ui/difficulty-badge";
+import { PlatformBadge } from "@/components/ui/platform-badge";
 import { getSession } from "@/lib/session";
 import { getRecipeById } from "@/models/recipe";
 
@@ -24,52 +29,25 @@ export default async function RecipePage({ params }: RecipePageProps) {
     notFound();
   }
 
-  const platformColors = {
-    tiktok: "bg-pink-100 text-pink-800",
-    instagram: "bg-purple-100 text-purple-800",
-    youtube: "bg-red-100 text-red-800",
-    other: "bg-gray-100 text-gray-800",
-  };
-
-  const difficultyColors = {
-    Easy: "bg-green-100 text-green-800",
-    Medium: "bg-yellow-100 text-yellow-800",
-    Hard: "bg-red-100 text-red-800",
-  };
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-start justify-between mb-6">
         <div>
           <Link
             href="/recipes"
-            className="text-sm text-gray-500 hover:text-gray-700 mb-2 inline-block"
+            className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 transition-colors"
           >
-            ← Back to recipes
+            <ArrowLeft className="h-4 w-4" />
+            Back to recipes
           </Link>
           <h1 className="text-3xl font-bold">{recipe.title}</h1>
           <div className="flex flex-wrap gap-2 mt-3">
-            <span
-              className={`text-sm px-3 py-1 rounded-full ${platformColors[recipe.source.platform]
-                }`}
-            >
-              {recipe.source.platform}
-            </span>
+            <PlatformBadge platform={recipe.source.platform} />
             {recipe.difficulty && (
-              <span
-                className={`text-sm px-3 py-1 rounded-full ${difficultyColors[recipe.difficulty]
-                  }`}
-              >
-                {recipe.difficulty}
-              </span>
+              <DifficultyBadge difficulty={recipe.difficulty as "Easy" | "Medium" | "Hard"} />
             )}
             {recipe.dietaryTags.map((tag) => (
-              <span
-                key={tag}
-                className="text-sm px-3 py-1 bg-gray-100 text-gray-700 rounded-full"
-              >
-                {tag}
-              </span>
+              <DietaryTag key={tag} tag={tag} />
             ))}
           </div>
         </div>
@@ -82,158 +60,60 @@ export default async function RecipePage({ params }: RecipePageProps) {
       </div>
 
       {recipe.description && (
-        <p className="text-gray-600 mb-6">{recipe.description}</p>
+        <p className="text-muted-foreground mb-6">{recipe.description}</p>
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {recipe.prepTime && (
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500">Prep Time</p>
+          <div className="flex flex-col items-center justify-center p-4 bg-secondary rounded-lg card-shadow">
+            <Timer className="h-5 w-5 text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">Prep Time</p>
             <p className="font-medium">{recipe.prepTime}</p>
           </div>
         )}
         {recipe.cookTime && (
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500">Cook Time</p>
+          <div className="flex flex-col items-center justify-center p-4 bg-secondary rounded-lg card-shadow">
+            <Clock className="h-5 w-5 text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">Cook Time</p>
             <p className="font-medium">{recipe.cookTime}</p>
           </div>
         )}
         {recipe.totalTime && (
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500">Total Time</p>
+          <div className="flex flex-col items-center justify-center p-4 bg-secondary rounded-lg card-shadow">
+            <Clock className="h-5 w-5 text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">Total Time</p>
             <p className="font-medium">{recipe.totalTime}</p>
           </div>
         )}
         {recipe.servings && (
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-500">Servings</p>
+          <div className="flex flex-col items-center justify-center p-4 bg-secondary rounded-lg card-shadow">
+            <Users className="h-5 w-5 text-primary mb-2" />
+            <p className="text-sm text-muted-foreground">Servings</p>
             <p className="font-medium">{recipe.servings}</p>
           </div>
         )}
       </div>
 
       {recipe.nutrition && (recipe.nutrition.perServing || recipe.nutrition.per100g) && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Nutrition Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recipe.nutrition.perServing && (
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-3">Per Serving</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {recipe.nutrition.perServing.calories !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.calories}</p>
-                      <p className="text-xs text-gray-500 mt-1">Calories</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.perServing.protein !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.protein}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Protein</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.perServing.carbs !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.carbs}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Carbs</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.perServing.fat !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.fat}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Fat</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.perServing.fiber !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.fiber}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Fiber</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.perServing.sugar !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.sugar}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Sugar</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.perServing.sodium !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.perServing.sodium}mg</p>
-                      <p className="text-xs text-gray-500 mt-1">Sodium</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {recipe.nutrition.per100g && (
-              <div className={recipe.nutrition.perServing ? "mt-4 pt-4 border-t" : ""}>
-                <p className="text-sm font-medium text-gray-600 mb-3">Per 100g</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {recipe.nutrition.per100g.calories !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.calories}</p>
-                      <p className="text-xs text-gray-500 mt-1">Calories</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.per100g.protein !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.protein}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Protein</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.per100g.carbs !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.carbs}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Carbs</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.per100g.fat !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.fat}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Fat</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.per100g.fiber !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.fiber}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Fiber</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.per100g.sugar !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.sugar}g</p>
-                      <p className="text-xs text-gray-500 mt-1">Sugar</p>
-                    </div>
-                  )}
-                  {recipe.nutrition.per100g.sodium !== undefined && (
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <p className="text-2xl font-bold text-gray-800">{recipe.nutrition.per100g.sodium}mg</p>
-                      <p className="text-xs text-gray-500 mt-1">Sodium</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <NutritionCard nutrition={recipe.nutrition} className="mb-8" />
       )}
 
       <div className="grid md:grid-cols-3 gap-8">
-        <Card className="md:col-span-1">
+        <Card className="md:col-span-1 card-shadow">
           <CardHeader>
-            <CardTitle>Ingredients</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <ChefHat className="h-5 w-5 text-primary" />
+              Ingredients
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {recipe.ingredients.length === 0 ? (
-              <p className="text-gray-500 text-sm">No ingredients listed</p>
+              <p className="text-muted-foreground text-sm">No ingredients listed</p>
             ) : (
               <ul className="space-y-2">
                 {recipe.ingredients.map((ingredient, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <span className="text-gray-400">•</span>
+                    <span className="text-primary mt-1">•</span>
                     <span>
                       {ingredient.quantity && (
                         <span className="font-medium">
@@ -243,7 +123,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                       )}
                       {ingredient.name}
                       {ingredient.notes && (
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-muted-foreground text-sm">
                           {" "}
                           ({ingredient.notes})
                         </span>
@@ -256,24 +136,24 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 card-shadow">
           <CardHeader>
             <CardTitle>Instructions</CardTitle>
           </CardHeader>
           <CardContent>
             {recipe.instructions.length === 0 ? (
-              <p className="text-gray-500 text-sm">No instructions listed</p>
+              <p className="text-muted-foreground text-sm">No instructions listed</p>
             ) : (
               <ol className="space-y-4">
                 {recipe.instructions.map((instruction) => (
                   <li key={instruction.stepNumber} className="flex gap-4">
-                    <span className="shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-medium text-gray-600">
+                    <span className="shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-medium text-sm">
                       {instruction.stepNumber}
                     </span>
-                    <div className="flex-1">
+                    <div className="flex-1 pt-1">
                       <p>{instruction.description}</p>
                       {(instruction.duration || instruction.technique) && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {instruction.technique && (
                             <span className="mr-3">
                               Technique: {instruction.technique}
@@ -296,7 +176,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
       {(recipe.equipment.length > 0 || recipe.tipsAndNotes.length > 0) && (
         <div className="grid md:grid-cols-2 gap-8 mt-8">
           {recipe.equipment.length > 0 && (
-            <Card>
+            <Card className="card-shadow">
               <CardHeader>
                 <CardTitle>Equipment</CardTitle>
               </CardHeader>
@@ -304,7 +184,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 <ul className="space-y-1">
                   {recipe.equipment.map((item, index) => (
                     <li key={index} className="flex items-center gap-2">
-                      <span className="text-gray-400">•</span>
+                      <span className="text-primary">•</span>
                       {item}
                     </li>
                   ))}
@@ -314,15 +194,18 @@ export default async function RecipePage({ params }: RecipePageProps) {
           )}
 
           {recipe.tipsAndNotes.length > 0 && (
-            <Card>
+            <Card className="card-shadow">
               <CardHeader>
-                <CardTitle>Tips & Notes</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-yellow-500" />
+                  Tips & Notes
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   {recipe.tipsAndNotes.map((tip, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <span className="text-yellow-500">💡</span>
+                      <span className="text-yellow-500 mt-0.5">•</span>
                       {tip}
                     </li>
                   ))}
@@ -335,18 +218,19 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
       {recipe.source.url && (
         <div className="mt-8 pt-6 border-t">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <ExternalLink className="h-4 w-4" />
             Source:{" "}
             <a
               href={recipe.source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-primary hover:underline"
             >
               {recipe.source.url}
             </a>
             {recipe.source.authorUsername && (
-              <span> by {recipe.source.authorUsername}</span>
+              <span> by @{recipe.source.authorUsername}</span>
             )}
           </p>
         </div>
