@@ -11,6 +11,10 @@ import {
 } from "@/models/raw-extraction";
 import { createRecipe } from "@/models/recipe";
 import {
+  createOrUpdateMetadataCache,
+  findMetadataCacheByUrl,
+} from "@/models/video-metadata-cache";
+import {
   sendError,
   sendRecipePreview,
   sendStatusUpdate,
@@ -74,16 +78,38 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
         await notifyTelegram("Fetching video data...");
 
-        const [transcriptResult, metadataResult] = await Promise.all([
-          getTranscript(sourceUrl),
-          getMetadata(sourceUrl),
-        ]);
+        const cachedMetadata = await findMetadataCacheByUrl(normalizedUrl);
+
+        let metadataDescription: string | undefined;
+
+        if (cachedMetadata) {
+          await updateExtractionJobStatus(id, "fetching_transcript", 15, "Using cached metadata...");
+          metadataDescription = cachedMetadata.metadata.description;
+        }
+
+        const transcriptResult = await getTranscript(sourceUrl);
 
         if (transcriptResult.error || !transcriptResult.transcript) {
           const errorMsg = transcriptResult.error || "Could not fetch transcript";
           await failExtractionJob(id, errorMsg);
           if (telegramChatId) await sendError(telegramChatId, errorMsg);
           return;
+        }
+
+        if (!cachedMetadata) {
+          const metadataResult = await getMetadata(sourceUrl);
+          metadataDescription = metadataResult.description;
+
+          if (!metadataResult.error) {
+            await createOrUpdateMetadataCache(normalizedUrl, platform, {
+              title: metadataResult.title,
+              description: metadataResult.description,
+              author: metadataResult.authorUsername ? {
+                username: metadataResult.authorUsername,
+              } : undefined,
+              tags: metadataResult.tags,
+            });
+          }
         }
 
         await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
@@ -94,7 +120,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           transcriptResult.transcript,
           sourceUrl,
           platform,
-          metadataResult.description,
+          metadataDescription,
           targetLanguage
         );
 
