@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Apple, Beef, Cookie, Droplet, Flame, Pill, Wheat } from "lucide-react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { NutritionInfo } from "@/types/recipe";
 
 type NutritionValues = NonNullable<NutritionInfo["perServing"]>;
 
 interface NutritionCardProps {
-  nutrition: NutritionInfo;
+  nutrition?: NutritionInfo;
   className?: string;
 }
 
@@ -22,14 +22,29 @@ const nutritionItems = [
   { key: "sodium", label: "Sodium", unit: "mg", icon: Pill, colorClass: "bg-nutrition-sodium" },
 ] as const;
 
+function hasAnyNutritionValue(data: NutritionValues | undefined): boolean {
+  if (!data) return false;
+  return nutritionItems.some((item) => !!data[item.key]);
+}
+
 export function NutritionCard({ nutrition, className }: NutritionCardProps) {
-  const [activeTab, setActiveTab] = useState<"perServing" | "per100g">(
-    nutrition.perServing ? "perServing" : "per100g"
+  const hasPerServing = useMemo(
+    () => hasAnyNutritionValue(nutrition?.perServing),
+    [nutrition?.perServing]
+  );
+  const hasPer100g = useMemo(
+    () => hasAnyNutritionValue(nutrition?.per100g),
+    [nutrition?.per100g]
   );
 
-  const data = activeTab === "perServing" ? nutrition.perServing : nutrition.per100g;
+  const [activeTab, setActiveTab] = useState<"perServing" | "per100g">(
+    hasPerServing ? "perServing" : "per100g"
+  );
 
-  if (!nutrition.perServing && !nutrition.per100g) {
+  const data = activeTab === "perServing" ? nutrition?.perServing : nutrition?.per100g;
+  const showSwitcher = hasPerServing && hasPer100g;
+
+  if (!hasPerServing && !hasPer100g) {
     return null;
   }
 
@@ -37,8 +52,8 @@ export function NutritionCard({ nutrition, className }: NutritionCardProps) {
     <div className={cn("rounded-lg border bg-card p-4 card-shadow", className)}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-lg">Nutrition Facts</h3>
-        <div className="flex rounded-lg bg-muted p-1">
-          {nutrition.perServing && (
+        {showSwitcher && (
+          <div className="flex rounded-lg bg-muted p-1">
             <button
               onClick={() => setActiveTab("perServing")}
               className={cn(
@@ -50,8 +65,6 @@ export function NutritionCard({ nutrition, className }: NutritionCardProps) {
             >
               Per Serving
             </button>
-          )}
-          {nutrition.per100g && (
             <button
               onClick={() => setActiveTab("per100g")}
               className={cn(
@@ -63,15 +76,15 @@ export function NutritionCard({ nutrition, className }: NutritionCardProps) {
             >
               Per 100g
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {data && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {nutritionItems.map((item) => {
             const value = data[item.key as keyof NutritionValues];
-            if (value === undefined) return null;
+            if (!value) return null;
 
             const Icon = item.icon;
 
