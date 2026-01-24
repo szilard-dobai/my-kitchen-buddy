@@ -21,6 +21,7 @@ export async function findMetadataCacheByUrl(
     normalizedUrl: doc.normalizedUrl,
     platform: doc.platform,
     metadata: doc.metadata,
+    authorId: doc.authorId,
     fetchedAt: doc.fetchedAt,
     updatedAt: doc.updatedAt,
   } as VideoMetadataCache;
@@ -29,26 +30,27 @@ export async function findMetadataCacheByUrl(
 export async function createOrUpdateMetadataCache(
   normalizedUrl: string,
   platform: "tiktok" | "instagram" | "youtube" | "other",
-  metadata: VideoMetadata
+  metadata: VideoMetadata,
+  authorId?: string
 ): Promise<VideoMetadataCache> {
   const collection = await getVideoMetadataCacheCollection();
   const now = new Date();
 
-  const doc = {
+  const doc: Partial<VideoMetadataCache> = {
     normalizedUrl,
     platform,
     metadata,
-    fetchedAt: now,
     updatedAt: now,
   };
+
+  if (authorId) {
+    doc.authorId = authorId;
+  }
 
   const result = await collection.updateOne(
     { normalizedUrl },
     {
-      $set: {
-        ...doc,
-        updatedAt: now,
-      },
+      $set: doc,
       $setOnInsert: {
         fetchedAt: now,
       },
@@ -60,7 +62,8 @@ export async function createOrUpdateMetadataCache(
     return {
       ...doc,
       _id: result.upsertedId.toString(),
-    };
+      fetchedAt: now,
+    } as VideoMetadataCache;
   }
 
   const updated = await collection.findOne({ normalizedUrl });
@@ -69,6 +72,7 @@ export async function createOrUpdateMetadataCache(
     normalizedUrl: updated!.normalizedUrl,
     platform: updated!.platform,
     metadata: updated!.metadata,
+    authorId: updated!.authorId,
     fetchedAt: updated!.fetchedAt,
     updatedAt: updated!.updatedAt,
   } as VideoMetadataCache;

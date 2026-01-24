@@ -38,6 +38,8 @@ export interface RecipeSource {
   url: string;
   platform: "tiktok" | "instagram" | "youtube" | "other";
   authorUsername?: string;
+  authorId?: string;
+  thumbnailUrl?: string;
 }
 
 export interface ExtractionMetadata {

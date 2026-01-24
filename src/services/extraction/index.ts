@@ -1,3 +1,4 @@
+import { upsertAuthor } from "@/models/author";
 import {
   completeExtractionJob,
   failExtractionJob,
@@ -78,7 +79,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
         await notifyTelegram("Fetching video data...");
 
-        const cachedMetadata = await findMetadataCacheByUrl(normalizedUrl);
+        let cachedMetadata = await findMetadataCacheByUrl(normalizedUrl);
 
         let metadataDescription: string | undefined;
 
@@ -101,14 +102,31 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           metadataDescription = metadataResult.description;
 
           if (!metadataResult.error) {
-            await createOrUpdateMetadataCache(normalizedUrl, platform, {
-              title: metadataResult.title,
-              description: metadataResult.description,
-              author: metadataResult.authorUsername ? {
-                username: metadataResult.authorUsername,
-              } : undefined,
-              tags: metadataResult.tags,
-            });
+            let authorId: string | undefined;
+
+            if (metadataResult.author?.username) {
+              const author = await upsertAuthor({
+                platform,
+                username: metadataResult.author.username,
+                displayName: metadataResult.author.displayName,
+                avatarUrl: metadataResult.author.avatarUrl,
+                verified: metadataResult.author.verified,
+              });
+              authorId = author._id;
+            }
+
+            cachedMetadata = await createOrUpdateMetadataCache(
+              normalizedUrl,
+              platform,
+              {
+                title: metadataResult.title,
+                description: metadataResult.description,
+                author: metadataResult.author,
+                media: metadataResult.media,
+                tags: metadataResult.tags,
+              },
+              authorId
+            );
           }
         }
 
@@ -139,6 +157,8 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       }
     }
 
+    const metadataForRecipe = await findMetadataCacheByUrl(normalizedUrl);
+
     const recipe = await createRecipe({
       userId,
       title: extractedRecipe.title || "Untitled Recipe",
@@ -157,9 +177,14 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       instructions: extractedRecipe.instructions || [],
       equipment: extractedRecipe.equipment || [],
       tipsAndNotes: extractedRecipe.tipsAndNotes || [],
-      source: extractedRecipe.source || {
+      source: {
         url: sourceUrl,
         platform,
+        authorUsername:
+          extractedRecipe.source?.authorUsername ||
+          metadataForRecipe?.metadata.author?.username,
+        authorId: metadataForRecipe?.authorId,
+        thumbnailUrl: metadataForRecipe?.metadata.media?.thumbnailUrl,
       },
       extractionMetadata: {
         extractedAt: new Date(),
