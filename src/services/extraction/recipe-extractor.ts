@@ -7,9 +7,10 @@ const openai = new OpenAI({
 });
 
 function detectTranscriptLanguage(transcript: string): string {
-  const sample = transcript.slice(0, 500).toLowerCase();
+  const sample = ` ${transcript.slice(0, 500).toLowerCase()} `;
 
   const patterns: Array<{ lang: string; markers: string[] }> = [
+    { lang: "English", markers: [" the ", " and ", " you ", " that ", " this ", " with ", " have ", " for ", " are ", " but ", " not ", " what ", " all ", " were ", " when ", " your ", " can ", " there ", " an ", " which "] },
     { lang: "Hungarian", markers: ["és", "azt", "egy", "nem", "hogy", "van", "meg", "csak", "már", "ezt", "ő", "ű", "ö", "ü"] },
     { lang: "German", markers: ["und", "der", "die", "das", "ist", "nicht", "ein", "eine", "auch", "mit", "für", "ß", "ä", "ö", "ü"] },
     { lang: "French", markers: ["le", "la", "les", "de", "et", "est", "un", "une", "que", "pour", "dans", "avec", "ç", "é", "è", "ê", "à"] },
