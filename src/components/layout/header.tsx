@@ -68,7 +68,7 @@ export function Header() {
         </div>
 
         <button
-          className="md:hidden p-2"
+          className="md:hidden cursor-pointer p-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? (
