@@ -1,5 +1,7 @@
+/* eslint-disable no-console */
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import getDb from "../src/lib/db";
 
 const envPath = resolve(__dirname, "../.env");
 const envFile = readFileSync(envPath, "utf-8");
@@ -14,8 +16,6 @@ envFile.split("\n").forEach((line) => {
   }
 });
 
-import getDb from "../src/lib/db";
-
 async function addExtractionJobIndex() {
   try {
     const db = await getDb();
@@ -25,7 +25,7 @@ async function addExtractionJobIndex() {
 
     await collection.createIndex(
       { normalizedUrl: 1, status: 1 },
-      { name: "normalizedUrl_status_idx" }
+      { name: "normalizedUrl_status_idx" },
     );
 
     console.log("Index created successfully!");

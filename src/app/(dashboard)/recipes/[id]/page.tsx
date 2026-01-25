@@ -1,5 +1,14 @@
+import {
+  ArrowLeft,
+  ChefHat,
+  Clock,
+  ExternalLink,
+  Lightbulb,
+  Timer,
+  Users,
+  UtensilsCrossed,
+} from "lucide-react";
 import type { Metadata } from "next";
-import { ArrowLeft, ChefHat, Clock, ExternalLink, Lightbulb, Timer, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -31,7 +40,9 @@ export async function generateMetadata({
 
   return {
     title: recipe.title,
-    description: recipe.description || `${recipe.title} - View ingredients, instructions, and nutrition info.`,
+    description:
+      recipe.description ||
+      `${recipe.title} - View ingredients, instructions, and nutrition info.`,
   };
 }
 
@@ -64,7 +75,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
           <div className="flex flex-wrap gap-2 mt-3">
             <PlatformBadge platform={recipe.source.platform} />
             {recipe.difficulty && (
-              <DifficultyBadge difficulty={recipe.difficulty as "Easy" | "Medium" | "Hard"} />
+              <DifficultyBadge
+                difficulty={recipe.difficulty as "Easy" | "Medium" | "Hard"}
+              />
             )}
             {recipe.dietaryTags.map((tag) => (
               <DietaryTag key={tag} tag={tag} />
@@ -131,9 +144,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
         )}
       </div>
 
-      {recipe.nutrition && (recipe.nutrition.perServing || recipe.nutrition.per100g) && (
-        <NutritionCard nutrition={recipe.nutrition} className="mb-8" />
-      )}
+      {recipe.nutrition &&
+        (recipe.nutrition.perServing || recipe.nutrition.per100g) && (
+          <NutritionCard nutrition={recipe.nutrition} className="mb-8" />
+        )}
 
       <div className="grid md:grid-cols-3 gap-8">
         <Card className="md:col-span-1 card-shadow">
@@ -145,7 +159,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </CardHeader>
           <CardContent>
             {recipe.ingredients.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No ingredients listed</p>
+              <p className="text-muted-foreground text-sm">
+                No ingredients listed
+              </p>
             ) : (
               <ul className="space-y-2">
                 {recipe.ingredients.map((ingredient, index) => (
@@ -179,7 +195,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </CardHeader>
           <CardContent>
             {recipe.instructions.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No instructions listed</p>
+              <p className="text-muted-foreground text-sm">
+                No instructions listed
+              </p>
             ) : (
               <ol className="space-y-4">
                 {recipe.instructions.map((instruction) => (

@@ -1,5 +1,7 @@
+/* eslint-disable no-console */
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import getDb from "../src/lib/db";
 
 const envPath = resolve(__dirname, "../.env");
 const envFile = readFileSync(envPath, "utf-8");
@@ -14,8 +16,6 @@ envFile.split("\n").forEach((line) => {
   }
 });
 
-import getDb from "../src/lib/db";
-
 async function addAuthorsIndex() {
   try {
     const db = await getDb();
@@ -25,7 +25,7 @@ async function addAuthorsIndex() {
 
     await collection.createIndex(
       { platform: 1, username: 1 },
-      { unique: true, name: "platform_username_unique_idx" }
+      { unique: true, name: "platform_username_unique_idx" },
     );
 
     console.log("Index created successfully!");

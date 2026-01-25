@@ -1,5 +1,7 @@
+/* eslint-disable no-console */
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import getDb from "../src/lib/db";
 
 const envPath = resolve(__dirname, "../.env");
 const envFile = readFileSync(envPath, "utf-8");
@@ -14,8 +16,6 @@ envFile.split("\n").forEach((line) => {
   }
 });
 
-import getDb from "../src/lib/db";
-
 async function addVideoMetadataCacheIndex() {
   try {
     const db = await getDb();
@@ -25,7 +25,7 @@ async function addVideoMetadataCacheIndex() {
 
     await collection.createIndex(
       { normalizedUrl: 1 },
-      { unique: true, name: "normalizedUrl_unique_idx" }
+      { unique: true, name: "normalizedUrl_unique_idx" },
     );
 
     console.log("Index created successfully!");

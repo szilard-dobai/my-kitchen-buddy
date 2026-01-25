@@ -3,7 +3,6 @@
 import { Moon, Monitor, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
-
 import { Button } from "@/components/ui/button";
 
 type Theme = "light" | "dark" | "system";
@@ -22,7 +21,7 @@ const useIsMounted = () => {
   return useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 };
 
