@@ -90,3 +90,40 @@ export function normalizeUrl(url: string): string {
     return url;
   }
 }
+
+function isShortUrl(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname.toLowerCase();
+    return (
+      hostname === "vm.tiktok.com" ||
+      hostname === "vt.tiktok.com" ||
+      hostname.includes("tiktok.com/t/") ||
+      parsedUrl.pathname.startsWith("/t/") ||
+      hostname === "youtu.be"
+    );
+  } catch {
+    return false;
+  }
+}
+
+export async function resolveUrl(url: string): Promise<string> {
+  const normalizedInput = normalizeUrl(url);
+
+  if (!isShortUrl(url)) {
+    return normalizedInput;
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: "HEAD",
+      redirect: "follow",
+    });
+
+    const finalUrl = response.url;
+    return normalizeUrl(finalUrl);
+  } catch (error) {
+    console.warn("Failed to resolve URL, using original:", error);
+    return normalizedInput;
+  }
+}

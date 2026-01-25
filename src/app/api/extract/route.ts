@@ -3,7 +3,7 @@ import { getSession } from "@/lib/session";
 import { createExtractionJob, getExtractionJobById } from "@/models/extraction-job";
 import { findRecipeBySourceUrl } from "@/models/recipe";
 import { processExtraction } from "@/services/extraction";
-import { detectPlatform, normalizeUrl } from "@/services/extraction/platform-detector";
+import { detectPlatform, resolveUrl } from "@/services/extraction/platform-detector";
 import type { TargetLanguage } from "@/types/extraction-job";
 
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
-    const normalizedUrl = normalizeUrl(url);
+    const normalizedUrl = await resolveUrl(url);
     const detection = detectPlatform(normalizedUrl);
 
     if (!detection.isValid) {
