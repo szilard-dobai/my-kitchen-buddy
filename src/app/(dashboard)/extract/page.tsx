@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { TargetLanguage } from "@/types/extraction-job";
+import type { UsageInfo } from "@/types/subscription";
 
 interface ExtractionStatus {
   id: string;
@@ -72,6 +73,7 @@ export default function ExtractPage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [extractionStatus, setExtractionStatus] =
     useState<ExtractionStatus | null>(null);
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
 
   const pollStatus = useCallback(
     async (id: string) => {
@@ -123,6 +125,13 @@ export default function ExtractPage() {
     };
   }, [jobId, pollStatus]);
 
+  useEffect(() => {
+    fetch("/api/billing/usage")
+      .then((res) => res.json())
+      .then((data) => setUsage(data))
+      .catch(console.error);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -170,6 +179,19 @@ export default function ExtractPage() {
         <p className="text-muted-foreground">
           Paste a cooking video URL and let AI do the magic
         </p>
+        {usage && (
+          <div className="text-sm text-muted-foreground mt-4">
+            {usage.used} / {usage.limit} extractions used this month
+            {usage.used >= usage.limit && (
+              <span className="text-red-500 ml-2">
+                Limit reached.{" "}
+                <a href="/settings/billing" className="underline">
+                  Upgrade to Pro
+                </a>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <Card className="card-shadow">
@@ -228,7 +250,7 @@ export default function ExtractPage() {
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !url || (usage !== null && usage.used >= usage.limit)}
               className="w-full h-12 text-base"
             >
               {loading ? (
