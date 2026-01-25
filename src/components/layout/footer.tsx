@@ -29,13 +29,13 @@ export function Footer({ compact = false }: FooterProps) {
             </p>
             <div className="flex items-center gap-4">
               <Link
-                href="#"
+                href="/privacy"
                 className="hover:text-foreground transition-colors"
               >
                 Privacy
               </Link>
               <Link
-                href="#"
+                href="/terms"
                 className="hover:text-foreground transition-colors"
               >
                 Terms
@@ -100,7 +100,7 @@ export function Footer({ compact = false }: FooterProps) {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link
-                  href="#"
+                  href="/privacy"
                   className="hover:text-foreground transition-colors"
                 >
                   Privacy Policy
@@ -108,7 +108,7 @@ export function Footer({ compact = false }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/terms"
                   className="hover:text-foreground transition-colors"
                 >
                   Terms of Service
