@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import type { UsageInfo } from "@/types/subscription";
 
-export default function BillingPage() {
+function BillingContent() {
   const searchParams = useSearchParams();
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -199,5 +199,24 @@ export default function BillingPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">Billing</h1>
+          <Card>
+            <CardContent className="py-8">
+              <p className="text-center text-muted-foreground">Loading...</p>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <BillingContent />
+    </Suspense>
   );
 }
