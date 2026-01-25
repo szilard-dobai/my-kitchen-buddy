@@ -1,4 +1,5 @@
-import { ArrowLeft, ChefHat, Clock, ExternalLink, Lightbulb, Timer, Users } from "lucide-react";
+import { ArrowLeft, ChefHat, Clock, ExternalLink, Lightbulb, Timer, Users, UtensilsCrossed } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
@@ -61,6 +62,23 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
       {recipe.description && (
         <p className="text-muted-foreground mb-6">{recipe.description}</p>
+      )}
+
+      {recipe.source.thumbnailUrl ? (
+        <div className="aspect-video relative rounded-lg overflow-hidden mb-8">
+          <Image
+            src={recipe.source.thumbnailUrl}
+            alt={recipe.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 896px) 100vw, 896px"
+            priority
+          />
+        </div>
+      ) : (
+        <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-8">
+          <UtensilsCrossed className="h-16 w-16 text-muted-foreground/30" />
+        </div>
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -225,12 +243,24 @@ export default async function RecipePage({ params }: RecipePageProps) {
               href={recipe.source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary hover:underline capitalize"
             >
-              {recipe.source.url}
+              {recipe.source.platform}
             </a>
             {recipe.source.authorUsername && (
-              <span> by @{recipe.source.authorUsername}</span>
+              <span className="inline-flex items-center gap-1.5">
+                by
+                {recipe.source.authorAvatarUrl && (
+                  <Image
+                    src={recipe.source.authorAvatarUrl}
+                    alt={recipe.source.authorUsername}
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                )}
+                @{recipe.source.authorUsername}
+              </span>
             )}
           </p>
         </div>

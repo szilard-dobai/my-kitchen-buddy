@@ -184,6 +184,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           extractedRecipe.source?.authorUsername ||
           metadataForRecipe?.metadata.author?.username,
         authorId: metadataForRecipe?.authorId,
+        authorAvatarUrl: metadataForRecipe?.metadata.author?.avatarUrl,
         thumbnailUrl: metadataForRecipe?.metadata.media?.thumbnailUrl,
       },
       extractionMetadata: {

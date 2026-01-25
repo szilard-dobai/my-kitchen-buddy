@@ -39,6 +39,7 @@ export interface RecipeSource {
   platform: "tiktok" | "instagram" | "youtube" | "other";
   authorUsername?: string;
   authorId?: string;
+  authorAvatarUrl?: string;
   thumbnailUrl?: string;
 }
 

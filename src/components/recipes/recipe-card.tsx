@@ -1,4 +1,5 @@
 import { Clock, Flame, Users, UtensilsCrossed } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DietaryTag } from '@/components/ui/dietary-tag'
@@ -16,7 +17,22 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
 
     return (
         <Link href={`/recipes/${recipe._id}`} className="group">
-            <Card className="h-full card-shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer">
+            <Card className="h-full card-shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden">
+                <div className="aspect-video bg-muted relative">
+                    {recipe.source.thumbnailUrl ? (
+                        <Image
+                            src={recipe.source.thumbnailUrl}
+                            alt={recipe.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <UtensilsCrossed className="h-12 w-12 text-muted-foreground/30" />
+                        </div>
+                    )}
+                </div>
                 <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                         <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
