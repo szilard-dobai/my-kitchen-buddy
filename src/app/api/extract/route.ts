@@ -5,6 +5,7 @@ import {
   getExtractionJobById,
 } from "@/models/extraction-job";
 import { findRecipeBySourceUrl } from "@/models/recipe";
+import { canUserExtract, getOrCreateSubscription } from "@/models/subscription";
 import { processExtraction } from "@/services/extraction";
 import {
   detectPlatform,
@@ -17,6 +18,20 @@ export async function POST(request: Request) {
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const canExtract = await canUserExtract(session.user.id);
+    if (!canExtract) {
+      const subscription = await getOrCreateSubscription(session.user.id);
+      return NextResponse.json(
+        {
+          error: "Extraction limit reached",
+          used: subscription.extractionsUsed,
+          limit: subscription.extractionsLimit,
+          planTier: subscription.planTier,
+        },
+        { status: 429 },
+      );
     }
 
     const body = await request.json();
