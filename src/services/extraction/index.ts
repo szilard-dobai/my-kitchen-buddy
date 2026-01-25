@@ -9,6 +9,7 @@ import {
   findRawExtraction,
 } from "@/models/raw-extraction";
 import { createRecipe } from "@/models/recipe";
+import { incrementExtractionCount } from "@/models/subscription";
 import {
   createOrUpdateMetadataCache,
   findMetadataCacheByUrl,
@@ -239,6 +240,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
     });
 
     await completeExtractionJob(id, recipe._id!);
+    await incrementExtractionCount(userId);
 
     if (telegramChatId) {
       await sendRecipePreview(telegramChatId, recipe);
