@@ -56,14 +56,19 @@ async function withRetry<T>(
   throw new Error("Max retries exceeded");
 }
 
-export async function getTranscript(url: string): Promise<TranscriptResult> {
+export async function getTranscript(
+  url: string,
+  lang?: string
+): Promise<TranscriptResult> {
   const client = getSupadataClient();
   if (!client) {
     return { transcript: "", error: "Supadata API key not configured" };
   }
 
   try {
-    const result = await withRetry(() => client.transcript({ url, text: true }));
+    const result = await withRetry(() =>
+      client.transcript({ url, text: true, lang })
+    );
 
     if ("jobId" in result) {
       return { transcript: "", error: "Transcript generation in progress" };

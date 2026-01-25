@@ -56,18 +56,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
     if (cachedMetadata) {
       await updateExtractionJobStatus(id, "fetching_transcript", 15, "Using cached metadata...");
       metadataDescription = cachedMetadata.metadata.description;
-    }
-
-    const transcriptResult = await getTranscript(sourceUrl);
-
-    if (transcriptResult.error || !transcriptResult.transcript) {
-      const errorMsg = transcriptResult.error || "Could not fetch transcript";
-      await failExtractionJob(id, errorMsg);
-      if (telegramChatId) await sendError(telegramChatId, errorMsg);
-      return;
-    }
-
-    if (!cachedMetadata) {
+    } else {
       const metadataResult = await getMetadata(sourceUrl);
       metadataDescription = metadataResult.description;
 
@@ -98,6 +87,25 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           authorId
         );
       }
+    }
+
+    let transcriptLang: string | undefined;
+    if (targetLanguage === "original" && metadataDescription) {
+      const descriptionLanguage = detectTranscriptLanguage(metadataDescription);
+      if (descriptionLanguage !== "unknown") {
+        transcriptLang = descriptionLanguage;
+      }
+    } else if (targetLanguage === "en") {
+      transcriptLang = "en";
+    }
+
+    const transcriptResult = await getTranscript(sourceUrl, transcriptLang);
+
+    if (transcriptResult.error || !transcriptResult.transcript) {
+      const errorMsg = transcriptResult.error || "Could not fetch transcript";
+      await failExtractionJob(id, errorMsg);
+      if (telegramChatId) await sendError(telegramChatId, errorMsg);
+      return;
     }
 
     await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
