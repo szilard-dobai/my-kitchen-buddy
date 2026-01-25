@@ -1,14 +1,25 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Globe, Link2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ExtractionProgress } from "@/components/recipes/extraction-progress";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlatformBadge } from "@/components/ui/platform-badge";
+import {
+  InstagramIcon,
+  TikTokIcon,
+  YouTubeIcon,
+} from "@/components/ui/platform-badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { TargetLanguage } from "@/types/extraction-job";
 
 interface ExtractionStatus {
@@ -147,17 +158,16 @@ export default function ExtractPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Extract Recipe</h1>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2">Extract Recipe from Video</h1>
+        <p className="text-muted-foreground">
+          Paste a cooking video URL and let AI do the magic
+        </p>
+      </div>
 
       <Card className="card-shadow">
-        <CardHeader>
-          <CardTitle>Paste a video URL</CardTitle>
-          <CardDescription>
-            We&apos;ll extract the recipe from TikTok, Instagram Reels, or YouTube videos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                 {error}
@@ -174,31 +184,44 @@ export default function ExtractPage() {
 
             <div className="space-y-2">
               <Label htmlFor="url">Video URL</Label>
-              <Input
-                id="url"
-                type="url"
-                placeholder="https://www.tiktok.com/@user/video/..."
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <div className="relative">
+                <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="https://www.tiktok.com/@chef/video/..."
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="language">Output Language</Label>
-              <select
-                id="language"
+              <Label htmlFor="language">Language</Label>
+              <Select
                 value={targetLanguage}
-                onChange={(e) => setTargetLanguage(e.target.value as TargetLanguage)}
+                onValueChange={(value) => setTargetLanguage(value as TargetLanguage)}
                 disabled={loading}
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
               >
-                <option value="original">Original (keep source language)</option>
-                <option value="en">English (translate to English)</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="original">Keep Original</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Button type="submit" disabled={loading} className="w-full">
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 text-base"
+            >
               {loading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -212,17 +235,41 @@ export default function ExtractPage() {
         </CardContent>
       </Card>
 
-      <div className="mt-8">
-        <p className="font-medium mb-4 text-sm text-muted-foreground">Supported platforms:</p>
-        <div className="flex flex-wrap gap-2">
-          <PlatformBadge platform="tiktok" />
-          <PlatformBadge platform="instagram" />
-          <PlatformBadge platform="youtube" />
-        </div>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Note: The video must contain spoken recipe instructions. Image-only posts are not supported yet.
-        </p>
-      </div>
+      <Card className="mt-6 card-shadow">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">i</span>
+            </div>
+            <span className="font-medium">Supported Platforms</span>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card">
+              <div className="h-10 w-10 rounded-full bg-tiktok flex items-center justify-center">
+                <TikTokIcon className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-medium">TikTok</span>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card">
+              <div className="h-10 w-10 rounded-full bg-instagram flex items-center justify-center">
+                <InstagramIcon className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-medium text-sm">Instagram Reels</span>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card">
+              <div className="h-10 w-10 rounded-full bg-youtube flex items-center justify-center">
+                <YouTubeIcon className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-medium text-sm">YouTube Shorts</span>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm text-muted-foreground">
+            Note: Videos must contain spoken recipe instructions. Image-only posts or videos without narration cannot be extracted.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
