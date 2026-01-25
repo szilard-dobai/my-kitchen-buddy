@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/recipes", label: "My Recipes" },
   { href: "/extract", label: "Extract Recipe" },
+  { href: "/settings/billing", label: "Billing" },
 ];
 
 export function Header() {
