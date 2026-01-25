@@ -150,7 +150,7 @@ export default function TelegramSettingsPage() {
             <div className="space-y-4">
               {deepLink && token ? (
                 <>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Click the link below to open Telegram and complete the
                     linking process.
                   </p>
@@ -161,7 +161,7 @@ export default function TelegramSettingsPage() {
                   </Button>
 
                   <div className="pt-4 border-t">
-                    <p className="text-sm text-gray-600 mb-2">
+                    <p className="text-sm text-muted-foreground mb-2">
                       If the link doesn&apos;t work, copy this command and paste
                       it in the bot chat:
                     </p>
@@ -191,7 +191,7 @@ export default function TelegramSettingsPage() {
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Click the button below to generate a link to connect your
                     Telegram account.
                   </p>

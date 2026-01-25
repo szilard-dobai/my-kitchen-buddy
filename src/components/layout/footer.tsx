@@ -1,6 +1,8 @@
 import { ChefHat, Github, Twitter } from "lucide-react";
 import Link from "next/link";
 
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 interface FooterProps {
   compact?: boolean;
 }
@@ -21,6 +23,7 @@ export function Footer({ compact = false }: FooterProps) {
               <a href="#" className="hover:text-foreground transition-colors">
                 <Github className="h-4 w-4" />
               </a>
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -73,6 +76,7 @@ export function Footer({ compact = false }: FooterProps) {
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <Github className="h-5 w-5" />
             </a>
+            <ThemeToggle />
           </div>
         </div>
       </div>
