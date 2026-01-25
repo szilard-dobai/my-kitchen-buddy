@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowLeft, ChefHat, Clock, ExternalLink, Lightbulb, Timer, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,6 +15,24 @@ import { getRecipeById } from "@/models/recipe";
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: RecipePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const recipe = await getRecipeById(id);
+
+  if (!recipe) {
+    return {
+      title: "Recipe Not Found",
+    };
+  }
+
+  return {
+    title: recipe.title,
+    description: recipe.description || `${recipe.title} - View ingredients, instructions, and nutrition info.`,
+  };
 }
 
 export default async function RecipePage({ params }: RecipePageProps) {

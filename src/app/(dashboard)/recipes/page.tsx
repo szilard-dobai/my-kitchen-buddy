@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { RecipeCard } from "@/components/recipes/recipe-card";
 import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/session";
 import { getRecipesByUserId } from "@/models/recipe";
+
+export const metadata: Metadata = {
+  title: "My Recipes",
+  description: "Browse and manage your saved recipe collection.",
+};
 
 export default async function RecipesPage() {
   const session = await getSession();

@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { RecipeForm } from "@/components/recipes/recipe-form";
 import { getSession } from "@/lib/session";
 import { getRecipeById } from "@/models/recipe";
+
+export const metadata: Metadata = {
+  title: "Edit Recipe",
+};
 
 interface EditRecipePageProps {
   params: Promise<{ id: string }>;

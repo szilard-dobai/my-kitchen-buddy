@@ -1,8 +1,15 @@
+import type { Metadata } from 'next'
 import { ArrowRight, CheckCircle, ChefHat, Clock, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
+
+export const metadata: Metadata = {
+    title: 'Turn Cooking Videos Into Recipes | My Kitchen Buddy',
+    description:
+        'Transform TikTok, Instagram, and YouTube cooking videos into structured recipes with AI. Get ingredients, steps, and nutrition info in seconds.',
+}
 
 const features = [
     {
