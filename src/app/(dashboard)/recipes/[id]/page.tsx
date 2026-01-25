@@ -291,8 +291,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   <Image
                     src={recipe.source.authorAvatarUrl}
                     alt={recipe.source.authorUsername}
-                    width={20}
-                    height={20}
+                    width={24}
+                    height={24}
                     className="rounded-full"
                   />
                 )}
