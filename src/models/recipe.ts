@@ -1,6 +1,10 @@
 import { ObjectId } from "mongodb";
 import getDb from "@/lib/db";
-import type { Recipe, CreateRecipeInput, UpdateRecipeInput } from "@/types/recipe";
+import type {
+  Recipe,
+  CreateRecipeInput,
+  UpdateRecipeInput,
+} from "@/types/recipe";
 
 const COLLECTION_NAME = "recipes";
 
@@ -60,7 +64,7 @@ export async function getRecipesByUserId(userId: string): Promise<Recipe[]> {
 export async function updateRecipe(
   id: string,
   userId: string,
-  input: UpdateRecipeInput
+  input: UpdateRecipeInput,
 ): Promise<Recipe | null> {
   const collection = await getRecipesCollection();
 
@@ -68,7 +72,7 @@ export async function updateRecipe(
     const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(id), userId },
       { $set: { ...input, updatedAt: new Date() } },
-      { returnDocument: "after" }
+      { returnDocument: "after" },
     );
 
     if (!result) return null;
@@ -82,7 +86,10 @@ export async function updateRecipe(
   }
 }
 
-export async function deleteRecipe(id: string, userId: string): Promise<boolean> {
+export async function deleteRecipe(
+  id: string,
+  userId: string,
+): Promise<boolean> {
   const collection = await getRecipesCollection();
 
   try {
@@ -99,7 +106,7 @@ export async function deleteRecipe(id: string, userId: string): Promise<boolean>
 
 export async function findRecipeBySourceUrl(
   userId: string,
-  normalizedUrl: string
+  normalizedUrl: string,
 ): Promise<Recipe | null> {
   const collection = await getRecipesCollection();
 

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://mykitchenbuddy.app"
+    process.env.NEXT_PUBLIC_APP_URL || "https://mykitchenbuddy.app",
   ),
   title: {
     template: "%s | My Kitchen Buddy",
@@ -61,9 +61,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
 
         <Analytics />
       </body>

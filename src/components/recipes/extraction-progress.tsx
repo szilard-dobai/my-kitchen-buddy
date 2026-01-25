@@ -25,7 +25,9 @@ export function ExtractionProgress({
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">{currentStep}</span>
-          <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+          <span className="text-sm text-muted-foreground">
+            {Math.round(progress)}%
+          </span>
         </div>
         <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
           <div
@@ -48,9 +50,10 @@ export function ExtractionProgress({
             <span
               className={cn(
                 "text-sm",
-                step.status === "completed" && "text-muted-foreground line-through",
+                step.status === "completed" &&
+                  "text-muted-foreground line-through",
                 step.status === "active" && "font-medium text-foreground",
-                step.status === "pending" && "text-muted-foreground"
+                step.status === "pending" && "text-muted-foreground",
               )}
             >
               {step.label}

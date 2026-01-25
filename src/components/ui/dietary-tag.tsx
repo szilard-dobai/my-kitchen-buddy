@@ -1,4 +1,14 @@
-import { Leaf, Carrot, Wheat, Milk, Flame, Fish, Nut, Egg, type LucideIcon } from "lucide-react";
+import {
+  Leaf,
+  Carrot,
+  Wheat,
+  Milk,
+  Flame,
+  Fish,
+  Nut,
+  Egg,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DietaryTagProps {
@@ -24,14 +34,15 @@ export function DietaryTag({ tag, className }: DietaryTagProps) {
   const config = tagConfig[normalizedTag];
 
   const Icon = config?.icon;
-  const colorClass = config?.colorClass || "bg-secondary text-secondary-foreground";
+  const colorClass =
+    config?.colorClass || "bg-secondary text-secondary-foreground";
 
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
         colorClass,
-        className
+        className,
       )}
     >
       {Icon && <Icon className="h-3 w-3" />}

@@ -29,7 +29,7 @@ import { getMetadata, getTranscript } from "./supadata";
 
 function computeEffectiveTargetLanguage(
   detectedLanguage: DetectedLanguageCode,
-  targetLanguage: TargetLanguage
+  targetLanguage: TargetLanguage,
 ): TargetLanguage {
   if (detectedLanguage === "en" && targetLanguage === "original") {
     return "en";
@@ -38,7 +38,15 @@ function computeEffectiveTargetLanguage(
 }
 
 export async function processExtraction(job: ExtractionJob): Promise<void> {
-  const { id, userId, sourceUrl, normalizedUrl, platform, telegramChatId, targetLanguage } = job;
+  const {
+    id,
+    userId,
+    sourceUrl,
+    normalizedUrl,
+    platform,
+    telegramChatId,
+    targetLanguage,
+  } = job;
 
   async function notifyTelegram(message: string) {
     if (telegramChatId) {
@@ -47,14 +55,24 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
   }
 
   try {
-    await updateExtractionJobStatus(id, "fetching_transcript", 10, "Fetching video data...");
+    await updateExtractionJobStatus(
+      id,
+      "fetching_transcript",
+      10,
+      "Fetching video data...",
+    );
     await notifyTelegram("Fetching video data...");
 
     let cachedMetadata = await findMetadataCacheByUrl(normalizedUrl);
     let metadataDescription: string | undefined;
 
     if (cachedMetadata) {
-      await updateExtractionJobStatus(id, "fetching_transcript", 15, "Using cached metadata...");
+      await updateExtractionJobStatus(
+        id,
+        "fetching_transcript",
+        15,
+        "Using cached metadata...",
+      );
       metadataDescription = cachedMetadata.metadata.description;
     } else {
       const metadataResult = await getMetadata(sourceUrl);
@@ -84,7 +102,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
             media: metadataResult.media,
             tags: metadataResult.tags,
           },
-          authorId
+          authorId,
         );
       }
     }
@@ -108,24 +126,47 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       return;
     }
 
-    await updateExtractionJobStatus(id, "fetching_transcript", 30, "Video data received");
+    await updateExtractionJobStatus(
+      id,
+      "fetching_transcript",
+      30,
+      "Video data received",
+    );
 
-    const detectedLanguage = detectTranscriptLanguage(transcriptResult.transcript);
-    const effectiveTargetLanguage = computeEffectiveTargetLanguage(detectedLanguage, targetLanguage);
+    const detectedLanguage = detectTranscriptLanguage(
+      transcriptResult.transcript,
+    );
+    const effectiveTargetLanguage = computeEffectiveTargetLanguage(
+      detectedLanguage,
+      targetLanguage,
+    );
 
     await updateExtractionJobStatus(id, "analyzing", 40, "Checking cache...");
 
     let extractedRecipe: Partial<CreateRecipeInput> | undefined;
     let confidence: number | undefined;
 
-    const cached = await findRawExtraction(normalizedUrl, effectiveTargetLanguage);
+    const cached = await findRawExtraction(
+      normalizedUrl,
+      effectiveTargetLanguage,
+    );
 
     if (cached) {
-      await updateExtractionJobStatus(id, "analyzing", 80, "Using cached extraction...");
+      await updateExtractionJobStatus(
+        id,
+        "analyzing",
+        80,
+        "Using cached extraction...",
+      );
       extractedRecipe = cached.recipe;
       confidence = cached.confidence;
     } else {
-      await updateExtractionJobStatus(id, "analyzing", 50, "Analyzing with AI...");
+      await updateExtractionJobStatus(
+        id,
+        "analyzing",
+        50,
+        "Analyzing with AI...",
+      );
       await notifyTelegram("Analyzing recipe...");
 
       const extractionResult = await extractRecipeFromTranscript(
@@ -133,7 +174,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         sourceUrl,
         platform,
         metadataDescription,
-        targetLanguage
+        targetLanguage,
       );
 
       if (extractionResult.error || !extractionResult.recipe) {
@@ -151,9 +192,14 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         effectiveTargetLanguage,
         detectedLanguage,
         extractedRecipe,
-        confidence
+        confidence,
       );
-      await updateExtractionJobStatus(id, "analyzing", 80, "Recipe extracted, saving...");
+      await updateExtractionJobStatus(
+        id,
+        "analyzing",
+        80,
+        "Recipe extracted, saving...",
+      );
     }
 
     const metadataForRecipe = await findMetadataCacheByUrl(normalizedUrl);
@@ -199,7 +245,8 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
     }
   } catch (error) {
     console.error("Extraction processing error:", error);
-    const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred";
+    const errorMsg =
+      error instanceof Error ? error.message : "An unexpected error occurred";
     await failExtractionJob(id, errorMsg);
     if (telegramChatId) await sendError(telegramChatId, errorMsg);
   }

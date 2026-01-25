@@ -36,7 +36,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     console.error("Error fetching job:", error);
     return NextResponse.json(
       { error: "Failed to fetch job status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

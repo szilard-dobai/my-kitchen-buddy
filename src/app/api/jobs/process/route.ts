@@ -26,7 +26,10 @@ export async function POST(request: Request) {
     }
 
     if (job.status !== "pending") {
-      return NextResponse.json({ error: "Job already processed" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Job already processed" },
+        { status: 400 },
+      );
     }
 
     await processExtraction(job);
@@ -34,9 +37,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Job processing error:", error);
-    return NextResponse.json(
-      { error: "Processing failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 }

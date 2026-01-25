@@ -17,6 +17,7 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 ### Key Flows
 
 **Extraction Flow** (`src/services/extraction/index.ts`):
+
 1. Check `raw_extractions` cache by normalized URL
 2. If cached, skip API calls and use cached result
 3. If not cached, fetch transcript + metadata from Supadata in parallel
@@ -24,10 +25,12 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 5. Create user's recipe from extracted data
 
 **Duplicate Detection** (`src/app/api/extract/route.ts`):
+
 - Before starting extraction, checks if user already has a recipe from this URL
 - If yes, returns `existingRecipeId` and frontend redirects to edit page
 
 **Telegram Bot Flow** (`src/services/telegram/`):
+
 1. User links account via deep link from /settings/telegram
 2. Sends video URL to bot
 3. Bot creates extraction job with `telegramChatId`

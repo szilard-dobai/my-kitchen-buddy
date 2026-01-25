@@ -13,7 +13,10 @@ const difficultyConfig: Record<Difficulty, { bgClass: string }> = {
   Hard: { bgClass: "bg-hard" },
 };
 
-export function DifficultyBadge({ difficulty, className }: DifficultyBadgeProps) {
+export function DifficultyBadge({
+  difficulty,
+  className,
+}: DifficultyBadgeProps) {
   const config = difficultyConfig[difficulty];
 
   if (!config) return null;
@@ -23,7 +26,7 @@ export function DifficultyBadge({ difficulty, className }: DifficultyBadgeProps)
       className={cn(
         "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium text-white",
         config.bgClass,
-        className
+        className,
       )}
     >
       {difficulty}

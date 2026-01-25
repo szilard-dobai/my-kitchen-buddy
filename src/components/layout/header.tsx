@@ -32,7 +32,9 @@ export function Header() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-110">
             <ChefHat className="h-5 w-5" />
           </div>
-          <span className="font-bold text-lg hidden sm:inline-block">My Kitchen Buddy</span>
+          <span className="font-bold text-lg hidden sm:inline-block">
+            My Kitchen Buddy
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
@@ -44,7 +46,7 @@ export function Header() {
                 "text-sm font-medium transition-colors hover:text-primary",
                 pathname === link.href
                   ? "text-primary"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground",
               )}
             >
               {link.label}
@@ -69,7 +71,11 @@ export function Header() {
           className="md:hidden p-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </button>
       </div>
 
@@ -85,7 +91,7 @@ export function Header() {
                   "block py-2 text-sm font-medium transition-colors hover:text-primary",
                   pathname === link.href
                     ? "text-primary"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 {link.label}

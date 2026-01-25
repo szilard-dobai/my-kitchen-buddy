@@ -1,5 +1,8 @@
 import getDb from "@/lib/db";
-import type { VideoMetadata, VideoMetadataCache } from "@/types/video-metadata-cache";
+import type {
+  VideoMetadata,
+  VideoMetadataCache,
+} from "@/types/video-metadata-cache";
 
 const COLLECTION_NAME = "video_metadata_cache";
 
@@ -9,7 +12,7 @@ async function getVideoMetadataCacheCollection() {
 }
 
 export async function findMetadataCacheByUrl(
-  normalizedUrl: string
+  normalizedUrl: string,
 ): Promise<VideoMetadataCache | null> {
   const collection = await getVideoMetadataCacheCollection();
   const doc = await collection.findOne({ normalizedUrl });
@@ -31,7 +34,7 @@ export async function createOrUpdateMetadataCache(
   normalizedUrl: string,
   platform: "tiktok" | "instagram" | "youtube" | "other",
   metadata: VideoMetadata,
-  authorId?: string
+  authorId?: string,
 ): Promise<VideoMetadataCache> {
   const collection = await getVideoMetadataCacheCollection();
   const now = new Date();
@@ -55,7 +58,7 @@ export async function createOrUpdateMetadataCache(
         fetchedAt: now,
       },
     },
-    { upsert: true }
+    { upsert: true },
   );
 
   if (result.upsertedId) {

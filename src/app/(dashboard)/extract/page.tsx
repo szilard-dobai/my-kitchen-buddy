@@ -39,7 +39,7 @@ const extractionSteps = [
 
 function getStepStatus(
   currentStatus: string,
-  stepId: string
+  stepId: string,
 ): "pending" | "active" | "completed" {
   const statusMap: Record<string, number> = {
     pending: 0,
@@ -65,39 +65,44 @@ function getStepStatus(
 export default function ExtractPage() {
   const router = useRouter();
   const [url, setUrl] = useState("");
-  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("original");
+  const [targetLanguage, setTargetLanguage] =
+    useState<TargetLanguage>("original");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
-  const [extractionStatus, setExtractionStatus] = useState<ExtractionStatus | null>(null);
+  const [extractionStatus, setExtractionStatus] =
+    useState<ExtractionStatus | null>(null);
 
-  const pollStatus = useCallback(async (id: string) => {
-    try {
-      const response = await fetch(`/api/extract/${id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch status");
+  const pollStatus = useCallback(
+    async (id: string) => {
+      try {
+        const response = await fetch(`/api/extract/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch status");
+        }
+
+        const status: ExtractionStatus = await response.json();
+        setExtractionStatus(status);
+
+        if (status.status === "completed" && status.recipeId) {
+          router.push(`/recipes/${status.recipeId}`);
+          return true;
+        }
+
+        if (status.status === "failed") {
+          setError(status.error || "Extraction failed");
+          setLoading(false);
+          return true;
+        }
+
+        return false;
+      } catch (err) {
+        console.error("Polling error:", err);
+        return false;
       }
-
-      const status: ExtractionStatus = await response.json();
-      setExtractionStatus(status);
-
-      if (status.status === "completed" && status.recipeId) {
-        router.push(`/recipes/${status.recipeId}`);
-        return true;
-      }
-
-      if (status.status === "failed") {
-        setError(status.error || "Extraction failed");
-        setLoading(false);
-        return true;
-      }
-
-      return false;
-    } catch (err) {
-      console.error("Polling error:", err);
-      return false;
-    }
-  }, [router]);
+    },
+    [router],
+  );
 
   useEffect(() => {
     if (!jobId) return;
@@ -144,7 +149,9 @@ export default function ExtractPage() {
 
       setJobId(data.jobId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred",
+      );
       setLoading(false);
     }
   };
@@ -203,7 +210,9 @@ export default function ExtractPage() {
               <Label htmlFor="language">Language</Label>
               <Select
                 value={targetLanguage}
-                onValueChange={(value) => setTargetLanguage(value as TargetLanguage)}
+                onValueChange={(value) =>
+                  setTargetLanguage(value as TargetLanguage)
+                }
                 disabled={loading}
               >
                 <SelectTrigger className="w-full">
@@ -266,7 +275,8 @@ export default function ExtractPage() {
           </div>
 
           <p className="mt-4 text-sm text-muted-foreground">
-            Note: Videos must contain spoken recipe instructions. Image-only posts or videos without narration cannot be extracted.
+            Note: Videos must contain spoken recipe instructions. Image-only
+            posts or videos without narration cannot be extracted.
           </p>
         </CardContent>
       </Card>

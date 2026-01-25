@@ -32,7 +32,9 @@ const ISO_639_3_TO_1: Record<string, DetectedLanguageCode> = {
   sqi: "sq",
 };
 
-export function detectTranscriptLanguage(transcript: string): DetectedLanguageCode {
+export function detectTranscriptLanguage(
+  transcript: string,
+): DetectedLanguageCode {
   const iso639_3 = franc(transcript);
 
   if (iso639_3 === "und") {
@@ -42,7 +44,10 @@ export function detectTranscriptLanguage(transcript: string): DetectedLanguageCo
   return ISO_639_3_TO_1[iso639_3] || "unknown";
 }
 
-function buildSystemPrompt(targetLanguage: TargetLanguage, detectedLanguage: DetectedLanguageCode): string {
+function buildSystemPrompt(
+  targetLanguage: TargetLanguage,
+  detectedLanguage: DetectedLanguageCode,
+): string {
   const displayName = getLanguageDisplayName(detectedLanguage);
   const languageInstruction =
     targetLanguage === "en"
@@ -142,9 +147,13 @@ export async function extractRecipeFromTranscript(
   sourceUrl: string,
   platform: "tiktok" | "instagram" | "youtube" | "other",
   postDescription?: string,
-  targetLanguage: TargetLanguage = "original"
+  targetLanguage: TargetLanguage = "original",
 ): Promise<ExtractionResult> {
-  if (!transcript || transcript.trim().length < 50 || (postDescription && postDescription.trim().length < 50)) {
+  if (
+    !transcript ||
+    transcript.trim().length < 50 ||
+    (postDescription && postDescription.trim().length < 50)
+  ) {
     return {
       recipe: null,
       error: "Transcript is too short to extract a recipe",
@@ -190,7 +199,8 @@ export async function extractRecipeFromTranscript(
     if (!extracted.title) {
       return {
         recipe: null,
-        error: "Could not extract a recipe from this transcript. The video may not contain a recipe.",
+        error:
+          "Could not extract a recipe from this transcript. The video may not contain a recipe.",
       };
     }
 
@@ -214,7 +224,7 @@ export async function extractRecipeFromTranscript(
           unit: ing.unit || undefined,
           notes: ing.notes || undefined,
           category: ing.category || undefined,
-        })
+        }),
       ),
       instructions: (extracted.instructions || []).map(
         (inst: Record<string, string | number>, index: number) => ({
@@ -222,7 +232,7 @@ export async function extractRecipeFromTranscript(
           description: inst.description || "",
           duration: inst.duration || undefined,
           technique: inst.technique || undefined,
-        })
+        }),
       ),
       equipment: extracted.equipment || [],
       tipsAndNotes: extracted.tipsAndNotes || [],
@@ -249,7 +259,8 @@ export async function extractRecipeFromTranscript(
 
     return {
       recipe: null,
-      error: error instanceof Error ? error.message : "Failed to extract recipe",
+      error:
+        error instanceof Error ? error.message : "Failed to extract recipe",
     };
   }
 }

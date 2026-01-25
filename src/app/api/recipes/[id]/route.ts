@@ -29,7 +29,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     console.error("Error fetching recipe:", error);
     return NextResponse.json(
       { error: "Failed to fetch recipe" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -55,7 +55,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     console.error("Error updating recipe:", error);
     return NextResponse.json(
       { error: "Failed to update recipe" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -79,7 +79,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     console.error("Error deleting recipe:", error);
     return NextResponse.json(
       { error: "Failed to delete recipe" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

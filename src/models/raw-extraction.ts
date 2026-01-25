@@ -11,14 +11,14 @@ async function getRawExtractionsCollection() {
   const collection = db.collection(COLLECTION_NAME);
   await collection.createIndex(
     { normalizedUrl: 1, targetLanguage: 1 },
-    { unique: true }
+    { unique: true },
   );
   return collection;
 }
 
 export async function findRawExtraction(
   normalizedUrl: string,
-  targetLanguage: TargetLanguage
+  targetLanguage: TargetLanguage,
 ): Promise<RawExtraction | null> {
   const collection = await getRawExtractionsCollection();
   const doc = await collection.findOne({ normalizedUrl, targetLanguage });
@@ -41,7 +41,7 @@ export async function createRawExtraction(
   targetLanguage: TargetLanguage,
   detectedLanguage: DetectedLanguageCode,
   recipe: Partial<CreateRecipeInput>,
-  confidence: number
+  confidence: number,
 ): Promise<RawExtraction> {
   const collection = await getRawExtractionsCollection();
 

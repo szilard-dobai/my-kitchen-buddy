@@ -34,7 +34,7 @@ function getSupadataClient(): Supadata | null {
 async function withRetry<T>(
   fn: () => Promise<T>,
   maxRetries = 3,
-  baseDelay = 60000
+  baseDelay = 60000,
 ): Promise<T> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -45,7 +45,7 @@ async function withRetry<T>(
       if (isRateLimited && attempt < maxRetries - 1) {
         const delay = baseDelay * (attempt + 1);
         console.warn(
-          `Rate limited, waiting ${delay / 1000}s before retry ${attempt + 1}...`
+          `Rate limited, waiting ${delay / 1000}s before retry ${attempt + 1}...`,
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
@@ -58,7 +58,7 @@ async function withRetry<T>(
 
 export async function getTranscript(
   url: string,
-  lang?: string
+  lang?: string,
 ): Promise<TranscriptResult> {
   const client = getSupadataClient();
   if (!client) {
@@ -67,7 +67,7 @@ export async function getTranscript(
 
   try {
     const result = await withRetry(() =>
-      client.transcript({ url, text: true, lang })
+      client.transcript({ url, text: true, lang }),
     );
 
     if ("jobId" in result) {
@@ -85,7 +85,10 @@ export async function getTranscript(
     };
   } catch (error) {
     if (error instanceof SupadataError) {
-      if (error.error === "not-found" || error.error === "transcript-unavailable") {
+      if (
+        error.error === "not-found" ||
+        error.error === "transcript-unavailable"
+      ) {
         return {
           transcript: "",
           error:

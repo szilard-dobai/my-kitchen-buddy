@@ -49,17 +49,17 @@ async function handleStart(ctx: Context): Promise<void> {
 
     if (!payload) {
       await ctx.reply(
-        "This link has expired or is invalid. Please generate a new one from the app settings."
+        "This link has expired or is invalid. Please generate a new one from the app settings.",
       );
       return;
     }
 
     const existingLink = await getTelegramLinkByTelegramUserId(
-      ctx.from?.id || 0
+      ctx.from?.id || 0,
     );
     if (existingLink) {
       await ctx.reply(
-        "Your Telegram account is already linked to a My Kitchen Buddy account."
+        "Your Telegram account is already linked to a My Kitchen Buddy account.",
       );
       return;
     }
@@ -72,7 +72,7 @@ async function handleStart(ctx: Context): Promise<void> {
     });
 
     await ctx.reply(
-      "Account linked successfully! You can now send video URLs to extract recipes."
+      "Account linked successfully! You can now send video URLs to extract recipes.",
     );
     return;
   }
@@ -80,7 +80,7 @@ async function handleStart(ctx: Context): Promise<void> {
   await ctx.reply(
     "Welcome to My Kitchen Buddy!\n\n" +
       "Send me a TikTok, Instagram, or YouTube video URL and I'll extract the recipe for you.\n\n" +
-      "To get started, link your account from the app settings page."
+      "To get started, link your account from the app settings page.",
   );
 }
 
@@ -95,7 +95,7 @@ async function handleHelp(ctx: Context): Promise<void> {
       "Commands:\n" +
       "/lang - Set output language (original or English)\n" +
       "/help - Show this help message\n\n" +
-      "Make sure your account is linked in the app settings first."
+      "Make sure your account is linked in the app settings first.",
   );
 }
 
@@ -107,7 +107,7 @@ async function handleLang(ctx: Context): Promise<void> {
   if (!link) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     await ctx.reply(
-      `Your Telegram account is not linked. Please link it first:\n${appUrl}/settings/telegram`
+      `Your Telegram account is not linked. Please link it first:\n${appUrl}/settings/telegram`,
     );
     return;
   }
@@ -116,12 +116,13 @@ async function handleLang(ctx: Context): Promise<void> {
   const parts = text.split(" ");
 
   if (parts.length < 2) {
-    const currentLang = link.preferredLanguage === "en" ? "English" : "Original";
+    const currentLang =
+      link.preferredLanguage === "en" ? "English" : "Original";
     await ctx.reply(
       `Current language: ${currentLang}\n\n` +
         "Usage:\n" +
         "/lang original - Keep the source language\n" +
-        "/lang en - Translate to English"
+        "/lang en - Translate to English",
     );
     return;
   }
@@ -137,7 +138,7 @@ async function handleLang(ctx: Context): Promise<void> {
     await ctx.reply(
       "Invalid language. Use:\n" +
         "/lang original - Keep the source language\n" +
-        "/lang en - Translate to English"
+        "/lang en - Translate to English",
     );
     return;
   }
@@ -151,12 +152,10 @@ async function handleMessage(ctx: Context): Promise<void> {
   const text = ctx.message?.text;
   if (!text) return;
 
-  const urlMatch = text.match(
-    /https?:\/\/[^\s]+/
-  );
+  const urlMatch = text.match(/https?:\/\/[^\s]+/);
   if (!urlMatch) {
     await ctx.reply(
-      "Please send a valid video URL from TikTok, Instagram, or YouTube."
+      "Please send a valid video URL from TikTok, Instagram, or YouTube.",
     );
     return;
   }
@@ -169,7 +168,7 @@ async function handleMessage(ctx: Context): Promise<void> {
   if (!link) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     await ctx.reply(
-      `Your Telegram account is not linked. Please link it first:\n${appUrl}/settings/telegram`
+      `Your Telegram account is not linked. Please link it first:\n${appUrl}/settings/telegram`,
     );
     return;
   }
@@ -180,12 +179,15 @@ async function handleMessage(ctx: Context): Promise<void> {
   if (!detection.isValid) {
     await ctx.reply(
       detection.error ||
-        "This URL is not supported. Please send a TikTok, Instagram, or YouTube video."
+        "This URL is not supported. Please send a TikTok, Instagram, or YouTube video.",
     );
     return;
   }
 
-  const existingRecipe = await findRecipeBySourceUrl(link.userId, normalizedUrl);
+  const existingRecipe = await findRecipeBySourceUrl(
+    link.userId,
+    normalizedUrl,
+  );
   if (existingRecipe) {
     await sendRecipePreview(ctx.chat?.id || 0, existingRecipe);
     return;

@@ -32,10 +32,16 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const [cookTime, setCookTime] = useState(recipe.cookTime || "");
   const [totalTime, setTotalTime] = useState(recipe.totalTime || "");
   const [servings, setServings] = useState(recipe.servings || "");
-  const [ingredients, setIngredients] = useState<Ingredient[]>(recipe.ingredients);
-  const [instructions, setInstructions] = useState<Instruction[]>(recipe.instructions);
+  const [ingredients, setIngredients] = useState<Ingredient[]>(
+    recipe.ingredients,
+  );
+  const [instructions, setInstructions] = useState<Instruction[]>(
+    recipe.instructions,
+  );
   const [equipment, setEquipment] = useState<string[]>(recipe.equipment);
-  const [tipsAndNotes, setTipsAndNotes] = useState<string[]>(recipe.tipsAndNotes);
+  const [tipsAndNotes, setTipsAndNotes] = useState<string[]>(
+    recipe.tipsAndNotes,
+  );
 
   const [nutritionPerServing, setNutritionPerServing] = useState({
     calories: recipe.nutrition?.perServing?.calories?.toString() || "",
@@ -58,30 +64,64 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   });
 
   const buildNutritionObject = () => {
-    const hasPerServing = Object.values(nutritionPerServing).some(v => v !== "");
-    const hasPer100g = Object.values(nutritionPer100g).some(v => v !== "");
+    const hasPerServing = Object.values(nutritionPerServing).some(
+      (v) => v !== "",
+    );
+    const hasPer100g = Object.values(nutritionPer100g).some((v) => v !== "");
 
     if (!hasPerServing && !hasPer100g) return undefined;
 
     return {
-      perServing: hasPerServing ? {
-        calories: nutritionPerServing.calories ? parseFloat(nutritionPerServing.calories) : undefined,
-        protein: nutritionPerServing.protein ? parseFloat(nutritionPerServing.protein) : undefined,
-        carbs: nutritionPerServing.carbs ? parseFloat(nutritionPerServing.carbs) : undefined,
-        fat: nutritionPerServing.fat ? parseFloat(nutritionPerServing.fat) : undefined,
-        fiber: nutritionPerServing.fiber ? parseFloat(nutritionPerServing.fiber) : undefined,
-        sugar: nutritionPerServing.sugar ? parseFloat(nutritionPerServing.sugar) : undefined,
-        sodium: nutritionPerServing.sodium ? parseFloat(nutritionPerServing.sodium) : undefined,
-      } : undefined,
-      per100g: hasPer100g ? {
-        calories: nutritionPer100g.calories ? parseFloat(nutritionPer100g.calories) : undefined,
-        protein: nutritionPer100g.protein ? parseFloat(nutritionPer100g.protein) : undefined,
-        carbs: nutritionPer100g.carbs ? parseFloat(nutritionPer100g.carbs) : undefined,
-        fat: nutritionPer100g.fat ? parseFloat(nutritionPer100g.fat) : undefined,
-        fiber: nutritionPer100g.fiber ? parseFloat(nutritionPer100g.fiber) : undefined,
-        sugar: nutritionPer100g.sugar ? parseFloat(nutritionPer100g.sugar) : undefined,
-        sodium: nutritionPer100g.sodium ? parseFloat(nutritionPer100g.sodium) : undefined,
-      } : undefined,
+      perServing: hasPerServing
+        ? {
+            calories: nutritionPerServing.calories
+              ? parseFloat(nutritionPerServing.calories)
+              : undefined,
+            protein: nutritionPerServing.protein
+              ? parseFloat(nutritionPerServing.protein)
+              : undefined,
+            carbs: nutritionPerServing.carbs
+              ? parseFloat(nutritionPerServing.carbs)
+              : undefined,
+            fat: nutritionPerServing.fat
+              ? parseFloat(nutritionPerServing.fat)
+              : undefined,
+            fiber: nutritionPerServing.fiber
+              ? parseFloat(nutritionPerServing.fiber)
+              : undefined,
+            sugar: nutritionPerServing.sugar
+              ? parseFloat(nutritionPerServing.sugar)
+              : undefined,
+            sodium: nutritionPerServing.sodium
+              ? parseFloat(nutritionPerServing.sodium)
+              : undefined,
+          }
+        : undefined,
+      per100g: hasPer100g
+        ? {
+            calories: nutritionPer100g.calories
+              ? parseFloat(nutritionPer100g.calories)
+              : undefined,
+            protein: nutritionPer100g.protein
+              ? parseFloat(nutritionPer100g.protein)
+              : undefined,
+            carbs: nutritionPer100g.carbs
+              ? parseFloat(nutritionPer100g.carbs)
+              : undefined,
+            fat: nutritionPer100g.fat
+              ? parseFloat(nutritionPer100g.fat)
+              : undefined,
+            fiber: nutritionPer100g.fiber
+              ? parseFloat(nutritionPer100g.fiber)
+              : undefined,
+            sugar: nutritionPer100g.sugar
+              ? parseFloat(nutritionPer100g.sugar)
+              : undefined,
+            sodium: nutritionPer100g.sodium
+              ? parseFloat(nutritionPer100g.sodium)
+              : undefined,
+          }
+        : undefined,
     };
   };
 
@@ -128,7 +168,11 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
   };
 
-  const updateIngredient = (index: number, field: keyof Ingredient, value: string) => {
+  const updateIngredient = (
+    index: number,
+    field: keyof Ingredient,
+    value: string,
+  ) => {
     const updated = [...ingredients];
     updated[index] = { ...updated[index], [field]: value };
     setIngredients(updated);
@@ -302,7 +346,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="caloriesPerServing"
                   type="number"
                   value={nutritionPerServing.calories}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, calories: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      calories: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 350"
                 />
               </div>
@@ -312,7 +361,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="proteinPerServing"
                   type="number"
                   value={nutritionPerServing.protein}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, protein: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      protein: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 25"
                 />
               </div>
@@ -322,7 +376,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="carbsPerServing"
                   type="number"
                   value={nutritionPerServing.carbs}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, carbs: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      carbs: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 30"
                 />
               </div>
@@ -332,7 +391,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="fatPerServing"
                   type="number"
                   value={nutritionPerServing.fat}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, fat: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      fat: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 15"
                 />
               </div>
@@ -342,7 +406,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="fiberPerServing"
                   type="number"
                   value={nutritionPerServing.fiber}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, fiber: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      fiber: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 5"
                 />
               </div>
@@ -352,7 +421,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="sugarPerServing"
                   type="number"
                   value={nutritionPerServing.sugar}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, sugar: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      sugar: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 10"
                 />
               </div>
@@ -362,7 +436,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="sodiumPerServing"
                   type="number"
                   value={nutritionPerServing.sodium}
-                  onChange={(e) => setNutritionPerServing({...nutritionPerServing, sodium: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPerServing({
+                      ...nutritionPerServing,
+                      sodium: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 400"
                 />
               </div>
@@ -378,7 +457,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="caloriesPer100g"
                   type="number"
                   value={nutritionPer100g.calories}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, calories: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      calories: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 200"
                 />
               </div>
@@ -388,7 +472,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="proteinPer100g"
                   type="number"
                   value={nutritionPer100g.protein}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, protein: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      protein: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 15"
                 />
               </div>
@@ -398,7 +487,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="carbsPer100g"
                   type="number"
                   value={nutritionPer100g.carbs}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, carbs: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      carbs: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 20"
                 />
               </div>
@@ -408,7 +502,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="fatPer100g"
                   type="number"
                   value={nutritionPer100g.fat}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, fat: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      fat: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 8"
                 />
               </div>
@@ -418,7 +517,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="fiberPer100g"
                   type="number"
                   value={nutritionPer100g.fiber}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, fiber: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      fiber: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 3"
                 />
               </div>
@@ -428,7 +532,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="sugarPer100g"
                   type="number"
                   value={nutritionPer100g.sugar}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, sugar: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      sugar: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 6"
                 />
               </div>
@@ -438,7 +547,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                   id="sodiumPer100g"
                   type="number"
                   value={nutritionPer100g.sodium}
-                  onChange={(e) => setNutritionPer100g({...nutritionPer100g, sodium: e.target.value})}
+                  onChange={(e) =>
+                    setNutritionPer100g({
+                      ...nutritionPer100g,
+                      sodium: e.target.value,
+                    })
+                  }
                   placeholder="e.g., 250"
                 />
               </div>
@@ -450,7 +564,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Ingredients</CardTitle>
-          <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addIngredient}
+          >
             Add Ingredient
           </Button>
         </CardHeader>
@@ -462,25 +581,33 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
               <div key={index} className="flex gap-2 items-start">
                 <Input
                   value={ingredient.quantity || ""}
-                  onChange={(e) => updateIngredient(index, "quantity", e.target.value)}
+                  onChange={(e) =>
+                    updateIngredient(index, "quantity", e.target.value)
+                  }
                   placeholder="Qty"
                   className="w-20"
                 />
                 <Input
                   value={ingredient.unit || ""}
-                  onChange={(e) => updateIngredient(index, "unit", e.target.value)}
+                  onChange={(e) =>
+                    updateIngredient(index, "unit", e.target.value)
+                  }
                   placeholder="Unit"
                   className="w-24"
                 />
                 <Input
                   value={ingredient.name}
-                  onChange={(e) => updateIngredient(index, "name", e.target.value)}
+                  onChange={(e) =>
+                    updateIngredient(index, "name", e.target.value)
+                  }
                   placeholder="Ingredient name"
                   className="flex-1"
                 />
                 <Input
                   value={ingredient.notes || ""}
-                  onChange={(e) => updateIngredient(index, "notes", e.target.value)}
+                  onChange={(e) =>
+                    updateIngredient(index, "notes", e.target.value)
+                  }
                   placeholder="Notes"
                   className="w-32"
                 />
@@ -502,7 +629,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Instructions</CardTitle>
-          <Button type="button" variant="outline" size="sm" onClick={addInstruction}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addInstruction}
+          >
             Add Step
           </Button>
         </CardHeader>
@@ -540,7 +672,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Equipment</CardTitle>
-          <Button type="button" variant="outline" size="sm" onClick={addEquipment}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addEquipment}
+          >
             Add Equipment
           </Button>
         </CardHeader>
@@ -607,11 +744,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : "Save Changes"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
         </Button>
       </div>

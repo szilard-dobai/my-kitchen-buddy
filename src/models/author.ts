@@ -11,7 +11,7 @@ async function getAuthorsCollection() {
 
 export async function findAuthorByPlatformAndUsername(
   platform: Platform,
-  username: string
+  username: string,
 ): Promise<Author | null> {
   const collection = await getAuthorsCollection();
   const doc = await collection.findOne({ platform, username });
@@ -71,7 +71,7 @@ export async function upsertAuthor(input: CreateAuthorInput): Promise<Author> {
         firstSeenAt: now,
       },
     },
-    { upsert: true, returnDocument: "after" }
+    { upsert: true, returnDocument: "after" },
   );
 
   return {

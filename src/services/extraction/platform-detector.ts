@@ -76,7 +76,8 @@ export function detectPlatform(url: string): PlatformDetectionResult {
   return {
     platform: "other",
     isValid: false,
-    error: "URL is not from a supported platform (TikTok, Instagram, or YouTube)",
+    error:
+      "URL is not from a supported platform (TikTok, Instagram, or YouTube)",
   };
 }
 

@@ -25,11 +25,13 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
 ## Setup
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Create `.env.local` with:
+
    ```
    MONGODB_URI=your_mongodb_connection_string
    MONGODB_DB=your_database_name
@@ -39,6 +41,7 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
    ```
 
 3. Run the development server:
+
    ```bash
    npm run dev
    ```

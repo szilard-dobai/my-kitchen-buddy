@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import { createExtractionJob, getExtractionJobById } from "@/models/extraction-job";
+import {
+  createExtractionJob,
+  getExtractionJobById,
+} from "@/models/extraction-job";
 import { findRecipeBySourceUrl } from "@/models/recipe";
 import { processExtraction } from "@/services/extraction";
-import { detectPlatform, resolveUrl } from "@/services/extraction/platform-detector";
+import {
+  detectPlatform,
+  resolveUrl,
+} from "@/services/extraction/platform-detector";
 import type { TargetLanguage } from "@/types/extraction-job";
 
 export async function POST(request: Request) {
@@ -29,11 +35,14 @@ export async function POST(request: Request) {
     if (!detection.isValid) {
       return NextResponse.json(
         { error: detection.error || "Invalid URL" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const existingRecipe = await findRecipeBySourceUrl(session.user.id, normalizedUrl);
+    const existingRecipe = await findRecipeBySourceUrl(
+      session.user.id,
+      normalizedUrl,
+    );
     if (existingRecipe) {
       return NextResponse.json({
         existingRecipeId: existingRecipe._id,
@@ -62,7 +71,7 @@ export async function POST(request: Request) {
     console.error("Error starting extraction:", error);
     return NextResponse.json(
       { error: "Failed to start extraction" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -96,7 +105,7 @@ export async function GET(request: Request) {
     console.error("Error fetching job:", error);
     return NextResponse.json(
       { error: "Failed to fetch job status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

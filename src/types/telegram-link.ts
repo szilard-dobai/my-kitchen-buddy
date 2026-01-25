@@ -10,4 +10,7 @@ export interface TelegramLink {
   linkedAt: Date;
 }
 
-export type CreateTelegramLinkInput = Omit<TelegramLink, "_id" | "linkedAt" | "preferredLanguage">;
+export type CreateTelegramLinkInput = Omit<
+  TelegramLink,
+  "_id" | "linkedAt" | "preferredLanguage"
+>;

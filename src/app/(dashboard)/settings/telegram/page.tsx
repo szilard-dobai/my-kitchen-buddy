@@ -155,7 +155,11 @@ export default function TelegramSettingsPage() {
                     linking process.
                   </p>
                   <Button asChild>
-                    <a href={deepLink} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={deepLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       Open Telegram Bot
                     </a>
                   </Button>
@@ -169,11 +173,7 @@ export default function TelegramSettingsPage() {
                       <code className="flex-1 p-2 bg-gray-100 rounded text-sm font-mono break-all">
                         /start {token}
                       </code>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={copyCommand}
-                      >
+                      <Button variant="outline" size="sm" onClick={copyCommand}>
                         {copied ? "Copied!" : "Copy"}
                       </Button>
                     </div>

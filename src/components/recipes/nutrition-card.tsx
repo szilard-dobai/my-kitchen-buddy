@@ -13,13 +13,55 @@ interface NutritionCardProps {
 }
 
 const nutritionItems = [
-  { key: "calories", label: "Calories", unit: "kcal", icon: Flame, colorClass: "bg-nutrition-calories" },
-  { key: "protein", label: "Protein", unit: "g", icon: Beef, colorClass: "bg-nutrition-protein" },
-  { key: "carbs", label: "Carbs", unit: "g", icon: Wheat, colorClass: "bg-nutrition-carbs" },
-  { key: "fat", label: "Fat", unit: "g", icon: Droplet, colorClass: "bg-nutrition-fat" },
-  { key: "fiber", label: "Fiber", unit: "g", icon: Apple, colorClass: "bg-nutrition-fiber" },
-  { key: "sugar", label: "Sugar", unit: "g", icon: Cookie, colorClass: "bg-nutrition-sugar" },
-  { key: "sodium", label: "Sodium", unit: "mg", icon: Pill, colorClass: "bg-nutrition-sodium" },
+  {
+    key: "calories",
+    label: "Calories",
+    unit: "kcal",
+    icon: Flame,
+    colorClass: "bg-nutrition-calories",
+  },
+  {
+    key: "protein",
+    label: "Protein",
+    unit: "g",
+    icon: Beef,
+    colorClass: "bg-nutrition-protein",
+  },
+  {
+    key: "carbs",
+    label: "Carbs",
+    unit: "g",
+    icon: Wheat,
+    colorClass: "bg-nutrition-carbs",
+  },
+  {
+    key: "fat",
+    label: "Fat",
+    unit: "g",
+    icon: Droplet,
+    colorClass: "bg-nutrition-fat",
+  },
+  {
+    key: "fiber",
+    label: "Fiber",
+    unit: "g",
+    icon: Apple,
+    colorClass: "bg-nutrition-fiber",
+  },
+  {
+    key: "sugar",
+    label: "Sugar",
+    unit: "g",
+    icon: Cookie,
+    colorClass: "bg-nutrition-sugar",
+  },
+  {
+    key: "sodium",
+    label: "Sodium",
+    unit: "mg",
+    icon: Pill,
+    colorClass: "bg-nutrition-sodium",
+  },
 ] as const;
 
 function hasAnyNutritionValue(data: NutritionValues | undefined): boolean {
@@ -30,18 +72,19 @@ function hasAnyNutritionValue(data: NutritionValues | undefined): boolean {
 export function NutritionCard({ nutrition, className }: NutritionCardProps) {
   const hasPerServing = useMemo(
     () => hasAnyNutritionValue(nutrition?.perServing),
-    [nutrition?.perServing]
+    [nutrition?.perServing],
   );
   const hasPer100g = useMemo(
     () => hasAnyNutritionValue(nutrition?.per100g),
-    [nutrition?.per100g]
+    [nutrition?.per100g],
   );
 
   const [activeTab, setActiveTab] = useState<"perServing" | "per100g">(
-    hasPerServing ? "perServing" : "per100g"
+    hasPerServing ? "perServing" : "per100g",
   );
 
-  const data = activeTab === "perServing" ? nutrition?.perServing : nutrition?.per100g;
+  const data =
+    activeTab === "perServing" ? nutrition?.perServing : nutrition?.per100g;
   const showSwitcher = hasPerServing && hasPer100g;
 
   if (!hasPerServing && !hasPer100g) {
@@ -60,7 +103,7 @@ export function NutritionCard({ nutrition, className }: NutritionCardProps) {
                 "px-3 py-1 rounded-md text-sm font-medium transition-colors",
                 activeTab === "perServing"
                   ? "bg-card shadow-sm text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               Per Serving
@@ -71,7 +114,7 @@ export function NutritionCard({ nutrition, className }: NutritionCardProps) {
                 "px-3 py-1 rounded-md text-sm font-medium transition-colors",
                 activeTab === "per100g"
                   ? "bg-card shadow-sm text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               Per 100g
@@ -94,7 +137,7 @@ export function NutritionCard({ nutrition, className }: NutritionCardProps) {
                 className={cn(
                   "flex flex-col items-center justify-center rounded-lg p-3 text-white",
                   item.colorClass,
-                  item.key === "calories" && "col-span-2 sm:col-span-1"
+                  item.key === "calories" && "col-span-2 sm:col-span-1",
                 )}
               >
                 <Icon className="h-5 w-5 mb-1 opacity-80" />

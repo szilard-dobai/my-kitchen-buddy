@@ -3,7 +3,7 @@ import type { Recipe } from "@/types/recipe";
 
 export async function sendStatusUpdate(
   chatId: number,
-  message: string
+  message: string,
 ): Promise<void> {
   try {
     const bot = getBot();
@@ -15,7 +15,7 @@ export async function sendStatusUpdate(
 
 export async function sendRecipePreview(
   chatId: number,
-  recipe: Recipe
+  recipe: Recipe,
 ): Promise<void> {
   try {
     const bot = getBot();
@@ -35,7 +35,7 @@ export async function sendRecipePreview(
 
     parts.push("");
     parts.push(
-      `${recipe.ingredients.length} ingredients · ${recipe.instructions.length} steps`
+      `${recipe.ingredients.length} ingredients · ${recipe.instructions.length} steps`,
     );
 
     parts.push("");

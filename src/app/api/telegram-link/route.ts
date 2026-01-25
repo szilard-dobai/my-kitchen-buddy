@@ -29,7 +29,7 @@ export async function GET() {
     console.error("Error checking telegram link:", error);
     return NextResponse.json(
       { error: "Failed to check link status" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -45,7 +45,7 @@ export async function POST() {
     if (existingLink) {
       return NextResponse.json(
         { error: "Telegram account already linked" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -58,7 +58,7 @@ export async function POST() {
     console.error("Error generating link token:", error);
     return NextResponse.json(
       { error: "Failed to generate link" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -75,7 +75,7 @@ export async function DELETE() {
     if (!deleted) {
       return NextResponse.json(
         { error: "No linked Telegram account found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -84,7 +84,7 @@ export async function DELETE() {
     console.error("Error unlinking telegram:", error);
     return NextResponse.json(
       { error: "Failed to unlink account" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

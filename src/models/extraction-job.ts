@@ -15,7 +15,7 @@ export async function getExtractionJobsCollection() {
 }
 
 export async function createExtractionJob(
-  input: CreateExtractionJobInput
+  input: CreateExtractionJobInput,
 ): Promise<ExtractionJob> {
   const collection = await getExtractionJobsCollection();
   const now = new Date();
@@ -43,7 +43,7 @@ export async function createExtractionJob(
 }
 
 export async function getExtractionJobById(
-  id: string
+  id: string,
 ): Promise<ExtractionJob | null> {
   const collection = await getExtractionJobsCollection();
 
@@ -69,7 +69,7 @@ export async function updateExtractionJobStatus(
   id: string,
   status: ExtractionStatus,
   progress: number,
-  statusMessage?: string
+  statusMessage?: string,
 ): Promise<void> {
   const collection = await getExtractionJobsCollection();
 
@@ -82,13 +82,13 @@ export async function updateExtractionJobStatus(
         statusMessage,
         updatedAt: new Date(),
       },
-    }
+    },
   );
 }
 
 export async function completeExtractionJob(
   id: string,
-  recipeId: string
+  recipeId: string,
 ): Promise<void> {
   const collection = await getExtractionJobsCollection();
 
@@ -102,13 +102,13 @@ export async function completeExtractionJob(
         statusMessage: "Recipe extracted successfully",
         updatedAt: new Date(),
       },
-    }
+    },
   );
 }
 
 export async function failExtractionJob(
   id: string,
-  error: string
+  error: string,
 ): Promise<void> {
   const collection = await getExtractionJobsCollection();
 
@@ -121,12 +121,12 @@ export async function failExtractionJob(
         statusMessage: error,
         updatedAt: new Date(),
       },
-    }
+    },
   );
 }
 
 export async function findInProgressJobByUrl(
-  normalizedUrl: string
+  normalizedUrl: string,
 ): Promise<ExtractionJob | null> {
   const collection = await getExtractionJobsCollection();
 
@@ -145,7 +145,7 @@ export async function findInProgressJobByUrl(
 
 export async function waitForJobCompletion(
   jobId: string,
-  timeoutMs: number
+  timeoutMs: number,
 ): Promise<ExtractionJob> {
   const startTime = Date.now();
   const pollInterval = 2000;
@@ -161,7 +161,7 @@ export async function waitForJobCompletion(
       return job;
     }
 
-    await new Promise(resolve => setTimeout(resolve, pollInterval));
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
   }
 
   throw new Error(`Timeout waiting for job ${jobId} to complete`);
