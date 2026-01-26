@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 
 const guestOnlyPaths = ["/login", "/register"];
 
-export const middleware = (request: NextRequest) => {
+export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const pathname = request.nextUrl.pathname;
 
@@ -22,7 +22,7 @@ export const middleware = (request: NextRequest) => {
   }
 
   return NextResponse.next();
-};
+}
 
 export const config = {
   matcher: [
