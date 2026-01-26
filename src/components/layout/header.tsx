@@ -1,26 +1,25 @@
 "use client";
 
-import { ChefHat, Menu, X } from "lucide-react";
+import { ChefHat, ChevronDown, Menu, Settings, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { signOut, useSession } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
-
-const navLinks = [
-  { href: "/recipes", label: "My Recipes" },
-  { href: "/extract", label: "Extract Recipe" },
-  { href: "/settings/billing", label: "Billing" },
-];
 
 export function Header() {
   const router = useRouter();
-  const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
+    setUserMenuOpen(false);
     await signOut();
     router.push("/");
     router.refresh();
@@ -38,33 +37,32 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === link.href
-                  ? "text-primary"
-                  : "text-muted-foreground",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center">
           {session?.user && (
-            <>
-              <span className="text-sm text-muted-foreground">
-                {session.user.name || session.user.email}
-              </span>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                Sign out
-              </Button>
-            </>
+            <Popover open={userMenuOpen} onOpenChange={setUserMenuOpen}>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  {session.user.name || session.user.email}
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 p-2">
+                <Link
+                  href="/settings"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors cursor-pointer"
+                >
+                  Sign out
+                </button>
+              </PopoverContent>
+            </Popover>
           )}
         </div>
 
@@ -83,37 +81,31 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background">
           <nav className="container mx-auto px-4 py-4 space-y-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "block py-2 text-sm font-medium transition-colors hover:text-primary",
-                  pathname === link.href
-                    ? "text-primary"
-                    : "text-muted-foreground",
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
             {session?.user && (
-              <div className="pt-3 border-t space-y-2">
+              <>
                 <p className="text-sm text-muted-foreground py-2">
                   {session.user.name || session.user.email}
                 </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    handleSignOut();
-                    setMobileMenuOpen(false);
-                  }}
+                <Link
+                  href="/settings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Sign out
-                </Button>
-              </div>
+                  Settings
+                </Link>
+                <div className="pt-3 border-t">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      handleSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Sign out
+                  </Button>
+                </div>
+              </>
             )}
           </nav>
         </div>
