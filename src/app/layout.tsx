@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  appleWebApp: {
+    title: "My Kitchen Buddy",
+  },
 };
 
 export default function RootLayout({
