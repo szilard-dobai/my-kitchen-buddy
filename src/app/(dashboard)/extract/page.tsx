@@ -166,6 +166,7 @@ export default function ExtractPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    setJobId(null);
     setExtractionStatus(null);
     hasTrackedSuccessRef.current = false;
     hasTrackedErrorRef.current = false;
