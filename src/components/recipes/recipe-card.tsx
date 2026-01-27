@@ -3,6 +3,7 @@
 import { Clock, Flame, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DietaryTag } from "@/components/ui/dietary-tag";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
@@ -15,6 +16,7 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
+  const [imageError, setImageError] = useState(false);
   const calories =
     recipe.nutrition?.perServing?.calories || recipe.caloriesPerServing;
 
@@ -26,13 +28,14 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
     >
       <Card className="h-full card-shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden">
         <div className="aspect-video bg-muted relative">
-          {recipe.source.thumbnailUrl ? (
+          {recipe.source.thumbnailUrl && !imageError ? (
             <Image
               src={recipe.source.thumbnailUrl}
               alt={recipe.title}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              onError={() => setImageError(true)}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

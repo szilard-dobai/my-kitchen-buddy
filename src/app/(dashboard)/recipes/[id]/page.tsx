@@ -6,14 +6,14 @@ import {
   Lightbulb,
   Timer,
   Users,
-  UtensilsCrossed,
 } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { AuthorAvatar } from "@/components/recipes/author-avatar";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { NutritionCard } from "@/components/recipes/nutrition-card";
+import { RecipeThumbnail } from "@/components/recipes/recipe-thumbnail";
 import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,22 +98,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
         <p className="text-muted-foreground mb-6">{recipe.description}</p>
       )}
 
-      {recipe.source.thumbnailUrl ? (
-        <div className="aspect-video relative rounded-lg overflow-hidden mb-8">
-          <Image
-            src={recipe.source.thumbnailUrl}
-            alt={recipe.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 896px) 100vw, 896px"
-            priority
-          />
-        </div>
-      ) : (
-        <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-8">
-          <UtensilsCrossed className="h-16 w-16 text-muted-foreground/30" />
-        </div>
-      )}
+      <RecipeThumbnail
+        src={recipe.source.thumbnailUrl}
+        alt={recipe.title}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {recipe.prepTime && (
@@ -290,12 +278,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
               <span className="inline-flex items-center gap-1.5">
                 by
                 {recipe.source.authorAvatarUrl && (
-                  <Image
+                  <AuthorAvatar
                     src={recipe.source.authorAvatarUrl}
                     alt={recipe.source.authorUsername}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
                   />
                 )}
                 @{recipe.source.authorUsername}
