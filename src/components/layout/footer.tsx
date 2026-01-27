@@ -12,36 +12,19 @@ export function Footer({ compact = false }: FooterProps) {
       <footer className="border-t bg-muted/30">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-            <p>
-              <span>© {new Date().getFullYear()} My Kitchen Buddy</span>
-              <span className="mx-2">·</span>
-              <span className="font-mono">
-                Built by{" "}
-                <a
-                  href="https://www.linkedin.com/in/szilard-dobai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity underline"
-                >
-                  Szilard Dobai
-                </a>
-              </span>
+            <p className="font-mono">
+              Built by{" "}
+              <a
+                href="https://www.linkedin.com/in/szilard-dobai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity underline"
+              >
+                Szilard Dobai
+              </a>
             </p>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/privacy"
-                className="hover:text-foreground transition-colors"
-              >
-                Privacy
-              </Link>
-              <Link
-                href="/terms"
-                className="hover:text-foreground transition-colors"
-              >
-                Terms
-              </Link>
-              <ThemeToggle />
-            </div>
+
+            <ThemeToggle />
           </div>
         </div>
       </footer>
@@ -119,20 +102,16 @@ export function Footer({ compact = false }: FooterProps) {
         </div>
 
         <div className="mt-8 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            <span>© {new Date().getFullYear()} My Kitchen Buddy</span>
-            <span className="mx-2">·</span>
-            <span className="font-mono">
-              Built by{" "}
-              <a
-                href="https://www.linkedin.com/in/szilard-dobai/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity underline"
-              >
-                Szilard Dobai
-              </a>
-            </span>
+          <p className="text-sm text-muted-foreground font-mono">
+            Built by{" "}
+            <a
+              href="https://www.linkedin.com/in/szilard-dobai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity underline"
+            >
+              Szilard Dobai
+            </a>
           </p>
 
           <ThemeToggle />
