@@ -14,7 +14,6 @@ import {
   createOrUpdateMetadataCache,
   findMetadataCacheByUrl,
 } from "@/models/video-metadata-cache";
-import { uploadImageToBlob } from "@/services/image/blob-storage";
 import {
   sendError,
   sendRecipePreview,
@@ -81,27 +80,6 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       metadataDescription = metadataResult.description;
 
       if (!metadataResult.error) {
-        let avatarBlobUrl: string | undefined;
-        let thumbnailBlobUrl: string | undefined;
-
-        if (metadataResult.author?.avatarUrl) {
-          const blobUrl = await uploadImageToBlob(
-            metadataResult.author.avatarUrl,
-            "avatar",
-            `${platform}-${metadataResult.author.username}`,
-          );
-          if (blobUrl) avatarBlobUrl = blobUrl;
-        }
-
-        if (metadataResult.media?.thumbnailUrl) {
-          const blobUrl = await uploadImageToBlob(
-            metadataResult.media.thumbnailUrl,
-            "thumbnail",
-            normalizedUrl.replace(/[^a-zA-Z0-9]/g, "-"),
-          );
-          if (blobUrl) thumbnailBlobUrl = blobUrl;
-        }
-
         let authorId: string | undefined;
 
         if (metadataResult.author?.username) {
@@ -109,7 +87,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
             platform,
             username: metadataResult.author.username,
             displayName: metadataResult.author.displayName,
-            avatarUrl: avatarBlobUrl || metadataResult.author.avatarUrl,
+            avatarUrl: metadataResult.author.avatarUrl,
             verified: metadataResult.author.verified,
           });
           authorId = author._id;
@@ -121,19 +99,8 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           {
             title: metadataResult.title,
             description: metadataResult.description,
-            author: metadataResult.author
-              ? {
-                  ...metadataResult.author,
-                  avatarUrl: avatarBlobUrl || metadataResult.author.avatarUrl,
-                }
-              : undefined,
-            media: metadataResult.media
-              ? {
-                  ...metadataResult.media,
-                  thumbnailUrl:
-                    thumbnailBlobUrl || metadataResult.media.thumbnailUrl,
-                }
-              : undefined,
+            author: metadataResult.author,
+            media: metadataResult.media,
             tags: metadataResult.tags,
           },
           authorId,
