@@ -22,6 +22,7 @@ import {
   sortRecipes,
 } from "@/lib/recipe-filters";
 import type { RecipeFilters, SortOption } from "@/lib/recipe-filters";
+import { trackEvent } from "@/lib/tracking";
 import type { Recipe } from "@/types/recipe";
 
 interface RecipeLibraryProps {
@@ -46,6 +47,7 @@ export function RecipeLibrary({ recipes }: RecipeLibraryProps) {
   const handleReset = () => {
     setFilters(DEFAULT_FILTERS);
     setSort(DEFAULT_SORT);
+    trackEvent("filters_cleared");
   };
 
   if (recipes.length === 0) {

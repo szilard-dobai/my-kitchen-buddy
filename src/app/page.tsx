@@ -10,6 +10,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Footer } from "@/components/layout/footer";
+import { CTALink } from "@/components/tracking/cta-link";
+import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
 import {
   InstagramIcon,
@@ -65,6 +67,7 @@ const platforms: { name: string; color: string; icon: ReactNode }[] = [
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
+      <PageTracker event="homepage_view" />
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto px-4 flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
@@ -113,7 +116,7 @@ export default function Home() {
                 extract a complete, structured recipe for you.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 animate-fade-in animation-delay-200">
-                <Link href="/extract">
+                <CTALink href="/extract" cta="hero">
                   <Button
                     size="lg"
                     className="w-full sm:w-auto gap-2 bg-card text-foreground hover:bg-card/90"
@@ -121,8 +124,8 @@ export default function Home() {
                     Extract a Recipe
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
-                <Link href="/register">
+                </CTALink>
+                <CTALink href="/register" cta="hero">
                   <Button
                     size="lg"
                     variant="secondary"
@@ -130,7 +133,7 @@ export default function Home() {
                   >
                     Create Free Account
                   </Button>
-                </Link>
+                </CTALink>
               </div>
             </div>
           </div>
@@ -202,12 +205,12 @@ export default function Home() {
               Join thousands of home cooks who save and organize their favorite
               video recipes.
             </p>
-            <Link href="/register">
+            <CTALink href="/register" cta="bottom">
               <Button size="lg" className="gap-2">
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
+            </CTALink>
           </div>
         </section>
       </main>

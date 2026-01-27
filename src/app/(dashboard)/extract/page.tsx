@@ -2,7 +2,7 @@
 
 import { Globe, Link2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ExtractionProgress } from "@/components/recipes/extraction-progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { trackEvent } from "@/lib/tracking";
 import type { TargetLanguage } from "@/types/extraction-job";
 import type { UsageInfo } from "@/types/subscription";
 
@@ -74,6 +75,17 @@ export default function ExtractPage() {
   const [extractionStatus, setExtractionStatus] =
     useState<ExtractionStatus | null>(null);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
+  const hasTrackedViewRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasTrackedViewRef.current) {
+      trackEvent("extract_view");
+      hasTrackedViewRef.current = true;
+    }
+  }, []);
+
+  const hasTrackedSuccessRef = useRef(false);
+  const hasTrackedErrorRef = useRef(false);
 
   const pollStatus = useCallback(
     async (id: string) => {
@@ -87,11 +99,21 @@ export default function ExtractPage() {
         setExtractionStatus(status);
 
         if (status.status === "completed" && status.recipeId) {
+          if (!hasTrackedSuccessRef.current) {
+            trackEvent("extraction_success", { recipeId: status.recipeId });
+            hasTrackedSuccessRef.current = true;
+          }
           router.push(`/recipes/${status.recipeId}`);
           return true;
         }
 
         if (status.status === "failed") {
+          if (!hasTrackedErrorRef.current) {
+            trackEvent("extraction_error", {
+              error: status.error || "Extraction failed",
+            });
+            hasTrackedErrorRef.current = true;
+          }
           setError(status.error || "Extraction failed");
           setLoading(false);
           return true;
@@ -132,11 +154,24 @@ export default function ExtractPage() {
       .catch(console.error);
   }, []);
 
+  const detectPlatformFromUrl = (urlString: string): string => {
+    if (urlString.includes("tiktok.com")) return "tiktok";
+    if (urlString.includes("instagram.com")) return "instagram";
+    if (urlString.includes("youtube.com") || urlString.includes("youtu.be"))
+      return "youtube";
+    return "unknown";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     setExtractionStatus(null);
+    hasTrackedSuccessRef.current = false;
+    hasTrackedErrorRef.current = false;
+
+    const platform = detectPlatformFromUrl(url);
+    trackEvent("extraction_attempt", { url, platform });
 
     try {
       const response = await fetch("/api/extract", {
@@ -158,9 +193,10 @@ export default function ExtractPage() {
 
       setJobId(data.jobId);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred",
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      trackEvent("extraction_error", { error: errorMessage });
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -250,7 +286,9 @@ export default function ExtractPage() {
 
             <Button
               type="submit"
-              disabled={loading || !url || (usage !== null && usage.used >= usage.limit)}
+              disabled={
+                loading || !url || (usage !== null && usage.used >= usage.limit)
+              }
               className="w-full h-12 text-base"
             >
               {loading ? (

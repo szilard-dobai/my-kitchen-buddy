@@ -1,3 +1,5 @@
+"use client";
+
 import { Clock, Flame, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DietaryTag } from "@/components/ui/dietary-tag";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
 import { PlatformBadge } from "@/components/ui/platform-badge";
+import { trackEvent } from "@/lib/tracking";
 import type { Recipe } from "@/types/recipe";
 
 interface RecipeCardProps {
@@ -16,7 +19,11 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
     recipe.nutrition?.perServing?.calories || recipe.caloriesPerServing;
 
   return (
-    <Link href={`/recipes/${recipe._id}`} className="group">
+    <Link
+      href={`/recipes/${recipe._id}`}
+      className="group"
+      onClick={() => trackEvent("recipe_card_click", { recipeId: recipe._id })}
+    >
       <Card className="h-full card-shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden">
         <div className="aspect-video bg-muted relative">
           {recipe.source.thumbnailUrl ? (

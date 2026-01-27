@@ -14,6 +14,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { NutritionCard } from "@/components/recipes/nutrition-card";
+import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DietaryTag } from "@/components/ui/dietary-tag";
@@ -62,6 +63,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <PageTracker event="recipe_detail_view" metadata={{ recipeId: id }} />
       <div className="flex items-start justify-between mb-6">
         <div>
           <Link

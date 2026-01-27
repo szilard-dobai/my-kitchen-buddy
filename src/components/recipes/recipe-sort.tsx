@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { SortOption } from "@/lib/recipe-filters";
+import { trackEvent } from "@/lib/tracking";
 
 interface RecipeSortProps {
   value: SortOption;
@@ -24,7 +25,13 @@ const sortOptions: { value: SortOption; label: string }[] = [
 
 export function RecipeSort({ value, onChange, hasSearch }: RecipeSortProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      value={value}
+      onValueChange={(newValue) => {
+        onChange(newValue as SortOption);
+        trackEvent("sort_applied", { sortBy: newValue });
+      }}
+    >
       <SelectTrigger className="w-32" size="sm">
         <SelectValue />
       </SelectTrigger>

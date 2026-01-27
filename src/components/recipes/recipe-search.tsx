@@ -1,8 +1,9 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 
 interface RecipeSearchProps {
@@ -11,8 +12,13 @@ interface RecipeSearchProps {
   className?: string;
 }
 
-export function RecipeSearch({ value, onChange, className }: RecipeSearchProps) {
+export function RecipeSearch({
+  value,
+  onChange,
+  className,
+}: RecipeSearchProps) {
   const [localValue, setLocalValue] = useState(value);
+  const lastTrackedQueryRef = useRef("");
 
   useEffect(() => {
     setLocalValue(value);
@@ -22,6 +28,10 @@ export function RecipeSearch({ value, onChange, className }: RecipeSearchProps) 
     const timer = setTimeout(() => {
       if (localValue !== value) {
         onChange(localValue);
+        if (localValue && localValue !== lastTrackedQueryRef.current) {
+          trackEvent("recipe_search", { query: localValue });
+          lastTrackedQueryRef.current = localValue;
+        }
       }
     }, 300);
 

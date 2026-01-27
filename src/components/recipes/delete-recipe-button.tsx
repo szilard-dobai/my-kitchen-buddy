@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/tracking";
 
 interface DeleteRecipeButtonProps {
   recipeId: string;
@@ -25,6 +26,7 @@ export function DeleteRecipeButton({ recipeId }: DeleteRecipeButtonProps) {
       });
 
       if (response.ok) {
+        trackEvent("recipe_deleted", { recipeId });
         router.push("/recipes");
         router.refresh();
       } else {

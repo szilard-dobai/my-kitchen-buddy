@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
-import { getOrCreateSubscription, updateSubscription } from "@/models/subscription";
+import {
+  getOrCreateSubscription,
+  updateSubscription,
+} from "@/models/subscription";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +19,7 @@ export async function POST(request: Request) {
     if (!priceType || !["monthly", "yearly"].includes(priceType)) {
       return NextResponse.json(
         { error: "Invalid price type" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +34,9 @@ export async function POST(request: Request) {
         metadata: { userId: session.user.id },
       });
       customerId = customer.id;
-      await updateSubscription(session.user.id, { stripeCustomerId: customerId });
+      await updateSubscription(session.user.id, {
+        stripeCustomerId: customerId,
+      });
     }
 
     const priceId =
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
     console.error("Checkout error:", error);
     return NextResponse.json(
       { error: "Failed to create checkout session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

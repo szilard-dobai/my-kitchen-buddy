@@ -22,6 +22,7 @@ import type {
   RecencyOption,
   RecipeFilters,
 } from "@/lib/recipe-filters";
+import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 
 interface FilterOptions {
@@ -231,6 +232,7 @@ export function RecipeFiltersDesktop({
       ? current.filter((v) => v !== value)
       : [...current, value];
     onChange({ ...filters, [key]: updated });
+    trackEvent("filter_applied", { filterType: key, value });
   };
 
   return (
@@ -412,6 +414,7 @@ export function RecipeFiltersMobile({
       ? current.filter((v) => v !== value)
       : [...current, value];
     onChange({ ...filters, [key]: updated });
+    trackEvent("filter_applied", { filterType: key, value });
   };
 
   return (

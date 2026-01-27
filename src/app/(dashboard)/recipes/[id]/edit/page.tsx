@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { RecipeForm } from "@/components/recipes/recipe-form";
+import { PageTracker } from "@/components/tracking/page-tracker";
 import { getSession } from "@/lib/session";
 import { getRecipeById } from "@/models/recipe";
 
@@ -29,6 +30,7 @@ export default async function EditRecipePage({ params }: EditRecipePageProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <PageTracker event="recipe_edit_view" metadata={{ recipeId: id }} />
       <div className="mb-6">
         <Link
           href={`/recipes/${recipe._id}`}

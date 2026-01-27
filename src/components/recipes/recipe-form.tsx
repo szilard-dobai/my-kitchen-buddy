@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { trackEvent } from "@/lib/tracking";
 import type { Ingredient, Instruction, Recipe } from "@/types/recipe";
 
 interface RecipeFormProps {
@@ -152,6 +153,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       });
 
       if (response.ok) {
+        trackEvent("recipe_edited", { recipeId: recipe._id });
         router.push(`/recipes/${recipe._id}`);
         router.refresh();
       } else {

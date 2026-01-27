@@ -2,6 +2,7 @@ import { ChefHat } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/layout/footer";
+import { PageTracker } from "@/components/tracking/page-tracker";
 
 export const metadata: Metadata = {
   title: "Terms of Service | My Kitchen Buddy",
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <PageTracker event="terms_view" />
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 flex h-16 items-center">
           <Link href="/" className="flex items-center gap-2">

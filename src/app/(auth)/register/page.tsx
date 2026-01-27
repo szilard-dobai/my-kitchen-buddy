@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signUp } from "@/lib/auth-client";
+import { trackEvent } from "@/lib/tracking";
 
 function RegisterForm() {
   const router = useRouter();
@@ -25,6 +26,14 @@ function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const hasTrackedViewRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasTrackedViewRef.current) {
+      trackEvent("register_view");
+      hasTrackedViewRef.current = true;
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +59,15 @@ function RegisterForm() {
       });
 
       if (result.error) {
+        trackEvent("register_attempt", { success: false });
         setError(result.error.message || "Registration failed");
       } else {
+        trackEvent("register_attempt", { success: true });
         const callbackUrl = searchParams.get("callbackUrl") || "/recipes";
         router.replace(callbackUrl);
       }
     } catch {
+      trackEvent("register_attempt", { success: false });
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSession } from "@/lib/auth-client";
+import { trackEvent } from "@/lib/tracking";
 import type { UsageInfo } from "@/types/subscription";
 
 function ProfileTab() {
@@ -84,6 +85,7 @@ function TelegramTab() {
   }
 
   async function handleConnect() {
+    trackEvent("telegram_connect_click");
     setActionLoading(true);
     setError("");
     setDeepLink(null);
@@ -116,6 +118,7 @@ function TelegramTab() {
   }
 
   async function handleDisconnect() {
+    trackEvent("telegram_disconnect_click");
     setActionLoading(true);
     setError("");
 
@@ -262,7 +265,9 @@ function BillingTab() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
+    "yearly",
+  );
 
   const success = searchParams.get("success");
   const canceled = searchParams.get("canceled");
@@ -297,9 +302,7 @@ function BillingTab() {
       if (!response.ok) throw new Error(data.error);
       window.location.href = data.url;
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to start checkout"
-      );
+      setError(err instanceof Error ? err.message : "Failed to start checkout");
       setActionLoading(false);
     }
   }
@@ -329,9 +332,7 @@ function BillingTab() {
   }
 
   const isPro = usage?.planTier === "pro";
-  const usagePercent = usage
-    ? Math.round((usage.used / usage.limit) * 100)
-    : 0;
+  const usagePercent = usage ? Math.round((usage.used / usage.limit) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -357,9 +358,7 @@ function BillingTab() {
       <Card>
         <CardHeader>
           <CardTitle>Current Plan</CardTitle>
-          <CardDescription>
-            {isPro ? "Pro Plan" : "Free Plan"}
-          </CardDescription>
+          <CardDescription>{isPro ? "Pro Plan" : "Free Plan"}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -409,7 +408,10 @@ function BillingTab() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <span className="text-green-600 font-bold">✓</span>
-                <span><strong>100 extractions/month</strong> (vs {usage?.limit} on Free)</span>
+                <span>
+                  <strong>100 extractions/month</strong> (vs {usage?.limit} on
+                  Free)
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <span className="text-green-600 font-bold">✓</span>
@@ -420,7 +422,10 @@ function BillingTab() {
             <div className="grid gap-4 sm:grid-cols-2">
               <button
                 type="button"
-                onClick={() => setSelectedPlan("monthly")}
+                onClick={() => {
+                  setSelectedPlan("monthly");
+                  trackEvent("plan_card_click", { plan: "monthly" });
+                }}
                 className={`border-2 rounded-lg p-4 text-left cursor-pointer transition-colors ${
                   selectedPlan === "monthly"
                     ? "border-orange-500 bg-orange-50"
@@ -433,7 +438,10 @@ function BillingTab() {
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedPlan("yearly")}
+                onClick={() => {
+                  setSelectedPlan("yearly");
+                  trackEvent("plan_card_click", { plan: "yearly" });
+                }}
                 className={`border-2 rounded-lg p-4 text-left cursor-pointer transition-colors ${
                   selectedPlan === "yearly"
                     ? "border-orange-500 bg-orange-50"
@@ -452,7 +460,10 @@ function BillingTab() {
             </div>
             <Button
               className="w-full"
-              onClick={() => handleUpgrade(selectedPlan)}
+              onClick={() => {
+                trackEvent("subscribe_click", { plan: selectedPlan });
+                handleUpgrade(selectedPlan);
+              }}
               disabled={actionLoading}
             >
               {actionLoading ? "Loading..." : "Upgrade to Pro"}
@@ -471,6 +482,14 @@ function SettingsContent() {
   const defaultTab = ["profile", "telegram", "billing"].includes(tabParam || "")
     ? tabParam!
     : "profile";
+  const hasTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasTrackedRef.current) {
+      trackEvent("settings_view", { tab: defaultTab });
+      hasTrackedRef.current = true;
+    }
+  }, [defaultTab]);
 
   function handleTabChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());

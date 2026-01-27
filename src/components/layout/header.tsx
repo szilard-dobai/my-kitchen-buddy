@@ -11,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { signOut, useSession } from "@/lib/auth-client";
+import { trackEvent } from "@/lib/tracking";
 
 export function Header() {
   const router = useRouter();
@@ -28,7 +29,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
-        <Link href="/recipes" className="flex items-center gap-2 group">
+        <Link
+          href="/recipes"
+          className="flex items-center gap-2 group"
+          onClick={() => trackEvent("header_logo_click")}
+        >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-110">
             <ChefHat className="h-5 w-5" />
           </div>
@@ -39,7 +44,13 @@ export function Header() {
 
         <div className="hidden md:flex items-center">
           {session?.user && (
-            <Popover open={userMenuOpen} onOpenChange={setUserMenuOpen}>
+            <Popover
+              open={userMenuOpen}
+              onOpenChange={(open) => {
+                setUserMenuOpen(open);
+                if (open) trackEvent("header_dropdown_open");
+              }}
+            >
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                   {session.user.name || session.user.email}
@@ -68,7 +79,11 @@ export function Header() {
 
         <button
           className="md:hidden cursor-pointer p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => {
+            const newState = !mobileMenuOpen;
+            setMobileMenuOpen(newState);
+            trackEvent("header_mobile_menu_toggle", { opened: newState });
+          }}
         >
           {mobileMenuOpen ? (
             <X className="h-6 w-6" />

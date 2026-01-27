@@ -15,7 +15,7 @@ export async function POST() {
     if (!subscription.stripeCustomerId) {
       return NextResponse.json(
         { error: "No billing account found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST() {
     console.error("Portal error:", error);
     return NextResponse.json(
       { error: "Failed to create portal session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

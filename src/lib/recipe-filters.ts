@@ -55,7 +55,10 @@ function matchesDifficulty(recipe: Recipe, difficulties: string[]): boolean {
   return difficulties.includes(recipe.difficulty || "");
 }
 
-function matchesRecency(recipe: Recipe, recency: RecencyOption | null): boolean {
+function matchesRecency(
+  recipe: Recipe,
+  recency: RecencyOption | null,
+): boolean {
   if (!recency) return true;
 
   const createdAt = new Date(recipe.createdAt);
@@ -63,7 +66,7 @@ function matchesRecency(recipe: Recipe, recency: RecencyOption | null): boolean 
 
   const msPerDay = 24 * 60 * 60 * 1000;
   const daysSinceCreated = Math.floor(
-    (now.getTime() - createdAt.getTime()) / msPerDay
+    (now.getTime() - createdAt.getTime()) / msPerDay,
   );
 
   switch (recency) {
@@ -87,7 +90,7 @@ function matchesCuisine(recipe: Recipe, cuisines: string[]): boolean {
 
 export function filterRecipes(
   recipes: Recipe[],
-  filters: RecipeFilters
+  filters: RecipeFilters,
 ): Recipe[] {
   return recipes.filter((recipe) => {
     if (!matchesSearch(recipe, filters.search)) return false;
@@ -130,7 +133,7 @@ function calculateRelevanceScore(recipe: Recipe, searchTerm: string): number {
 export function sortRecipes(
   recipes: Recipe[],
   sortBy: SortOption,
-  searchTerm: string = ""
+  searchTerm: string = "",
 ): Recipe[] {
   const sorted = [...recipes];
 
@@ -140,25 +143,25 @@ export function sortRecipes(
         sorted.sort(
           (a, b) =>
             calculateRelevanceScore(b, searchTerm) -
-            calculateRelevanceScore(a, searchTerm)
+            calculateRelevanceScore(a, searchTerm),
         );
       } else {
         sorted.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
       }
       break;
     case "newest":
       sorted.sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
       break;
     case "oldest":
       sorted.sort(
         (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       );
       break;
     case "alphabetical":
@@ -199,7 +202,7 @@ export function extractFilterOptions(recipes: Recipe[]) {
   return {
     platforms: Array.from(platforms).sort(),
     creators: Array.from(creators.values()).sort((a, b) =>
-      a.username.localeCompare(b.username)
+      a.username.localeCompare(b.username),
     ),
     cuisines: Array.from(cuisines).sort(),
   };
