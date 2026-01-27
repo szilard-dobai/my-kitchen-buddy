@@ -10,47 +10,389 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { trackEvent } from "@/lib/tracking";
 import type { UsageInfo } from "@/types/subscription";
 
 function ProfileTab() {
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, refetch } = useSession();
+
+  const [name, setName] = useState("");
+  const [nameLoading, setNameLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [nameSuccess, setNameSuccess] = useState(false);
+
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
+
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      setName(session.user.name);
+    }
+  }, [session?.user?.name]);
+
+  useEffect(() => {
+    async function checkAccountType() {
+      try {
+        const response = await fetch("/api/account");
+        const data = await response.json();
+        setHasPassword(data.hasPassword);
+      } catch {
+        setHasPassword(false);
+      }
+    }
+    checkAccountType();
+  }, []);
+
+  async function handleNameSave() {
+    if (!name.trim()) return;
+    setNameLoading(true);
+    setNameError("");
+    setNameSuccess(false);
+
+    try {
+      const result = await authClient.updateUser({ name: name.trim() });
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to update name");
+      }
+      await refetch();
+      setNameSuccess(true);
+      setTimeout(() => setNameSuccess(false), 3000);
+    } catch (err) {
+      setNameError(err instanceof Error ? err.message : "Failed to update name");
+    } finally {
+      setNameLoading(false);
+    }
+  }
+
+  async function handleEmailChange() {
+    if (!newEmail.trim() || !emailPassword) return;
+    setEmailLoading(true);
+    setEmailError("");
+
+    try {
+      const response = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newEmail.trim(), currentPassword: emailPassword }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update email");
+      }
+      await refetch();
+      setEmailDialogOpen(false);
+      setNewEmail("");
+      setEmailPassword("");
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : "Failed to update email");
+    } finally {
+      setEmailLoading(false);
+    }
+  }
+
+  async function handlePasswordChange() {
+    if (!currentPassword || !newPassword || !confirmPassword) return;
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
+      return;
+    }
+    setPasswordLoading(true);
+    setPasswordError("");
+    setPasswordSuccess(false);
+
+    try {
+      const result = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+      });
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to change password");
+      }
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordSuccess(true);
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (err) {
+      setPasswordError(err instanceof Error ? err.message : "Failed to change password");
+    } finally {
+      setPasswordLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmation !== "DELETE") return;
+    setDeleteLoading(true);
+    setDeleteError("");
+
+    try {
+      const response = await fetch("/api/account/delete", { method: "DELETE" });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete account");
+      }
+      await authClient.signOut();
+      router.push("/login");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete account");
+      setDeleteLoading(false);
+    }
+  }
+
+  const nameChanged = name.trim() !== (session?.user?.name || "");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Profile</CardTitle>
-        <CardDescription>Manage your account details.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            defaultValue={session?.user?.name || ""}
-            disabled
-            placeholder="Your name"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            defaultValue={session?.user?.email || ""}
-            disabled
-            placeholder="Your email"
-          />
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Profile editing coming soon.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Manage your account details.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {nameError && (
+            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+              {nameError}
+            </div>
+          )}
+          {nameSuccess && (
+            <div className="p-3 text-sm text-green-700 bg-green-50 rounded-md">
+              Name updated successfully
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <div className="flex gap-2">
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+              />
+              <Button
+                onClick={handleNameSave}
+                disabled={nameLoading || !nameChanged}
+              >
+                {nameLoading ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <div className="flex gap-2">
+              <Input
+                id="email"
+                type="email"
+                value={session?.user?.email || ""}
+                disabled
+                placeholder="Your email"
+              />
+              {hasPassword && (
+                <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Change</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Change Email</DialogTitle>
+                      <DialogDescription>
+                        Enter your new email and current password to confirm.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      {emailError && (
+                        <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                          {emailError}
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="new-email">New Email</Label>
+                        <Input
+                          id="new-email"
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          placeholder="new@example.com"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email-password">Current Password</Label>
+                        <Input
+                          id="email-password"
+                          type="password"
+                          value={emailPassword}
+                          onChange={(e) => setEmailPassword(e.target.value)}
+                          placeholder="Enter your password"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button
+                        onClick={handleEmailChange}
+                        disabled={emailLoading || !newEmail.trim() || !emailPassword}
+                      >
+                        {emailLoading ? "Updating..." : "Update Email"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {hasPassword && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Password</CardTitle>
+            <CardDescription>Change your account password.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {passwordError && (
+              <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                {passwordError}
+              </div>
+            )}
+            {passwordSuccess && (
+              <div className="p-3 text-sm text-green-700 bg-green-50 rounded-md">
+                Password changed successfully
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password (min 8 characters)"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+              />
+            </div>
+            <Button
+              onClick={handlePasswordChange}
+              disabled={passwordLoading || !currentPassword || !newPassword || !confirmPassword}
+            >
+              {passwordLoading ? "Updating..." : "Update Password"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="border-red-200">
+        <CardHeader>
+          <CardTitle className="text-red-600">Danger Zone</CardTitle>
+          <CardDescription>
+            Permanently delete your account and all associated data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="destructive">Delete Account</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete Account</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete your
+                  account and all associated data including recipes, subscription,
+                  and Telegram link.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {deleteError && (
+                  <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                    {deleteError}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="delete-confirmation">
+                    Type <span className="font-mono font-bold">DELETE</span> to confirm
+                  </Label>
+                  <Input
+                    id="delete-confirmation"
+                    value={deleteConfirmation}
+                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                    placeholder="DELETE"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteAccount}
+                  disabled={deleteLoading || deleteConfirmation !== "DELETE"}
+                >
+                  {deleteLoading ? "Deleting..." : "Delete Account"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
