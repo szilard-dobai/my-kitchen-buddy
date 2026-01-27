@@ -4,12 +4,12 @@
 
 Two-tier freemium model targeting home cooks who save recipes from social media videos.
 
-| | Free | Pro |
-|---|---|---|
-| Price | $0 | $5/month or $50/year |
-| Extractions | 10/month | 100/month |
-| Recipe library | Unlimited | Unlimited |
-| Telegram bot | Yes | Yes |
+|                | Free      | Pro                  |
+| -------------- | --------- | -------------------- |
+| Price          | $0        | $5/month or $50/year |
+| Extractions    | 10/month  | 100/month            |
+| Recipe library | Unlimited | Unlimited            |
+| Telegram bot   | Yes       | Yes                  |
 
 ## Tier Details
 

@@ -18,6 +18,7 @@ Simplify site navigation by removing clutter from the main nav and creating a un
 **Left:** Logo → links to `/recipes`
 
 **Right:** Username/email dropdown containing:
+
 - Settings → `/settings`
 - Sign out
 
@@ -54,11 +55,11 @@ Simplify site navigation by removing clutter from the main nav and creating a un
 
 Single page with three tabs:
 
-| Tab | Content |
-|-----|---------|
-| Profile | Edit name, email, change password |
-| Telegram | Link/unlink Telegram, instructions, status |
-| Billing | Subscription status, manage plan, payment method |
+| Tab      | Content                                          |
+| -------- | ------------------------------------------------ |
+| Profile  | Edit name, email, change password                |
+| Telegram | Link/unlink Telegram, instructions, status       |
+| Billing  | Subscription status, manage plan, payment method |
 
 Tab selection via query param: `/settings?tab=telegram`
 

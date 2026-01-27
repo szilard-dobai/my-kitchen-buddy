@@ -13,6 +13,7 @@
 ## Task 1: Install Stripe and Add Environment Variables
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `.env.local` (local only, not committed)
 - Modify: `.env.example` (if exists, or create)
@@ -20,6 +21,7 @@
 **Step 1: Install Stripe SDK**
 
 Run:
+
 ```bash
 npm install stripe
 ```
@@ -44,6 +46,7 @@ git commit -m "chore: add stripe dependency"
 ## Task 2: Create Subscription Types
 
 **Files:**
+
 - Create: `src/types/subscription.ts`
 
 **Step 1: Create the types file**
@@ -89,6 +92,7 @@ git commit -m "feat: add subscription types"
 ## Task 3: Create Stripe Client Library
 
 **Files:**
+
 - Create: `src/lib/stripe.ts`
 
 **Step 1: Create the Stripe client**
@@ -123,6 +127,7 @@ git commit -m "feat: add stripe client library"
 ## Task 4: Create Subscription Model
 
 **Files:**
+
 - Create: `src/models/subscription.ts`
 
 **Step 1: Create the subscription model**
@@ -141,7 +146,7 @@ async function getSubscriptionsCollection() {
 }
 
 export async function getSubscription(
-  userId: string
+  userId: string,
 ): Promise<Subscription | null> {
   const collection = await getSubscriptionsCollection();
   const subscription = await collection.findOne({ userId });
@@ -150,7 +155,7 @@ export async function getSubscription(
 }
 
 export async function getOrCreateSubscription(
-  userId: string
+  userId: string,
 ): Promise<Subscription> {
   const existing = await getSubscription(userId);
   if (existing) return existing;
@@ -173,20 +178,20 @@ export async function getOrCreateSubscription(
 
 export async function updateSubscription(
   userId: string,
-  updates: Partial<Subscription>
+  updates: Partial<Subscription>,
 ): Promise<Subscription | null> {
   const collection = await getSubscriptionsCollection();
   const result = await collection.findOneAndUpdate(
     { userId },
     { $set: { ...updates, updatedAt: new Date() } },
-    { returnDocument: "after" }
+    { returnDocument: "after" },
   );
   if (!result) return null;
   return { ...result, _id: result._id.toString() } as Subscription;
 }
 
 export async function incrementExtractionCount(
-  userId: string
+  userId: string,
 ): Promise<Subscription | null> {
   const collection = await getSubscriptionsCollection();
   const result = await collection.findOneAndUpdate(
@@ -195,20 +200,20 @@ export async function incrementExtractionCount(
       $inc: { extractionsUsed: 1 },
       $set: { updatedAt: new Date() },
     },
-    { returnDocument: "after" }
+    { returnDocument: "after" },
   );
   if (!result) return null;
   return { ...result, _id: result._id.toString() } as Subscription;
 }
 
 export async function resetExtractionCount(
-  userId: string
+  userId: string,
 ): Promise<Subscription | null> {
   return updateSubscription(userId, { extractionsUsed: 0 });
 }
 
 export async function findSubscriptionByStripeCustomerId(
-  stripeCustomerId: string
+  stripeCustomerId: string,
 ): Promise<Subscription | null> {
   const collection = await getSubscriptionsCollection();
   const subscription = await collection.findOne({ stripeCustomerId });
@@ -234,30 +239,33 @@ git commit -m "feat: add subscription model with usage tracking"
 ## Task 5: Add Usage Check to Extract Route
 
 **Files:**
+
 - Modify: `src/app/api/extract/route.ts`
 
 **Step 1: Add usage check after auth check**
 
 Add import at top:
+
 ```typescript
 import { canUserExtract, getOrCreateSubscription } from "@/models/subscription";
 ```
 
 Add after the `session?.user` check (around line 20):
+
 ```typescript
-    const canExtract = await canUserExtract(session.user.id);
-    if (!canExtract) {
-      const subscription = await getOrCreateSubscription(session.user.id);
-      return NextResponse.json(
-        {
-          error: "Extraction limit reached",
-          used: subscription.extractionsUsed,
-          limit: subscription.extractionsLimit,
-          planTier: subscription.planTier,
-        },
-        { status: 429 }
-      );
-    }
+const canExtract = await canUserExtract(session.user.id);
+if (!canExtract) {
+  const subscription = await getOrCreateSubscription(session.user.id);
+  return NextResponse.json(
+    {
+      error: "Extraction limit reached",
+      used: subscription.extractionsUsed,
+      limit: subscription.extractionsLimit,
+      planTier: subscription.planTier,
+    },
+    { status: 429 },
+  );
+}
 ```
 
 **Step 2: Commit**
@@ -272,6 +280,7 @@ git commit -m "feat: add extraction limit check to extract route"
 ## Task 6: Add Usage Increment to Extraction Service
 
 **Files:**
+
 - Modify: `src/services/extraction/index.ts`
 
 **Step 1: Add import**
@@ -283,8 +292,9 @@ import { incrementExtractionCount } from "@/models/subscription";
 **Step 2: Add increment after successful recipe creation**
 
 Find the line where `completeExtractionJob` is called (around line 206) and add after it:
+
 ```typescript
-    await incrementExtractionCount(userId);
+await incrementExtractionCount(userId);
 ```
 
 **Step 3: Commit**
@@ -299,6 +309,7 @@ git commit -m "feat: increment extraction count on successful extraction"
 ## Task 7: Create Checkout API Route
 
 **Files:**
+
 - Create: `src/app/api/billing/checkout/route.ts`
 
 **Step 1: Create the checkout route**
@@ -308,7 +319,10 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/session";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
-import { getOrCreateSubscription, updateSubscription } from "@/models/subscription";
+import {
+  getOrCreateSubscription,
+  updateSubscription,
+} from "@/models/subscription";
 
 export async function POST(request: Request) {
   try {
@@ -323,7 +337,7 @@ export async function POST(request: Request) {
     if (!priceType || !["monthly", "yearly"].includes(priceType)) {
       return NextResponse.json(
         { error: "Invalid price type" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -338,7 +352,9 @@ export async function POST(request: Request) {
         metadata: { userId: session.user.id },
       });
       customerId = customer.id;
-      await updateSubscription(session.user.id, { stripeCustomerId: customerId });
+      await updateSubscription(session.user.id, {
+        stripeCustomerId: customerId,
+      });
     }
 
     const priceId =
@@ -360,7 +376,7 @@ export async function POST(request: Request) {
     console.error("Checkout error:", error);
     return NextResponse.json(
       { error: "Failed to create checkout session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -378,6 +394,7 @@ git commit -m "feat: add stripe checkout API route"
 ## Task 8: Create Customer Portal API Route
 
 **Files:**
+
 - Create: `src/app/api/billing/portal/route.ts`
 
 **Step 1: Create the portal route**
@@ -401,7 +418,7 @@ export async function POST() {
     if (!subscription.stripeCustomerId) {
       return NextResponse.json(
         { error: "No billing account found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -415,7 +432,7 @@ export async function POST() {
     console.error("Portal error:", error);
     return NextResponse.json(
       { error: "Failed to create portal session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -433,6 +450,7 @@ git commit -m "feat: add stripe customer portal API route"
 ## Task 9: Create Webhook API Route
 
 **Files:**
+
 - Create: `src/app/api/billing/webhook/route.ts`
 
 **Step 1: Create the webhook route**
@@ -462,7 +480,7 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (error) {
     console.error("Webhook signature verification failed:", error);
@@ -541,7 +559,7 @@ export async function POST(request: Request) {
     console.error("Webhook handler error:", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -559,6 +577,7 @@ git commit -m "feat: add stripe webhook handler"
 ## Task 10: Create Usage API Route
 
 **Files:**
+
 - Create: `src/app/api/billing/usage/route.ts`
 
 **Step 1: Create the usage route**
@@ -591,7 +610,7 @@ export async function GET() {
     console.error("Usage fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch usage" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -609,6 +628,7 @@ git commit -m "feat: add usage stats API route"
 ## Task 11: Create Billing Settings Page
 
 **Files:**
+
 - Create: `src/app/(dashboard)/settings/billing/page.tsx`
 
 **Step 1: Create the billing page**
@@ -834,21 +854,25 @@ git commit -m "feat: add billing settings page"
 ## Task 12: Add Usage Display to Extract Page
 
 **Files:**
+
 - Modify: `src/app/(dashboard)/extract/page.tsx`
 
 **Step 1: Add usage state and fetch**
 
 Add import:
+
 ```typescript
 import type { UsageInfo } from "@/types/subscription";
 ```
 
 Add state:
+
 ```typescript
 const [usage, setUsage] = useState<UsageInfo | null>(null);
 ```
 
 Add useEffect to fetch usage:
+
 ```typescript
 useEffect(() => {
   fetch("/api/billing/usage")
@@ -861,6 +885,7 @@ useEffect(() => {
 **Step 2: Add usage display in UI**
 
 Add near the top of the form, after the title:
+
 ```typescript
 {usage && (
   <div className="text-sm text-muted-foreground mb-4">
@@ -880,6 +905,7 @@ Add near the top of the form, after the title:
 **Step 3: Disable submit when limit reached**
 
 Update the submit button disabled condition to include usage check:
+
 ```typescript
 disabled={loading || !url || (usage && usage.used >= usage.limit)}
 ```
@@ -896,11 +922,13 @@ git commit -m "feat: add usage display and limit check to extract page"
 ## Task 13: Add Billing Link to Header
 
 **Files:**
+
 - Modify: `src/components/layout/header.tsx`
 
 **Step 1: Add Settings link to navigation**
 
 Find the `navLinks` array and add:
+
 ```typescript
 { href: "/settings/billing", label: "Billing" },
 ```
@@ -938,6 +966,7 @@ git commit -m "feat: add billing link to header navigation"
 **Step 4: Add Price IDs to Environment**
 
 Add to `.env.local`:
+
 ```
 STRIPE_PRO_MONTHLY_PRICE_ID=price_...
 STRIPE_PRO_YEARLY_PRICE_ID=price_...
@@ -988,6 +1017,7 @@ STRIPE_PRO_YEARLY_PRICE_ID=price_...
 ## Summary
 
 **Files Created:**
+
 - `src/types/subscription.ts`
 - `src/lib/stripe.ts`
 - `src/models/subscription.ts`
@@ -998,6 +1028,7 @@ STRIPE_PRO_YEARLY_PRICE_ID=price_...
 - `src/app/(dashboard)/settings/billing/page.tsx`
 
 **Files Modified:**
+
 - `package.json` (stripe dependency)
 - `src/app/api/extract/route.ts` (usage check)
 - `src/services/extraction/index.ts` (usage increment)
@@ -1005,6 +1036,7 @@ STRIPE_PRO_YEARLY_PRICE_ID=price_...
 - `src/components/layout/header.tsx` (billing link)
 
 **Environment Variables:**
+
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
