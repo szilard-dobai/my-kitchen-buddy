@@ -99,7 +99,7 @@ export default function Home() {
               alt="Fresh ingredients"
               width={1920}
               height={1080}
-              className="object-cover"
+              className="object-cover mx-auto"
             />
             <div className="absolute inset-0 hero-gradient" />
           </div>
