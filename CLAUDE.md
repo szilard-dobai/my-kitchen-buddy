@@ -11,7 +11,10 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 - `recipes` - User's saved recipes with full recipe data
 - `raw_extractions` - Cached AI extraction results keyed by normalized URL (avoids redundant API calls)
 - `extractionJobs` - Tracks extraction job status for polling (includes optional `telegramChatId`)
+- `videoMetadataCaches` - Cached video metadata (title, description, author, thumbnails)
+- `authors` - Video creator profiles (username, display name, avatar)
 - `telegramLinks` - Links Telegram users to app accounts
+- `subscriptions` - User plan tiers, extraction limits, usage tracking, Stripe customer IDs
 - `users`, `sessions` - Auth tables managed by better-auth
 
 ### Key Flows
@@ -31,10 +34,19 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 
 **Telegram Bot Flow** (`src/services/telegram/`):
 
-1. User links account via deep link from /settings/telegram
+1. User links account via deep link from /settings (Telegram tab)
 2. Sends video URL to bot
 3. Bot creates extraction job with `telegramChatId`
 4. Extraction service sends status updates and recipe preview via Telegram
+
+**Billing Flow** (`src/app/api/billing/`):
+
+- Free tier: 10 extractions/month
+- Pro tier: 100 extractions/month ($5/month or $50/year)
+- Stripe checkout at `/api/billing/checkout`
+- Customer portal at `/api/billing/portal`
+- Usage tracking at `/api/billing/usage`
+- Webhook at `/api/billing/webhook` handles subscription events
 
 ### URL Normalization
 
@@ -46,10 +58,20 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 src/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Login/register pages
-│   ├── (dashboard)/       # Protected pages (recipes, extract, settings)
-│   └── api/               # API routes (extract, telegram, telegram-link)
+│   ├── (dashboard)/       # Protected pages
+│   │   ├── extract/       # Video extraction page
+│   │   ├── recipes/       # Recipe library and detail pages
+│   │   └── settings/      # Unified settings (Profile, Telegram, Billing tabs)
+│   └── api/               # API routes
+│       ├── extract/       # Recipe extraction
+│       ├── billing/       # Stripe checkout, portal, usage, webhook
+│       ├── telegram/      # Bot webhook
+│       └── telegram-link/ # Account linking
 ├── components/            # React components
-├── lib/                   # Utilities (db, auth, session, telegram)
+│   ├── layout/           # Header, layout components
+│   ├── recipes/          # Recipe-specific components
+│   └── ui/               # UI primitives (Radix UI based)
+├── lib/                   # Utilities (db, auth, session, stripe, telegram)
 ├── models/                # Database operations
 ├── services/
 │   ├── extraction/        # Core extraction logic
@@ -86,3 +108,4 @@ The AI extraction only populates nutrition fields when explicitly mentioned in t
 - **Supadata** (`api.supadata.ai`): Video transcripts and metadata
 - **OpenAI**: GPT-4o for recipe extraction with JSON mode (extracts nutrition info when mentioned)
 - **Telegram Bot API**: Via grammy library, webhook at `/api/telegram/webhook`
+- **Stripe**: Subscription billing, webhook at `/api/billing/webhook`
