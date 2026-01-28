@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import { getRecipeById, updateRecipeThumbnail } from "@/models/recipe";
 import {
+  getRecipeById,
+  updateRecipeAuthorAvatar,
+  updateRecipeThumbnail,
+} from "@/models/recipe";
+import {
+  getInstagramAuthorAvatar,
   getInstagramThumbnail,
+  getTikTokAuthorAvatar,
   getYouTubeStableThumbnail,
 } from "@/services/extraction/platform-detector";
 import { getOEmbed } from "@/services/oembed";
@@ -15,7 +21,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { recipeId } = body as { recipeId: string };
+    const { recipeId, type = "thumbnail" } = body as {
+      recipeId: string;
+      type?: "thumbnail" | "authorAvatar";
+    };
 
     if (!recipeId) {
       return NextResponse.json(
@@ -36,6 +45,35 @@ export async function POST(request: Request) {
 
     const sourceUrl = recipe.source.url;
     const platform = recipe.source.platform;
+
+    if (type === "authorAvatar") {
+      let authorAvatarUrl: string | null = null;
+
+      if (platform === "instagram") {
+        authorAvatarUrl = await getInstagramAuthorAvatar(sourceUrl);
+      } else if (platform === "tiktok") {
+        authorAvatarUrl = await getTikTokAuthorAvatar(sourceUrl);
+      } else {
+        return NextResponse.json(
+          {
+            error:
+              "Author avatar refresh is only supported for Instagram and TikTok",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (!authorAvatarUrl) {
+        return NextResponse.json(
+          { error: "Could not fetch author avatar" },
+          { status: 404 },
+        );
+      }
+
+      await updateRecipeAuthorAvatar(recipeId, session.user.id, authorAvatarUrl);
+
+      return NextResponse.json({ authorAvatarUrl });
+    }
 
     let thumbnailUrl: string | undefined;
 

@@ -23,7 +23,9 @@ import type { DetectedLanguageCode } from "@/types/detected-language";
 import type { ExtractionJob, TargetLanguage } from "@/types/extraction-job";
 import type { CreateRecipeInput } from "@/types/recipe";
 import {
+  getInstagramAuthorAvatar,
   getInstagramThumbnail,
+  getTikTokAuthorAvatar,
   getYouTubeStableThumbnail,
 } from "./platform-detector";
 import {
@@ -87,11 +89,25 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         let authorId: string | undefined;
 
         if (metadataResult.author?.username) {
+          let authorAvatarUrl = metadataResult.author.avatarUrl;
+
+          if (platform === "instagram") {
+            const freshAvatar = await getInstagramAuthorAvatar(sourceUrl);
+            if (freshAvatar) {
+              authorAvatarUrl = freshAvatar;
+            }
+          } else if (platform === "tiktok") {
+            const freshAvatar = await getTikTokAuthorAvatar(sourceUrl);
+            if (freshAvatar) {
+              authorAvatarUrl = freshAvatar;
+            }
+          }
+
           const author = await upsertAuthor({
             platform,
             username: metadataResult.author.username,
             displayName: metadataResult.author.displayName,
-            avatarUrl: metadataResult.author.avatarUrl,
+            avatarUrl: authorAvatarUrl,
             verified: metadataResult.author.verified,
           });
           authorId = author._id;
@@ -210,13 +226,28 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
     const metadataForRecipe = await findMetadataCacheByUrl(normalizedUrl);
 
     let thumbnailUrl: string | null | undefined;
+    let authorAvatarUrl: string | null | undefined;
+
     if (platform === "youtube") {
       thumbnailUrl = getYouTubeStableThumbnail(sourceUrl);
+      authorAvatarUrl = metadataForRecipe?.metadata.author?.avatarUrl;
     } else if (platform === "instagram") {
-      // Always fetch fresh for Instagram since URLs expire
-      thumbnailUrl = await getInstagramThumbnail(sourceUrl);
+      const [freshThumbnail, freshAvatar] = await Promise.all([
+        getInstagramThumbnail(sourceUrl),
+        getInstagramAuthorAvatar(sourceUrl),
+      ]);
+      thumbnailUrl =
+        freshThumbnail || metadataForRecipe?.metadata.media?.thumbnailUrl;
+      authorAvatarUrl =
+        freshAvatar || metadataForRecipe?.metadata.author?.avatarUrl;
+    } else if (platform === "tiktok") {
+      thumbnailUrl = metadataForRecipe?.metadata.media?.thumbnailUrl;
+      const scrapedAvatar = await getTikTokAuthorAvatar(sourceUrl);
+      authorAvatarUrl =
+        scrapedAvatar || metadataForRecipe?.metadata.author?.avatarUrl;
     } else {
       thumbnailUrl = metadataForRecipe?.metadata.media?.thumbnailUrl;
+      authorAvatarUrl = metadataForRecipe?.metadata.author?.avatarUrl;
     }
 
     const recipe = await createRecipe({
@@ -244,7 +275,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           extractedRecipe.source?.authorUsername ||
           metadataForRecipe?.metadata.author?.username,
         authorId: metadataForRecipe?.authorId,
-        authorAvatarUrl: metadataForRecipe?.metadata.author?.avatarUrl,
+        authorAvatarUrl: authorAvatarUrl ?? undefined,
         thumbnailUrl: thumbnailUrl ?? undefined,
       },
       extractionMetadata: {

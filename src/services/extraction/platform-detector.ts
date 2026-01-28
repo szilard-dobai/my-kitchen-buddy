@@ -160,9 +160,7 @@ export async function resolveUrl(url: string): Promise<string> {
   }
 }
 
-export async function getInstagramThumbnail(
-  url: string,
-): Promise<string | null> {
+async function fetchInstagramHtml(url: string): Promise<string | null> {
   try {
     const response = await fetch(url, {
       headers: {
@@ -173,22 +171,135 @@ export async function getInstagramThumbnail(
 
     if (!response.ok) return null;
 
-    const html = await response.text();
-    const ogImageMatch = html.match(
-      /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
-    );
+    return await response.text();
+  } catch (error) {
+    console.warn("Failed to fetch Instagram page:", error);
+    return null;
+  }
+}
 
-    if (ogImageMatch?.[1]) {
-      return ogImageMatch[1];
+export async function getInstagramThumbnail(
+  url: string,
+): Promise<string | null> {
+  const html = await fetchInstagramHtml(url);
+  if (!html) return null;
+
+  const ogImageMatch = html.match(
+    /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
+  );
+
+  if (ogImageMatch?.[1]) {
+    return ogImageMatch[1];
+  }
+
+  const reverseMatch = html.match(
+    /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i,
+  );
+
+  return reverseMatch?.[1] || null;
+}
+
+export async function getInstagramAuthorAvatar(
+  url: string,
+): Promise<string | null> {
+  const html = await fetchInstagramHtml(url);
+  if (!html) return null;
+
+  const scriptMatch = html.match(
+    /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/i,
+  );
+
+  if (scriptMatch?.[1]) {
+    try {
+      const jsonLd = JSON.parse(scriptMatch[1]);
+
+      if (jsonLd.author?.image) {
+        return jsonLd.author.image;
+      }
+
+      if (Array.isArray(jsonLd)) {
+        for (const item of jsonLd) {
+          if (item.author?.image) {
+            return item.author.image;
+          }
+        }
+      }
+    } catch {
+      // JSON parsing failed, continue to fallback
+    }
+  }
+
+  const profilePicMatch = html.match(/"profile_pic_url":\s*"([^"]+)"/i);
+
+  if (profilePicMatch?.[1]) {
+    return profilePicMatch[1].replace(/\\u0026/g, "&");
+  }
+
+  return null;
+}
+
+function extractTikTokUsername(url: string): string | null {
+  try {
+    const parsedUrl = new URL(url);
+    const match = parsedUrl.pathname.match(/^\/@([\w.-]+)/);
+    return match?.[1] || null;
+  } catch {
+    return null;
+  }
+}
+
+function decodeUnicodeEscapes(str: string): string {
+  return str.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16)),
+  );
+}
+
+export async function getTikTokAuthorAvatar(
+  url: string,
+): Promise<string | null> {
+  const username = extractTikTokUsername(url);
+  if (!username) {
+    console.log("[TikTok Avatar] Could not extract username from URL:", url);
+    return null;
+  }
+
+  try {
+    const profileUrl = `https://www.tiktok.com/@${username}`;
+    console.log("[TikTok Avatar] Fetching profile:", profileUrl);
+
+    const response = await fetch(profileUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
+
+    if (!response.ok) {
+      console.log("[TikTok Avatar] Response not OK:", response.status);
+      return null;
     }
 
-    const reverseMatch = html.match(
-      /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i,
-    );
+    const html = await response.text();
+    console.log("[TikTok Avatar] HTML length:", html.length);
 
-    return reverseMatch?.[1] || null;
+    const avatarMatch = html.match(/"avatarMedium":"([^"]+)"/);
+    if (avatarMatch?.[1]) {
+      const decoded = decodeUnicodeEscapes(avatarMatch[1]);
+      console.log("[TikTok Avatar] Found avatarMedium");
+      return decoded;
+    }
+
+    const avatarThumbMatch = html.match(/"avatarThumb":"([^"]+)"/);
+    if (avatarThumbMatch?.[1]) {
+      const decoded = decodeUnicodeEscapes(avatarThumbMatch[1]);
+      console.log("[TikTok Avatar] Found avatarThumb");
+      return decoded;
+    }
+
+    console.log("[TikTok Avatar] No avatar found in HTML");
+    return null;
   } catch (error) {
-    console.warn("Failed to fetch Instagram thumbnail:", error);
+    console.warn("[TikTok Avatar] Failed to fetch:", error);
     return null;
   }
 }

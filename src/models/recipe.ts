@@ -141,3 +141,24 @@ export async function updateRecipeThumbnail(
     return false;
   }
 }
+
+export async function updateRecipeAuthorAvatar(
+  id: string,
+  userId: string,
+  authorAvatarUrl: string,
+): Promise<boolean> {
+  const collection = await getRecipesCollection();
+
+  try {
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id), userId },
+      {
+        $set: { "source.authorAvatarUrl": authorAvatarUrl, updatedAt: new Date() },
+      },
+    );
+
+    return result.modifiedCount === 1;
+  } catch {
+    return false;
+  }
+}
