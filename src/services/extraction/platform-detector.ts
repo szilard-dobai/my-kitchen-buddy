@@ -258,15 +258,10 @@ export async function getTikTokAuthorAvatar(
   url: string,
 ): Promise<string | null> {
   const username = extractTikTokUsername(url);
-  if (!username) {
-    console.log("[TikTok Avatar] Could not extract username from URL:", url);
-    return null;
-  }
+  if (!username) return null;
 
   try {
     const profileUrl = `https://www.tiktok.com/@${username}`;
-    console.log("[TikTok Avatar] Fetching profile:", profileUrl);
-
     const response = await fetch(profileUrl, {
       headers: {
         "User-Agent":
@@ -274,32 +269,23 @@ export async function getTikTokAuthorAvatar(
       },
     });
 
-    if (!response.ok) {
-      console.log("[TikTok Avatar] Response not OK:", response.status);
-      return null;
-    }
+    if (!response.ok) return null;
 
     const html = await response.text();
-    console.log("[TikTok Avatar] HTML length:", html.length);
 
     const avatarMatch = html.match(/"avatarMedium":"([^"]+)"/);
     if (avatarMatch?.[1]) {
-      const decoded = decodeUnicodeEscapes(avatarMatch[1]);
-      console.log("[TikTok Avatar] Found avatarMedium");
-      return decoded;
+      return decodeUnicodeEscapes(avatarMatch[1]);
     }
 
     const avatarThumbMatch = html.match(/"avatarThumb":"([^"]+)"/);
     if (avatarThumbMatch?.[1]) {
-      const decoded = decodeUnicodeEscapes(avatarThumbMatch[1]);
-      console.log("[TikTok Avatar] Found avatarThumb");
-      return decoded;
+      return decodeUnicodeEscapes(avatarThumbMatch[1]);
     }
 
-    console.log("[TikTok Avatar] No avatar found in HTML");
     return null;
   } catch (error) {
-    console.warn("[TikTok Avatar] Failed to fetch:", error);
+    console.warn("Failed to fetch TikTok author avatar:", error);
     return null;
   }
 }

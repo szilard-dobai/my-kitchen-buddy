@@ -186,6 +186,7 @@ function CreatorFilterList({
             <AuthorAvatar
               src={creator.avatarUrl}
               alt={`${creator.username} avatar`}
+              authorId={creator.authorId}
             />
             <span className="truncate text-sm">@{creator.username}</span>
           </span>

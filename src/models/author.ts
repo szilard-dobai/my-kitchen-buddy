@@ -85,3 +85,21 @@ export async function upsertAuthor(input: CreateAuthorInput): Promise<Author> {
     lastUpdatedAt: result!.lastUpdatedAt,
   } as Author;
 }
+
+export async function updateAuthorAvatar(
+  id: string,
+  avatarUrl: string,
+): Promise<boolean> {
+  const collection = await getAuthorsCollection();
+
+  try {
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { avatarUrl, lastUpdatedAt: new Date() } },
+    );
+
+    return result.modifiedCount === 1;
+  } catch {
+    return false;
+  }
+}

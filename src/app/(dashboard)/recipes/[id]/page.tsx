@@ -277,6 +277,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 <AuthorAvatar
                   src={recipe.source.authorAvatarUrl}
                   alt={recipe.source.authorUsername}
+                  authorId={recipe.source.authorId}
                 />
                 @{recipe.source.authorUsername}
               </span>

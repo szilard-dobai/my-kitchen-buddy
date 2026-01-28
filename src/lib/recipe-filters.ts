@@ -175,6 +175,7 @@ export function sortRecipes(
 export interface CreatorOption {
   username: string;
   avatarUrl?: string;
+  authorId?: string;
 }
 
 export function extractFilterOptions(recipes: Recipe[]) {
@@ -190,6 +191,7 @@ export function extractFilterOptions(recipes: Recipe[]) {
         creators.set(recipe.source.authorUsername, {
           username: recipe.source.authorUsername,
           avatarUrl: recipe.source.authorAvatarUrl,
+          authorId: recipe.source.authorId,
         });
       }
     }
