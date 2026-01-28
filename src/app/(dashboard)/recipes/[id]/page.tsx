@@ -277,12 +277,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {recipe.source.authorUsername && (
               <span className="inline-flex items-center gap-1.5">
                 by
-                {recipe.source.authorAvatarUrl && (
-                  <AuthorAvatar
-                    src={recipe.source.authorAvatarUrl}
-                    alt={recipe.source.authorUsername}
-                  />
-                )}
+                <AuthorAvatar
+                  src={recipe.source.authorAvatarUrl}
+                  alt={recipe.source.authorUsername}
+                />
                 @{recipe.source.authorUsername}
               </span>
             )}

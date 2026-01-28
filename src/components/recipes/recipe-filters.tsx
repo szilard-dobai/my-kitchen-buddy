@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronDown, Filter, Search, X } from "lucide-react";
-import Image from "next/image";
 import { useMemo, useState } from "react";
+import { AuthorAvatar } from "@/components/recipes/author-avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -183,19 +183,10 @@ function CreatorFilterList({
             onCheckedChange={() => onToggle(creator.username)}
           />
           <span className="flex items-center gap-2">
-            {creator.avatarUrl ? (
-              <Image
-                src={creator.avatarUrl}
-                alt={`${creator.username} avatar`}
-                width={24}
-                height={24}
-                className="rounded-full"
-              />
-            ) : (
-              <span className="bg-muted flex size-6 items-center justify-center rounded-full text-xs">
-                {creator.username.charAt(0).toUpperCase()}
-              </span>
-            )}
+            <AuthorAvatar
+              src={creator.avatarUrl}
+              alt={`${creator.username} avatar`}
+            />
             <span className="truncate text-sm">@{creator.username}</span>
           </span>
         </label>
