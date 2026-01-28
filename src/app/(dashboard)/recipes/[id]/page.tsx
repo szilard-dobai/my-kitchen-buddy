@@ -13,7 +13,7 @@ import { notFound, redirect } from "next/navigation";
 import { AuthorAvatar } from "@/components/recipes/author-avatar";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { NutritionCard } from "@/components/recipes/nutrition-card";
-import { RecipeThumbnail } from "@/components/recipes/recipe-thumbnail";
+import { VideoEmbed } from "@/components/recipes/video-embed";
 import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,10 +98,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
         <p className="text-muted-foreground mb-6">{recipe.description}</p>
       )}
 
-      <RecipeThumbnail
-        src={recipe.source.thumbnailUrl}
-        alt={recipe.title}
-      />
+      <VideoEmbed url={recipe.source.url} platform={recipe.source.platform} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {recipe.prepTime && (

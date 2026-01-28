@@ -3,7 +3,7 @@
 import { Clock, Flame, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DietaryTag } from "@/components/ui/dietary-tag";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
@@ -17,8 +17,36 @@ interface RecipeCardProps {
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
   const [imageError, setImageError] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentThumbnail, setCurrentThumbnail] = useState(
+    recipe.source.thumbnailUrl,
+  );
   const calories =
     recipe.nutrition?.perServing?.calories || recipe.caloriesPerServing;
+
+  const handleImageError = useCallback(async () => {
+    if (isRefreshing || imageError) return;
+    setIsRefreshing(true);
+
+    try {
+      const res = await fetch("/api/refresh-thumbnail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipeId: recipe._id }),
+      });
+
+      if (res.ok) {
+        const { thumbnailUrl } = await res.json();
+        setCurrentThumbnail(thumbnailUrl);
+      } else {
+        setImageError(true);
+      }
+    } catch {
+      setImageError(true);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, imageError, recipe._id]);
 
   return (
     <Link
@@ -28,14 +56,14 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
     >
       <Card className="h-full card-shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden">
         <div className="aspect-video bg-muted relative">
-          {recipe.source.thumbnailUrl && !imageError ? (
+          {currentThumbnail && !imageError ? (
             <Image
-              src={recipe.source.thumbnailUrl}
+              src={currentThumbnail}
               alt={recipe.title}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              onError={() => setImageError(true)}
+              onError={handleImageError}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

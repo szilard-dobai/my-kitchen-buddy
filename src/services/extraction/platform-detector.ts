@@ -108,6 +108,37 @@ function isShortUrl(url: string): boolean {
   }
 }
 
+export function extractYouTubeVideoId(url: string): string | null {
+  try {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    if (hostname === "youtu.be") {
+      return parsedUrl.pathname.slice(1).split("/")[0] || null;
+    }
+
+    if (hostname.includes("youtube.com")) {
+      if (parsedUrl.pathname.startsWith("/shorts/")) {
+        return parsedUrl.pathname.split("/")[2] || null;
+      }
+      if (parsedUrl.pathname.startsWith("/embed/")) {
+        return parsedUrl.pathname.split("/")[2] || null;
+      }
+      return parsedUrl.searchParams.get("v");
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function getYouTubeStableThumbnail(url: string): string | null {
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return null;
+  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+}
+
 export async function resolveUrl(url: string): Promise<string> {
   const normalizedInput = normalizeUrl(url);
 

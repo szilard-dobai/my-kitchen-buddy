@@ -122,3 +122,22 @@ export async function findRecipeBySourceUrl(
     _id: recipe._id.toString(),
   } as Recipe;
 }
+
+export async function updateRecipeThumbnail(
+  id: string,
+  userId: string,
+  thumbnailUrl: string,
+): Promise<boolean> {
+  const collection = await getRecipesCollection();
+
+  try {
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id), userId },
+      { $set: { "source.thumbnailUrl": thumbnailUrl, updatedAt: new Date() } },
+    );
+
+    return result.modifiedCount === 1;
+  } catch {
+    return false;
+  }
+}

@@ -22,6 +22,7 @@ import {
 import type { DetectedLanguageCode } from "@/types/detected-language";
 import type { ExtractionJob, TargetLanguage } from "@/types/extraction-job";
 import type { CreateRecipeInput } from "@/types/recipe";
+import { getYouTubeStableThumbnail } from "./platform-detector";
 import {
   detectTranscriptLanguage,
   extractRecipeFromTranscript,
@@ -205,6 +206,11 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
 
     const metadataForRecipe = await findMetadataCacheByUrl(normalizedUrl);
 
+    const thumbnailUrl =
+      platform === "youtube"
+        ? getYouTubeStableThumbnail(sourceUrl)
+        : metadataForRecipe?.metadata.media?.thumbnailUrl;
+
     const recipe = await createRecipe({
       userId,
       title: extractedRecipe.title || "Untitled Recipe",
@@ -231,7 +237,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           metadataForRecipe?.metadata.author?.username,
         authorId: metadataForRecipe?.authorId,
         authorAvatarUrl: metadataForRecipe?.metadata.author?.avatarUrl,
-        thumbnailUrl: metadataForRecipe?.metadata.media?.thumbnailUrl,
+        thumbnailUrl: thumbnailUrl ?? undefined,
       },
       extractionMetadata: {
         extractedAt: new Date(),
