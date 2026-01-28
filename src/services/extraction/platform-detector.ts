@@ -159,3 +159,36 @@ export async function resolveUrl(url: string): Promise<string> {
     return normalizedInput;
   }
 }
+
+export async function getInstagramThumbnail(
+  url: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      },
+    });
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    const ogImageMatch = html.match(
+      /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
+    );
+
+    if (ogImageMatch?.[1]) {
+      return ogImageMatch[1];
+    }
+
+    const reverseMatch = html.match(
+      /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i,
+    );
+
+    return reverseMatch?.[1] || null;
+  } catch (error) {
+    console.warn("Failed to fetch Instagram thumbnail:", error);
+    return null;
+  }
+}

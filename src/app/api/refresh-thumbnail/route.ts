@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { getRecipeById, updateRecipeThumbnail } from "@/models/recipe";
-import { getYouTubeStableThumbnail } from "@/services/extraction/platform-detector";
+import {
+  getInstagramThumbnail,
+  getYouTubeStableThumbnail,
+} from "@/services/extraction/platform-detector";
 import { getOEmbed } from "@/services/oembed";
 
 export async function POST(request: Request) {
@@ -38,6 +41,8 @@ export async function POST(request: Request) {
 
     if (platform === "youtube") {
       thumbnailUrl = getYouTubeStableThumbnail(sourceUrl) ?? undefined;
+    } else if (platform === "instagram") {
+      thumbnailUrl = (await getInstagramThumbnail(sourceUrl)) ?? undefined;
     } else {
       const oembed = await getOEmbed(sourceUrl);
       thumbnailUrl = oembed.thumbnailUrl;
