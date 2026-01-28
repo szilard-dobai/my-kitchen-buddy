@@ -260,7 +260,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
       {recipe.source.url && (
         <div className="mt-8 pt-6 border-t">
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
+          <div className="text-sm text-muted-foreground flex items-center gap-2">
             <ExternalLink className="h-4 w-4" />
             Source:{" "}
             <a
@@ -281,7 +281,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 @{recipe.source.authorUsername}
               </span>
             )}
-          </p>
+          </div>
         </div>
       )}
     </div>
