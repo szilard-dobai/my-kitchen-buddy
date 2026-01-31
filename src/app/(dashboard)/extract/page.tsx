@@ -33,6 +33,12 @@ interface ExtractionStatus {
   error?: string;
 }
 
+interface LimitError {
+  used: number;
+  limit: number;
+  planTier: "free" | "pro";
+}
+
 const extractionSteps = [
   { id: "fetching", label: "Fetching video data" },
   { id: "analyzing", label: "Analyzing recipe with AI" },
@@ -75,6 +81,7 @@ export default function ExtractPage() {
   const [extractionStatus, setExtractionStatus] =
     useState<ExtractionStatus | null>(null);
   const [usage, setUsage] = useState<UsageInfo | null>(null);
+  const [limitError, setLimitError] = useState<LimitError | null>(null);
   const hasTrackedViewRef = useRef(false);
 
   useEffect(() => {
@@ -165,6 +172,7 @@ export default function ExtractPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLimitError(null);
     setLoading(true);
     setJobId(null);
     setExtractionStatus(null);
@@ -184,6 +192,15 @@ export default function ExtractPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 429 && data.used !== undefined) {
+          setLimitError({
+            used: data.used,
+            limit: data.limit,
+            planTier: data.planTier,
+          });
+          setLoading(false);
+          return;
+        }
         throw new Error(data.error || "Failed to start extraction");
       }
 
@@ -232,11 +249,32 @@ export default function ExtractPage() {
       </div>
 
       <Card className="card-shadow">
-        <CardContent className="pt-6">
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                 {error}
+              </div>
+            )}
+
+            {limitError && (
+              <div className="p-4 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950">
+                <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                  Monthly extraction limit reached
+                </h3>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                  You&apos;ve used all {limitError.limit} extractions included
+                  in your {limitError.planTier === "free" ? "Free" : "Pro"} plan
+                  this month.
+                  {limitError.planTier === "free"
+                    ? " Upgrade to Pro for more extractions per month."
+                    : " Your limit will reset at the start of your next billing cycle."}
+                </p>
+                {limitError.planTier === "free" && (
+                  <Button asChild variant="default" size="sm">
+                    <a href="/settings?tab=billing">Upgrade to Pro</a>
+                  </Button>
+                )}
               </div>
             )}
 
@@ -306,7 +344,7 @@ export default function ExtractPage() {
       </Card>
 
       <Card className="mt-6 card-shadow">
-        <CardContent className="pt-6">
+        <CardContent>
           <div className="flex items-center gap-2 mb-4">
             <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center">
               <span className="text-xs text-muted-foreground">i</span>
