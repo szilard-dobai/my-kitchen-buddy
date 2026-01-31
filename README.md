@@ -68,3 +68,12 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm test` - Run tests
+- `npm run test:coverage` - Run tests with coverage
+
+## Production Infrastructure
+
+- **Error tracking**: Sentry with session replay
+- **Rate limiting**: Upstash Redis
+- **Health check**: `/api/health` endpoint
+- **Uptime monitoring**: [Status Page](https://stats.uptimerobot.com/s30TuQa2vL)
