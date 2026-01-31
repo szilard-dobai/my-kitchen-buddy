@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { isAuthenticated, validateSameOrigin } from "@/lib/tracking/api";
-import type { DeviceType, TrackingEventType } from "@/lib/tracking/types";
+import { validateBody } from "@/lib/validation";
+import { trackingBodySchema } from "@/lib/validation/schemas/tracking";
 import { getTrackingCollection, insertTrackingEvent } from "@/models/tracking";
 
 export const dynamic = "force-dynamic";
@@ -79,20 +80,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const { type, deviceId, deviceType, metadata } = body as {
-      type: TrackingEventType;
-      deviceId: string;
-      deviceType: DeviceType;
-      metadata?: Record<string, unknown>;
-    };
-
-    if (!type || !deviceId || !deviceType) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
+    const validation = await validateBody(request, trackingBodySchema);
+    if (!validation.success) {
+      return validation.response;
     }
+    const { type, deviceId, deviceType, metadata } = validation.data;
 
     const country = request.headers.get("x-vercel-ip-country") || undefined;
     const region =

@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
+import { validateBody, validateQuery } from "@/lib/validation";
+import {
+  extractBodySchema,
+  extractQuerySchema,
+} from "@/lib/validation/schemas/extract";
 import {
   createExtractionJob,
   getExtractionJobById,
@@ -11,7 +16,6 @@ import {
   detectPlatform,
   resolveUrl,
 } from "@/services/extraction/platform-detector";
-import type { TargetLanguage } from "@/types/extraction-job";
 
 export async function POST(request: Request) {
   try {
@@ -34,15 +38,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const { url, targetLanguage = "original" } = body as {
-      url: string;
-      targetLanguage?: TargetLanguage;
-    };
-
-    if (!url) {
-      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    const validation = await validateBody(request, extractBodySchema);
+    if (!validation.success) {
+      return validation.response;
     }
+    const { url, targetLanguage } = validation.data;
 
     const normalizedUrl = await resolveUrl(url);
     const detection = detectPlatform(normalizedUrl);
@@ -99,11 +99,11 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const jobId = searchParams.get("jobId");
-
-    if (!jobId) {
-      return NextResponse.json({ error: "jobId is required" }, { status: 400 });
+    const validation = validateQuery(searchParams, extractQuerySchema);
+    if (!validation.success) {
+      return validation.response;
     }
+    const { jobId } = validation.data;
 
     const job = await getExtractionJobById(jobId);
 

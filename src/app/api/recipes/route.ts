@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import { getRecipesByUserId, createRecipe } from "@/models/recipe";
-import type { CreateRecipeInput } from "@/types/recipe";
+import { validateBody } from "@/lib/validation";
+import { createRecipeSchema } from "@/lib/validation/schemas/recipes";
+import { createRecipe, getRecipesByUserId } from "@/models/recipe";
 
 export async function GET() {
   try {
@@ -28,33 +29,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const validation = await validateBody(request, createRecipeSchema);
+    if (!validation.success) {
+      return validation.response;
+    }
 
-    const recipeInput: CreateRecipeInput = {
+    const recipe = await createRecipe({
       userId: session.user.id,
-      title: body.title,
-      description: body.description,
-      cuisineType: body.cuisineType,
-      difficulty: body.difficulty,
-      prepTime: body.prepTime,
-      cookTime: body.cookTime,
-      totalTime: body.totalTime,
-      servings: body.servings,
-      caloriesPerServing: body.caloriesPerServing,
-      dietaryTags: body.dietaryTags || [],
-      mealType: body.mealType,
-      ingredients: body.ingredients || [],
-      instructions: body.instructions || [],
-      tipsAndNotes: body.tipsAndNotes || [],
-      equipment: body.equipment || [],
-      source: body.source || {
-        url: "",
-        platform: "other",
-      },
-      extractionMetadata: body.extractionMetadata,
-    };
-
-    const recipe = await createRecipe(recipeInput);
+      ...validation.data,
+      source: validation.data.source || { url: "", platform: "other" },
+    });
     return NextResponse.json(recipe, { status: 201 });
   } catch (error) {
     console.error("Error creating recipe:", error);

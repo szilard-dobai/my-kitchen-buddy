@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import { getRecipeById, updateRecipe, deleteRecipe } from "@/models/recipe";
+import { validateBody } from "@/lib/validation";
+import { updateRecipeSchema } from "@/lib/validation/schemas/recipes";
+import { deleteRecipe, getRecipeById, updateRecipe } from "@/models/recipe";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -42,9 +44,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     const { id } = await params;
-    const body = await request.json();
 
-    const recipe = await updateRecipe(id, session.user.id, body);
+    const validation = await validateBody(request, updateRecipeSchema);
+    if (!validation.success) {
+      return validation.response;
+    }
+
+    const recipe = await updateRecipe(id, session.user.id, validation.data);
 
     if (!recipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
