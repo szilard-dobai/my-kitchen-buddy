@@ -73,6 +73,21 @@ function ProfileTab() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
+  const { data: collections = [], isLoading: collectionsLoading } =
+    useCollections();
+  const [createCollectionDialogOpen, setCreateCollectionDialogOpen] =
+    useState(false);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(
+    null,
+  );
+  const [deletingCollection, setDeletingCollection] =
+    useState<Collection | null>(null);
+
+  const { data: tags = [], isLoading: tagsLoading } = useTags();
+  const [createTagDialogOpen, setCreateTagDialogOpen] = useState(false);
+  const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [deletingTag, setDeletingTag] = useState<Tag | null>(null);
+
   useEffect(() => {
     if (session?.user?.name) {
       setName(session.user.name);
@@ -375,6 +390,138 @@ function ProfileTab() {
         </Card>
       )}
 
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <CardTitle>Collections</CardTitle>
+              <CardDescription>Organize recipes into groups.</CardDescription>
+            </div>
+            <Button
+              onClick={() => setCreateCollectionDialogOpen(true)}
+              size="sm"
+            >
+              <Plus className="size-4 mr-1" />
+              Create
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {collectionsLoading ? (
+            <p className="text-center text-muted-foreground py-4">Loading...</p>
+          ) : collections.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">
+              No collections yet.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {collections.map((collection) => (
+                <div
+                  key={collection._id}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="size-3 rounded-full"
+                      style={{ backgroundColor: collection.color }}
+                    />
+                    <span className="text-sm font-medium">
+                      {collection.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {collection.recipeCount} recipe
+                      {collection.recipeCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="size-8 flex items-center justify-center rounded hover:bg-accent cursor-pointer">
+                        <MoreHorizontal className="size-4 text-muted-foreground" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                      <DropdownMenuItem
+                        onClick={() => setEditingCollection(collection)}
+                      >
+                        <Pencil className="size-3.5 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDeletingCollection(collection)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="size-3.5 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <CardTitle>Tags</CardTitle>
+              <CardDescription>Categorize and find recipes.</CardDescription>
+            </div>
+            <Button onClick={() => setCreateTagDialogOpen(true)} size="sm">
+              <Plus className="size-4 mr-1" />
+              Create
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {tagsLoading ? (
+            <p className="text-center text-muted-foreground py-4">Loading...</p>
+          ) : tags.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">
+              No tags yet.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {tags.map((tag) => (
+                <div
+                  key={tag._id}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium">#{tag.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {tag.recipeCount} recipe{tag.recipeCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="size-8 flex items-center justify-center rounded hover:bg-accent cursor-pointer">
+                        <MoreHorizontal className="size-4 text-muted-foreground" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                      <DropdownMenuItem onClick={() => setEditingTag(tag)}>
+                        <Pencil className="size-3.5 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDeletingTag(tag)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="size-3.5 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card className="border-red-200">
         <CardHeader>
           <CardTitle className="text-red-600">Danger Zone</CardTitle>
@@ -431,6 +578,52 @@ function ProfileTab() {
           </Dialog>
         </CardContent>
       </Card>
+
+      <CreateCollectionDialog
+        open={createCollectionDialogOpen}
+        onOpenChange={setCreateCollectionDialogOpen}
+        currentCount={collections.length}
+        planTier="free"
+      />
+
+      {editingCollection && (
+        <EditCollectionDialog
+          open={!!editingCollection}
+          onOpenChange={(open) => !open && setEditingCollection(null)}
+          collection={editingCollection}
+        />
+      )}
+
+      {deletingCollection && (
+        <DeleteCollectionDialog
+          open={!!deletingCollection}
+          onOpenChange={(open) => !open && setDeletingCollection(null)}
+          collection={deletingCollection}
+        />
+      )}
+
+      <CreateTagDialog
+        open={createTagDialogOpen}
+        onOpenChange={setCreateTagDialogOpen}
+        currentCount={tags.length}
+        planTier="free"
+      />
+
+      {editingTag && (
+        <EditTagDialog
+          open={!!editingTag}
+          onOpenChange={(open) => !open && setEditingTag(null)}
+          tag={editingTag}
+        />
+      )}
+
+      {deletingTag && (
+        <DeleteTagDialog
+          open={!!deletingTag}
+          onOpenChange={(open) => !open && setDeletingTag(null)}
+          tag={deletingTag}
+        />
+      )}
     </div>
   );
 }
@@ -817,7 +1010,8 @@ function BillingTab() {
     <div className="space-y-6">
       {success && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-          Welcome to Pro! Enjoy more extractions per month, unlimited collections, and unlimited tags.
+          Welcome to Pro! Enjoy more extractions per month, unlimited
+          collections, and unlimited tags.
         </div>
       )}
 
@@ -963,243 +1157,11 @@ function BillingTab() {
   );
 }
 
-function CollectionsTab() {
-  const { data: collections = [], isLoading } = useCollections();
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
-  const [deletingCollection, setDeletingCollection] = useState<Collection | null>(null);
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="py-8">
-          <p className="text-center text-muted-foreground">Loading...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Collections</CardTitle>
-              <CardDescription>
-                Manage your recipe collections. Collections help you organize
-                recipes into groups.
-              </CardDescription>
-            </div>
-            <Button onClick={() => setCreateDialogOpen(true)} size="sm">
-              <Plus className="size-4 mr-1" />
-              Create collection
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {collections.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                You haven&apos;t created any collections yet.
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setCreateDialogOpen(true)}
-              >
-                <Plus className="size-4 mr-1" />
-                Create your first collection
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {collections.map((collection) => (
-                <div
-                  key={collection._id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="size-3 rounded-full"
-                      style={{ backgroundColor: collection.color }}
-                    />
-                    <span className="text-sm font-medium">{collection.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {collection.recipeCount} recipe{collection.recipeCount !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="size-8 flex items-center justify-center rounded hover:bg-accent cursor-pointer">
-                        <MoreHorizontal className="size-4 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                      <DropdownMenuItem onClick={() => setEditingCollection(collection)}>
-                        <Pencil className="size-3.5 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setDeletingCollection(collection)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="size-3.5 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <CreateCollectionDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        currentCount={collections.length}
-        planTier="free"
-      />
-
-      {editingCollection && (
-        <EditCollectionDialog
-          open={!!editingCollection}
-          onOpenChange={(open) => !open && setEditingCollection(null)}
-          collection={editingCollection}
-        />
-      )}
-
-      {deletingCollection && (
-        <DeleteCollectionDialog
-          open={!!deletingCollection}
-          onOpenChange={(open) => !open && setDeletingCollection(null)}
-          collection={deletingCollection}
-        />
-      )}
-    </div>
-  );
-}
-
-function TagsTab() {
-  const { data: tags = [], isLoading } = useTags();
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editingTag, setEditingTag] = useState<Tag | null>(null);
-  const [deletingTag, setDeletingTag] = useState<Tag | null>(null);
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="py-8">
-          <p className="text-center text-muted-foreground">Loading...</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Tags</CardTitle>
-              <CardDescription>
-                Manage your recipe tags. Tags help you categorize and find
-                recipes.
-              </CardDescription>
-            </div>
-            <Button onClick={() => setCreateDialogOpen(true)} size="sm">
-              <Plus className="size-4 mr-1" />
-              Create tag
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {tags.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                You haven&apos;t created any tags yet.
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setCreateDialogOpen(true)}
-              >
-                <Plus className="size-4 mr-1" />
-                Create your first tag
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {tags.map((tag) => (
-                <div
-                  key={tag._id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">#{tag.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {tag.recipeCount} recipe{tag.recipeCount !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="size-8 flex items-center justify-center rounded hover:bg-accent cursor-pointer">
-                        <MoreHorizontal className="size-4 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                      <DropdownMenuItem onClick={() => setEditingTag(tag)}>
-                        <Pencil className="size-3.5 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setDeletingTag(tag)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="size-3.5 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <CreateTagDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        currentCount={tags.length}
-        planTier="free"
-      />
-
-      {editingTag && (
-        <EditTagDialog
-          open={!!editingTag}
-          onOpenChange={(open) => !open && setEditingTag(null)}
-          tag={editingTag}
-        />
-      )}
-
-      {deletingTag && (
-        <DeleteTagDialog
-          open={!!deletingTag}
-          onOpenChange={(open) => !open && setDeletingTag(null)}
-          tag={deletingTag}
-        />
-      )}
-    </div>
-  );
-}
-
 function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["profile", "collections", "tags", "integrations", "billing"].includes(
+  const defaultTab = ["profile", "integrations", "billing"].includes(
     tabParam || "",
   )
     ? tabParam!
@@ -1231,22 +1193,12 @@ function SettingsContent() {
       <Tabs value={defaultTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="collections">Collections</TabsTrigger>
-          <TabsTrigger value="tags">Tags</TabsTrigger>
-          <TabsTrigger value="telegram">Telegram</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
           <ProfileTab />
-        </TabsContent>
-
-        <TabsContent value="collections">
-          <CollectionsTab />
-        </TabsContent>
-
-        <TabsContent value="tags">
-          <TagsTab />
         </TabsContent>
 
         <TabsContent value="integrations">
