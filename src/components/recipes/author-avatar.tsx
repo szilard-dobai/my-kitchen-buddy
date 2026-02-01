@@ -10,6 +10,7 @@ interface AuthorAvatarProps {
   alt: string;
   size?: "sm" | "md";
   authorId?: string;
+  onRefresh?: (authorId: string, newAvatarUrl: string) => void;
 }
 
 const sizeConfig = {
@@ -22,6 +23,7 @@ export function AuthorAvatar({
   alt,
   size = "sm",
   authorId,
+  onRefresh,
 }: AuthorAvatarProps) {
   const [currentSrc, setCurrentSrc] = useState(src);
   const [imageError, setImageError] = useState(false);
@@ -49,6 +51,9 @@ export function AuthorAvatar({
           setCurrentSrc(data.avatarUrl);
           setImageError(false);
           setIsRefreshing(false);
+          if (onRefresh && data.authorId) {
+            onRefresh(data.authorId, data.avatarUrl);
+          }
           return;
         }
       }
@@ -58,7 +63,7 @@ export function AuthorAvatar({
 
     setImageError(true);
     setIsRefreshing(false);
-  }, [authorId, isRefreshing]);
+  }, [authorId, isRefreshing, onRefresh]);
 
   if (!currentSrc || imageError) {
     return (

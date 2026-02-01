@@ -313,6 +313,33 @@ export async function updateRecipeAuthorAvatar(
   }
 }
 
+export async function updateRecipesByAuthorId(
+  authorId: string,
+  avatarUrl: string,
+): Promise<number> {
+  const collection = await getRecipesCollection();
+
+  try {
+    const result = await collection.updateMany(
+      { "source.authorId": authorId },
+      {
+        $set: {
+          "source.authorAvatarUrl": avatarUrl,
+          updatedAt: new Date(),
+        },
+      },
+    );
+
+    return result.modifiedCount;
+  } catch (error) {
+    console.error(
+      `updateRecipesByAuthorId: Error updating recipes for author ${authorId}:`,
+      error,
+    );
+    return 0;
+  }
+}
+
 const CUISINE_GROUPS: Record<string, string[]> = {
   "latin-american": [
     "mexican",
@@ -462,6 +489,7 @@ export async function getSimilarRecipes(
         "source.thumbnailUrl": 1,
         "source.authorAvatarUrl": 1,
         "source.authorUsername": 1,
+        "source.authorId": 1,
       })
       .toArray();
 
@@ -528,6 +556,7 @@ export async function getSimilarRecipes(
       thumbnailUrl: r.source?.thumbnailUrl,
       authorAvatarUrl: r.source?.authorAvatarUrl,
       authorUsername: r.source?.authorUsername,
+      authorId: r.source?.authorId,
     }));
 
     return {

@@ -43,6 +43,7 @@ interface RecipeFiltersProps {
   activeCount: number;
   tags?: TagType[];
   planTier?: PlanTier;
+  onAuthorAvatarRefresh?: (authorId: string, newAvatarUrl: string) => void;
 }
 
 interface RecipeFiltersMobileProps extends RecipeFiltersProps {
@@ -148,10 +149,12 @@ function CreatorFilterList({
   creators,
   selected,
   onToggle,
+  onAuthorAvatarRefresh,
 }: {
   creators: CreatorOption[];
   selected: string[];
   onToggle: (username: string) => void;
+  onAuthorAvatarRefresh?: (authorId: string, newAvatarUrl: string) => void;
 }) {
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
@@ -201,6 +204,7 @@ function CreatorFilterList({
               src={creator.avatarUrl}
               alt={`${creator.username} avatar`}
               authorId={creator.authorId}
+              onRefresh={onAuthorAvatarRefresh}
             />
             <span className="truncate text-sm">@{creator.username}</span>
           </span>
@@ -231,6 +235,7 @@ export function RecipeFiltersDesktop({
   options,
   tags,
   planTier,
+  onAuthorAvatarRefresh,
 }: RecipeFiltersProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [createTagDialogOpen, setCreateTagDialogOpen] = useState(false);
@@ -303,6 +308,7 @@ export function RecipeFiltersDesktop({
               creators={options.creators}
               selected={filters.creators}
               onToggle={(username) => toggleArrayFilter("creators", username)}
+              onAuthorAvatarRefresh={onAuthorAvatarRefresh}
             />
           </PopoverContent>
         </Popover>
@@ -482,6 +488,7 @@ export function RecipeFiltersMobile({
   totalRecipeCount,
   tags,
   planTier,
+  onAuthorAvatarRefresh,
 }: RecipeFiltersMobileProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -611,6 +618,7 @@ export function RecipeFiltersMobile({
                   onToggle={(username) =>
                     toggleArrayFilter("creators", username)
                   }
+                  onAuthorAvatarRefresh={onAuthorAvatarRefresh}
                 />
               </div>
             )}

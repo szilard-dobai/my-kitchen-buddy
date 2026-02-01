@@ -83,6 +83,21 @@ export function RecipeLibrary({
     );
   };
 
+  const handleAuthorAvatarRefresh = (authorId: string, newAvatarUrl: string) => {
+    setRecipes((prev) =>
+      prev.map((recipe) => {
+        if (recipe.source.authorId !== authorId) return recipe;
+        return {
+          ...recipe,
+          source: {
+            ...recipe.source,
+            authorAvatarUrl: newAvatarUrl,
+          },
+        };
+      }),
+    );
+  };
+
   const isSidebarCollapsed = useCollapsedState();
 
   const handleSelectCollection = (collectionId: string | null) => {
@@ -159,6 +174,7 @@ export function RecipeLibrary({
               activeCount={activeFilterCount}
               tags={tags}
               planTier={planTier}
+              onAuthorAvatarRefresh={handleAuthorAvatarRefresh}
             />
             <RecipeFiltersMobile
               filters={filters}
@@ -171,6 +187,7 @@ export function RecipeLibrary({
               totalRecipeCount={recipes.length}
               tags={tags}
               planTier={planTier}
+              onAuthorAvatarRefresh={handleAuthorAvatarRefresh}
             />
 
             <div className="flex items-center gap-2">

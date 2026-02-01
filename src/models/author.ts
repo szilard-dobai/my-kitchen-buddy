@@ -98,8 +98,20 @@ export async function updateAuthorAvatar(
       { $set: { avatarUrl, lastUpdatedAt: new Date() } },
     );
 
-    return result.modifiedCount === 1;
-  } catch {
+    if (result.matchedCount === 0) {
+      console.error(`updateAuthorAvatar: No author found with id ${id}`);
+      return false;
+    }
+
+    if (result.modifiedCount === 0) {
+      console.warn(
+        `updateAuthorAvatar: Author ${id} matched but not modified (avatarUrl may be unchanged)`,
+      );
+    }
+
+    return result.matchedCount === 1;
+  } catch (error) {
+    console.error(`updateAuthorAvatar: Error updating author ${id}:`, error);
     return false;
   }
 }

@@ -87,6 +87,7 @@ export interface SimilarRecipe {
   thumbnailUrl?: string;
   authorAvatarUrl?: string;
   authorUsername?: string;
+  authorId?: string;
 }
 
 export interface SimilarRecipesResponse {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { findAuthorById, updateAuthorAvatar } from "@/models/author";
+import { updateRecipesByAuthorId } from "@/models/recipe";
 import {
   getInstagramAuthorAvatar,
   getTikTokAuthorAvatar,
@@ -51,9 +52,19 @@ export async function POST(request: Request) {
       );
     }
 
-    await updateAuthorAvatar(authorId, avatarUrl);
+    const [authorUpdated] = await Promise.all([
+      updateAuthorAvatar(authorId, avatarUrl),
+      updateRecipesByAuthorId(authorId, avatarUrl),
+    ]);
 
-    return NextResponse.json({ avatarUrl });
+    if (!authorUpdated) {
+      return NextResponse.json(
+        { error: "Failed to update author avatar in database" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ avatarUrl, authorId });
   } catch (error) {
     console.error("Error refreshing author avatar:", error);
     return NextResponse.json(

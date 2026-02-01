@@ -15,6 +15,10 @@ vi.mock("@/models/author", () => ({
   updateAuthorAvatar: vi.fn(),
 }));
 
+vi.mock("@/models/recipe", () => ({
+  updateRecipesByAuthorId: vi.fn(),
+}));
+
 vi.mock("@/services/extraction/platform-detector", () => ({
   getInstagramAuthorAvatar: vi.fn(),
   getTikTokAuthorAvatar: vi.fn(),
@@ -103,6 +107,7 @@ describe("/api/refresh-author-avatar", () => {
     it("refreshes Instagram author avatar successfully", async () => {
       const { getSession } = await import("@/lib/session");
       const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { updateRecipesByAuthorId } = await import("@/models/recipe");
       const { getInstagramAuthorAvatar } = await import(
         "@/services/extraction/platform-detector"
       );
@@ -113,6 +118,7 @@ describe("/api/refresh-author-avatar", () => {
         "https://example.com/new-ig-avatar.jpg",
       );
       vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(true);
+      vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(3);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
       const request = new Request("http://localhost/api/refresh-author-avatar", {
@@ -125,10 +131,15 @@ describe("/api/refresh-author-avatar", () => {
 
       expect(response.status).toBe(200);
       expect(data.avatarUrl).toBe("https://example.com/new-ig-avatar.jpg");
+      expect(data.authorId).toBe("author-456");
       expect(getInstagramAuthorAvatar).toHaveBeenCalledWith(
         `https://www.instagram.com/${mockInstagramAuthor.username}/`,
       );
       expect(updateAuthorAvatar).toHaveBeenCalledWith(
+        "author-456",
+        "https://example.com/new-ig-avatar.jpg",
+      );
+      expect(updateRecipesByAuthorId).toHaveBeenCalledWith(
         "author-456",
         "https://example.com/new-ig-avatar.jpg",
       );
@@ -137,6 +148,7 @@ describe("/api/refresh-author-avatar", () => {
     it("refreshes TikTok author avatar successfully", async () => {
       const { getSession } = await import("@/lib/session");
       const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { updateRecipesByAuthorId } = await import("@/models/recipe");
       const { getTikTokAuthorAvatar } = await import(
         "@/services/extraction/platform-detector"
       );
@@ -147,6 +159,7 @@ describe("/api/refresh-author-avatar", () => {
         "https://example.com/new-tt-avatar.jpg",
       );
       vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(true);
+      vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(2);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
       const request = new Request("http://localhost/api/refresh-author-avatar", {
@@ -159,6 +172,7 @@ describe("/api/refresh-author-avatar", () => {
 
       expect(response.status).toBe(200);
       expect(data.avatarUrl).toBe("https://example.com/new-tt-avatar.jpg");
+      expect(data.authorId).toBe("author-123");
       expect(getTikTokAuthorAvatar).toHaveBeenCalledWith(
         `https://www.tiktok.com/@${mockTikTokAuthor.username}`,
       );
@@ -166,6 +180,39 @@ describe("/api/refresh-author-avatar", () => {
         "author-123",
         "https://example.com/new-tt-avatar.jpg",
       );
+      expect(updateRecipesByAuthorId).toHaveBeenCalledWith(
+        "author-123",
+        "https://example.com/new-tt-avatar.jpg",
+      );
+    });
+
+    it("returns 500 when database update fails", async () => {
+      const { getSession } = await import("@/lib/session");
+      const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { updateRecipesByAuthorId } = await import("@/models/recipe");
+      const { getInstagramAuthorAvatar } = await import(
+        "@/services/extraction/platform-detector"
+      );
+
+      vi.mocked(getSession).mockResolvedValueOnce(mockSession);
+      vi.mocked(findAuthorById).mockResolvedValueOnce(mockInstagramAuthor);
+      vi.mocked(getInstagramAuthorAvatar).mockResolvedValueOnce(
+        "https://example.com/new-ig-avatar.jpg",
+      );
+      vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(false);
+      vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(0);
+
+      const { POST } = await import("@/app/api/refresh-author-avatar/route");
+      const request = new Request("http://localhost/api/refresh-author-avatar", {
+        method: "POST",
+        body: JSON.stringify({ authorId: "author-456" }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.error).toBe("Failed to update author avatar in database");
     });
 
     it("returns 404 when avatar fetch fails (null returned)", async () => {
