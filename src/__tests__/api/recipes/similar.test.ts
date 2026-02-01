@@ -3,7 +3,6 @@ import type { Session } from "@/lib/auth";
 import {
   mockFreeSubscription,
   mockProSubscription,
-  mockRecipe,
   mockSession,
 } from "../../mocks/fixtures";
 

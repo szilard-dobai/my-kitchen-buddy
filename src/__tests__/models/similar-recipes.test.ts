@@ -97,11 +97,12 @@ describe("getSimilarRecipes", () => {
       9,
     );
 
-    expect(result.recipes).toHaveLength(2);
-    expect(result.recipes[0].title).toBe("Similar Pasta");
-    expect(result.recipes[0].thumbnailUrl).toBe("https://example.com/thumb.jpg");
-    expect(result.totalSimilar).toBe(2);
-    expect(result.hasMore).toBe(false);
+    expect(result).not.toBeNull();
+    expect(result!.recipes).toHaveLength(2);
+    expect(result!.recipes[0].title).toBe("Similar Pasta");
+    expect(result!.recipes[0].thumbnailUrl).toBe("https://example.com/thumb.jpg");
+    expect(result!.totalSimilar).toBe(2);
+    expect(result!.hasMore).toBe(false);
   });
 
   it("returns hasMore true when more recipes exist than limit", async () => {
@@ -144,9 +145,10 @@ describe("getSimilarRecipes", () => {
       1,
     );
 
-    expect(result.recipes).toHaveLength(1);
-    expect(result.hasMore).toBe(true);
-    expect(result.totalSimilar).toBe(5);
+    expect(result).not.toBeNull();
+    expect(result!.recipes).toHaveLength(1);
+    expect(result!.hasMore).toBe(true);
+    expect(result!.totalSimilar).toBe(5);
   });
 
   it("returns null when source recipe not found", async () => {

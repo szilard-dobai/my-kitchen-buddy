@@ -3,10 +3,10 @@
 import { Crown } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { SimilarRecipeCard } from "./similar-recipe-card";
-import { SimilarRecipePlaceholder } from "./similar-recipe-placeholder";
 import type { SimilarRecipesResponse } from "@/types/recipe";
 import type { PlanTier } from "@/types/subscription";
+import { SimilarRecipeCard } from "./similar-recipe-card";
+import { SimilarRecipePlaceholder } from "./similar-recipe-placeholder";
 
 interface SimilarRecipesSectionProps {
   recipeId: string;
