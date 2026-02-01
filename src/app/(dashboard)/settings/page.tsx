@@ -435,7 +435,7 @@ function ProfileTab() {
   );
 }
 
-function TelegramTab() {
+function IntegrationsTab() {
   const [status, setStatus] = useState<{
     linked: boolean;
     telegramUsername?: string;
@@ -1199,7 +1199,7 @@ function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["profile", "collections", "tags", "telegram", "billing"].includes(
+  const defaultTab = ["profile", "collections", "tags", "integrations", "billing"].includes(
     tabParam || "",
   )
     ? tabParam!
@@ -1249,8 +1249,8 @@ function SettingsContent() {
           <TagsTab />
         </TabsContent>
 
-        <TabsContent value="telegram">
-          <TelegramTab />
+        <TabsContent value="integrations">
+          <IntegrationsTab />
         </TabsContent>
 
         <TabsContent value="billing">
