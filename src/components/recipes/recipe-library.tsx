@@ -17,6 +17,7 @@ import { RecipeSearch } from "@/components/recipes/recipe-search";
 import { RecipeSort } from "@/components/recipes/recipe-sort";
 import { Button } from "@/components/ui/button";
 import { useCollections } from "@/hooks/use-collections";
+import { useTags } from "@/hooks/use-tags";
 import {
   countActiveFilters,
   DEFAULT_FILTERS,
@@ -31,16 +32,19 @@ import { trackEvent } from "@/lib/tracking";
 import type { Collection } from "@/types/collection";
 import type { Recipe } from "@/types/recipe";
 import type { PlanTier } from "@/types/subscription";
+import type { Tag } from "@/types/tag";
 
 interface RecipeLibraryProps {
   initialRecipes: Recipe[];
   initialCollections: Collection[];
+  initialTags: Tag[];
   planTier: PlanTier;
 }
 
 export function RecipeLibrary({
   initialRecipes,
   initialCollections,
+  initialTags,
   planTier,
 }: RecipeLibraryProps) {
   const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes);
@@ -48,6 +52,7 @@ export function RecipeLibrary({
   const [sort, setSort] = useState<SortOption>(DEFAULT_SORT);
 
   const { data: collections = initialCollections } = useCollections();
+  const { data: tags = initialTags } = useTags();
 
   const handleCollectionChange = (
     recipeId: string,
@@ -76,6 +81,7 @@ export function RecipeLibrary({
       })),
     );
   };
+
   const isSidebarCollapsed = useCollapsedState();
 
   const handleSelectCollection = (collectionId: string | null) => {
@@ -149,6 +155,8 @@ export function RecipeLibrary({
               onChange={setFilters}
               options={filterOptions}
               activeCount={activeFilterCount}
+              tags={tags}
+              planTier={planTier}
             />
             <RecipeFiltersMobile
               filters={filters}
@@ -159,6 +167,7 @@ export function RecipeLibrary({
               selectedCollectionId={filters.collectionId}
               onSelectCollection={handleSelectCollection}
               totalRecipeCount={recipes.length}
+              tags={tags}
               planTier={planTier}
             />
 
@@ -183,7 +192,7 @@ export function RecipeLibrary({
           </div>
         </div>
 
-        <ActiveFilterChips filters={filters} onChange={setFilters} />
+        <ActiveFilterChips filters={filters} onChange={setFilters} tags={tags} />
 
         <div className="text-muted-foreground text-sm">
           {selectedCollection && (
@@ -236,6 +245,7 @@ export function RecipeLibrary({
                 key={recipe._id}
                 recipe={recipe}
                 collections={collections}
+                tags={tags}
                 onCollectionChange={handleCollectionChange}
               />
             ))}

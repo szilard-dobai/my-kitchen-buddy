@@ -5,6 +5,7 @@ import {
   mockPendingJob,
   mockRecipe,
   mockRecipeList,
+  mockTagList,
   mockTelegramLink,
 } from "./fixtures";
 
@@ -124,6 +125,10 @@ export const handlers = [
 
   http.delete("/api/account/delete", () => {
     return HttpResponse.json({ success: true });
+  }),
+
+  http.get("/api/tags", () => {
+    return HttpResponse.json(mockTagList);
   }),
 ];
 

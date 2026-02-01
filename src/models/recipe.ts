@@ -20,6 +20,7 @@ export async function createRecipe(input: CreateRecipeInput): Promise<Recipe> {
   const recipe = {
     ...input,
     collectionIds: [],
+    tagIds: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -79,13 +80,34 @@ export async function getRecipeWithCollections(
           },
         },
         {
+          $lookup: {
+            from: "recipeTags",
+            let: { recipeId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$recipeId", "$$recipeId"] },
+                      { $eq: ["$userId", userId] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "tags",
+          },
+        },
+        {
           $addFields: {
             collectionIds: "$collections.collectionId",
+            tagIds: "$tags.tagId",
           },
         },
         {
           $project: {
             collections: 0,
+            tags: 0,
           },
         },
       ])
@@ -145,13 +167,34 @@ export async function getRecipesWithCollectionsByUserId(
         },
       },
       {
+        $lookup: {
+          from: "recipeTags",
+          let: { recipeId: { $toString: "$_id" } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$recipeId", "$$recipeId"] },
+                    { $eq: ["$userId", userId] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "tags",
+        },
+      },
+      {
         $addFields: {
           collectionIds: "$collections.collectionId",
+          tagIds: "$tags.tagId",
         },
       },
       {
         $project: {
           collections: 0,
+          tags: 0,
         },
       },
       { $sort: { createdAt: -1 } },

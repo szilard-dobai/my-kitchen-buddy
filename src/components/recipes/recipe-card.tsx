@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { CollectionDropdown } from "@/components/collections/collection-dropdown";
+import { TagChip } from "@/components/tags/tag-chip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DietaryTag } from "@/components/ui/dietary-tag";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
@@ -12,10 +13,12 @@ import { PlatformBadge } from "@/components/ui/platform-badge";
 import { trackEvent } from "@/lib/tracking";
 import type { Collection } from "@/types/collection";
 import type { Recipe } from "@/types/recipe";
+import type { Tag } from "@/types/tag";
 
 interface RecipeCardProps {
   recipe: Recipe;
   collections?: Collection[];
+  tags?: Tag[];
   onCollectionChange?: (
     recipeId: string,
     collectionId: string,
@@ -26,6 +29,7 @@ interface RecipeCardProps {
 export function RecipeCard({
   recipe,
   collections,
+  tags,
   onCollectionChange,
 }: RecipeCardProps) {
   const [imageError, setImageError] = useState(false);
@@ -138,6 +142,20 @@ export function RecipeCard({
                 {recipe.dietaryTags.length > 3 && (
                   <span className="text-xs text-muted-foreground self-center">
                     +{recipe.dietaryTags.length - 3} more
+                  </span>
+                )}
+              </div>
+            )}
+            {tags && recipe.tagIds.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {recipe.tagIds.slice(0, 3).map((tagId) => {
+                  const tag = tags.find((t) => t._id === tagId);
+                  if (!tag) return null;
+                  return <TagChip key={tagId} tag={tag} />;
+                })}
+                {recipe.tagIds.length > 3 && (
+                  <span className="text-xs text-muted-foreground self-center">
+                    +{recipe.tagIds.length - 3} more
                   </span>
                 )}
               </div>

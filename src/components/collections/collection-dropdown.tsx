@@ -218,6 +218,9 @@ export function CollectionDropdown({
         onOpenChange={setCreateDialogOpen}
         currentCount={collections.length}
         planTier={planTier}
+        onCreated={(collectionId) => {
+          handleToggle(collectionId, false);
+        }}
       />
     </>
   );

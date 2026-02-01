@@ -94,7 +94,12 @@ describe("RecipeLibrary", () => {
 
   it("renders empty state when no recipes", async () => {
     renderWithQueryClient(
-      <RecipeLibrary initialRecipes={[]} initialCollections={[]} planTier="free" />,
+      <RecipeLibrary
+        initialTags={[]}
+        initialRecipes={[]}
+        initialCollections={[]}
+        planTier="free"
+      />,
     );
 
     expect(screen.getByText("No recipes yet.")).toBeInTheDocument();
@@ -104,6 +109,7 @@ describe("RecipeLibrary", () => {
   it("renders recipe cards for each recipe", async () => {
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -119,6 +125,7 @@ describe("RecipeLibrary", () => {
   it("renders search input", async () => {
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -132,6 +139,7 @@ describe("RecipeLibrary", () => {
   it("displays correct recipe count", async () => {
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -146,6 +154,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -163,6 +172,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -186,6 +196,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -209,6 +220,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -233,6 +245,7 @@ describe("RecipeLibrary", () => {
   it("sorts by newest first (default)", async () => {
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -247,6 +260,7 @@ describe("RecipeLibrary", () => {
   it("renders sort dropdown", async () => {
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -262,6 +276,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
@@ -301,6 +316,7 @@ describe("RecipeLibrary", () => {
         equipment: [],
         tipsAndNotes: [],
         collectionIds: [],
+        tagIds: [],
         source: {
           url: "https://www.tiktok.com/@test/video/123",
           platform: "tiktok" as const,
@@ -312,6 +328,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
+        initialTags={[]}
         initialRecipes={recipesWithMissing}
         initialCollections={[]}
         planTier="free"

@@ -8,6 +8,7 @@ import { getSession } from "@/lib/session";
 import { getCollectionsWithCountByUserId } from "@/models/collection";
 import { getRecipesWithCollectionsByUserId } from "@/models/recipe";
 import { getOrCreateSubscription } from "@/models/subscription";
+import { getTagsWithCountByUserId } from "@/models/tag";
 
 export const metadata: Metadata = {
   title: "My Recipes",
@@ -21,9 +22,10 @@ export default async function RecipesPage() {
     redirect("/login");
   }
 
-  const [recipes, collections, subscription] = await Promise.all([
+  const [recipes, collections, tags, subscription] = await Promise.all([
     getRecipesWithCollectionsByUserId(session.user.id),
     getCollectionsWithCountByUserId(session.user.id),
+    getTagsWithCountByUserId(session.user.id),
     getOrCreateSubscription(session.user.id),
   ]);
 
@@ -40,6 +42,7 @@ export default async function RecipesPage() {
       <RecipeLibrary
         initialRecipes={recipes}
         initialCollections={collections}
+        initialTags={tags}
         planTier={subscription.planTier}
       />
     </div>

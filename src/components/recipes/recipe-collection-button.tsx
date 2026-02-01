@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CollectionDropdown } from "@/components/collections/collection-dropdown";
 import {
   Tooltip,
@@ -28,10 +28,28 @@ export function RecipeCollectionButton({
   onCollectionChange,
 }: RecipeCollectionButtonProps) {
   const { data: collections = [] } = useCollections();
+  const [localCollectionIds, setLocalCollectionIds] = useState<string[]>(collectionIds);
+
+  useEffect(() => {
+    setLocalCollectionIds(collectionIds);
+  }, [collectionIds]);
+
+  const handleCollectionChange = (
+    recipeId: string,
+    collectionId: string,
+    action: "add" | "remove",
+  ) => {
+    if (action === "add") {
+      setLocalCollectionIds((prev) => [...prev, collectionId]);
+    } else {
+      setLocalCollectionIds((prev) => prev.filter((id) => id !== collectionId));
+    }
+    onCollectionChange?.(recipeId, collectionId, action);
+  };
 
   const recipeCollections = useMemo(
-    () => collections.filter((c) => collectionIds.includes(c._id!)),
-    [collections, collectionIds],
+    () => collections.filter((c) => localCollectionIds.includes(c._id!)),
+    [collections, localCollectionIds],
   );
 
   return (
@@ -50,10 +68,10 @@ export function RecipeCollectionButton({
       <CollectionDropdown
         recipeId={recipeId}
         collections={collections}
-        collectionIds={collectionIds}
+        collectionIds={localCollectionIds}
         planTier={planTier}
         variant="inline"
-        onCollectionChange={onCollectionChange}
+        onCollectionChange={handleCollectionChange}
       />
     </div>
   );

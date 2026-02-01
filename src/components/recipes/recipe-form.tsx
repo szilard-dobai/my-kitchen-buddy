@@ -132,6 +132,26 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     setLoading(true);
 
     try {
+      const filteredIngredients = ingredients
+        .filter((i) => i.name.trim() !== "")
+        .map((i) => ({
+          name: i.name,
+          quantity: i.quantity || undefined,
+          unit: i.unit || undefined,
+          notes: i.notes || undefined,
+          category: i.category || undefined,
+        }));
+      const filteredInstructions = instructions
+        .filter((i) => i.description.trim() !== "")
+        .map((inst, idx) => ({
+          stepNumber: idx + 1,
+          description: inst.description,
+          duration: inst.duration || undefined,
+          technique: inst.technique || undefined,
+        }));
+      const filteredEquipment = equipment.filter((e) => e.trim() !== "");
+      const filteredTips = tipsAndNotes.filter((t) => t.trim() !== "");
+
       const response = await fetch(`/api/recipes/${recipe._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -145,10 +165,10 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           totalTime: totalTime || undefined,
           servings: servings || undefined,
           nutrition: buildNutritionObject(),
-          ingredients,
-          instructions,
-          equipment,
-          tipsAndNotes,
+          ingredients: filteredIngredients,
+          instructions: filteredInstructions,
+          equipment: filteredEquipment,
+          tipsAndNotes: filteredTips,
         }),
       });
 
@@ -157,7 +177,11 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         router.push(`/recipes/${recipe._id}`);
         router.refresh();
       } else {
-        setError("Failed to update recipe");
+        const data = await response.json();
+        setError(data.error || "Failed to update recipe");
+        if (data.details) {
+          console.error("Validation errors:", data.details);
+        }
       }
     } catch {
       setError("An unexpected error occurred");

@@ -15,6 +15,7 @@ import { AuthorAvatar } from "@/components/recipes/author-avatar";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { NutritionCard } from "@/components/recipes/nutrition-card";
 import { RecipeCollectionButton } from "@/components/recipes/recipe-collection-button";
+import { RecipeTagButton } from "@/components/recipes/recipe-tag-button";
 import { VideoEmbed } from "@/components/recipes/video-embed";
 import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
@@ -114,8 +115,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
       </div>
 
       {recipe.description && (
-        <p className="text-muted-foreground mb-6">{recipe.description}</p>
+        <p className="text-muted-foreground mb-4">{recipe.description}</p>
       )}
+
+      <div className="mb-6">
+        <RecipeTagButton
+          recipeId={recipe._id!}
+          tagIds={recipe.tagIds}
+          planTier={subscription.planTier}
+        />
+      </div>
 
       <VideoEmbed url={recipe.source.url} platform={recipe.source.platform} />
 

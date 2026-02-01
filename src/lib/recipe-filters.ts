@@ -12,6 +12,7 @@ export interface RecipeFilters {
   recency: RecencyOption | null;
   cuisines: string[];
   collectionId: string | null;
+  tagIds: string[];
 }
 
 export const DEFAULT_FILTERS: RecipeFilters = {
@@ -22,6 +23,7 @@ export const DEFAULT_FILTERS: RecipeFilters = {
   recency: null,
   cuisines: [],
   collectionId: null,
+  tagIds: [],
 };
 
 export const DEFAULT_SORT: SortOption = "newest";
@@ -98,6 +100,11 @@ function matchesCollection(
   return recipe.collectionIds.includes(collectionId);
 }
 
+function matchesTags(recipe: Recipe, tagIds: string[]): boolean {
+  if (tagIds.length === 0) return true;
+  return tagIds.every((tagId) => recipe.tagIds.includes(tagId));
+}
+
 export function filterRecipes<T extends Recipe>(
   recipes: T[],
   filters: RecipeFilters,
@@ -110,6 +117,7 @@ export function filterRecipes<T extends Recipe>(
     if (!matchesRecency(recipe, filters.recency)) return false;
     if (!matchesCuisine(recipe, filters.cuisines)) return false;
     if (!matchesCollection(recipe, filters.collectionId)) return false;
+    if (!matchesTags(recipe, filters.tagIds)) return false;
     return true;
   });
 }
@@ -229,7 +237,8 @@ export function hasActiveFilters(filters: RecipeFilters): boolean {
     filters.difficulties.length > 0 ||
     filters.recency !== null ||
     filters.cuisines.length > 0 ||
-    filters.collectionId !== null
+    filters.collectionId !== null ||
+    filters.tagIds.length > 0
   );
 }
 
@@ -242,5 +251,6 @@ export function countActiveFilters(filters: RecipeFilters): number {
   if (filters.recency) count++;
   count += filters.cuisines.length;
   if (filters.collectionId) count++;
+  count += filters.tagIds.length;
   return count;
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronDown, Filter, FolderOpen, Plus, Search, X } from "lucide-react";
+import { ChevronDown, Filter, FolderOpen, Plus, Search, Tag, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { AuthorAvatar } from "@/components/recipes/author-avatar";
+import { CreateTagDialog } from "@/components/tags/create-tag-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import type { Collection } from "@/types/collection";
 import type { PlanTier } from "@/types/subscription";
+import type { Tag as TagType } from "@/types/tag";
 
 interface FilterOptions {
   platforms: string[];
@@ -39,6 +41,8 @@ interface RecipeFiltersProps {
   onChange: (filters: RecipeFilters) => void;
   options: FilterOptions;
   activeCount: number;
+  tags?: TagType[];
+  planTier?: PlanTier;
 }
 
 interface RecipeFiltersMobileProps extends RecipeFiltersProps {
@@ -46,7 +50,6 @@ interface RecipeFiltersMobileProps extends RecipeFiltersProps {
   selectedCollectionId?: string | null;
   onSelectCollection?: (collectionId: string | null) => void;
   totalRecipeCount?: number;
-  planTier?: PlanTier;
 }
 
 const platformIcons: Record<
@@ -226,8 +229,11 @@ export function RecipeFiltersDesktop({
   filters,
   onChange,
   options,
+  tags,
+  planTier,
 }: RecipeFiltersProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
+  const [createTagDialogOpen, setCreateTagDialogOpen] = useState(false);
 
   const toggleArrayFilter = (key: keyof RecipeFilters, value: string) => {
     const current = filters[key] as string[];
@@ -399,6 +405,68 @@ export function RecipeFiltersDesktop({
           </PopoverContent>
         </Popover>
       )}
+
+      {tags && tags.length > 0 && (
+        <Popover
+          open={openFilter === "tags"}
+          onOpenChange={(open) => setOpenFilter(open ? "tags" : null)}
+        >
+          <PopoverTrigger asChild>
+            <div>
+              <FilterChip
+                label="Tags"
+                count={filters.tagIds.length}
+                isOpen={openFilter === "tags"}
+                onClick={() => {}}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="max-h-64 w-48 overflow-y-auto"
+          >
+            <div className="space-y-2">
+              {tags.map((tag) => (
+                <label
+                  key={tag._id}
+                  className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md p-1.5"
+                >
+                  <Checkbox
+                    checked={filters.tagIds.includes(tag._id!)}
+                    onCheckedChange={() => toggleArrayFilter("tagIds", tag._id!)}
+                  />
+                  <span className="truncate text-sm text-muted-foreground">
+                    #{tag.name}
+                  </span>
+                </label>
+              ))}
+              {planTier && (
+                <div className="border-t pt-2 mt-2">
+                  <button
+                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground  cursor-pointer"
+                    onClick={() => {
+                      setOpenFilter(null);
+                      setCreateTagDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="size-4" />
+                    Create tag
+                  </button>
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {planTier && (
+        <CreateTagDialog
+          open={createTagDialogOpen}
+          onOpenChange={setCreateTagDialogOpen}
+          currentCount={tags?.length ?? 0}
+          planTier={planTier}
+        />
+      )}
     </div>
   );
 }
@@ -412,10 +480,12 @@ export function RecipeFiltersMobile({
   selectedCollectionId,
   onSelectCollection,
   totalRecipeCount,
+  tags,
   planTier,
 }: RecipeFiltersMobileProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createTagDialogOpen, setCreateTagDialogOpen] = useState(false);
 
   const toggleArrayFilter = (key: keyof RecipeFilters, value: string) => {
     const current = filters[key] as string[];
@@ -587,6 +657,40 @@ export function RecipeFiltersMobile({
                 />
               </div>
             )}
+
+            {tags && tags.length > 0 && (
+              <div>
+                <h4 className="mb-2 text-sm font-medium flex items-center gap-2">
+                  <Tag className="size-4" />
+                  Tags
+                </h4>
+                <div className="space-y-1">
+                  {tags.map((tag) => (
+                    <label
+                      key={tag._id}
+                      className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md p-1.5"
+                    >
+                      <Checkbox
+                        checked={filters.tagIds.includes(tag._id!)}
+                        onCheckedChange={() => toggleArrayFilter("tagIds", tag._id!)}
+                      />
+                      <span className="truncate text-sm text-muted-foreground">
+                        #{tag.name}
+                      </span>
+                    </label>
+                  ))}
+                  {planTier && (
+                    <button
+                      onClick={() => setCreateTagDialogOpen(true)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left hover:bg-accent/50 text-muted-foreground cursor-pointer"
+                    >
+                      <Plus className="size-3" />
+                      <span>New tag</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </PopoverContent>
       </Popover>
@@ -599,6 +703,15 @@ export function RecipeFiltersMobile({
           planTier={planTier}
         />
       )}
+
+      {planTier && (
+        <CreateTagDialog
+          open={createTagDialogOpen}
+          onOpenChange={setCreateTagDialogOpen}
+          currentCount={tags?.length ?? 0}
+          planTier={planTier}
+        />
+      )}
     </div>
   );
 }
@@ -606,9 +719,11 @@ export function RecipeFiltersMobile({
 export function ActiveFilterChips({
   filters,
   onChange,
+  tags,
 }: {
   filters: RecipeFilters;
   onChange: (filters: RecipeFilters) => void;
+  tags?: TagType[];
 }) {
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
 
@@ -671,6 +786,21 @@ export function ActiveFilterChips({
     });
   }
 
+  for (const tagId of filters.tagIds) {
+    const tag = tags?.find((t) => t._id === tagId);
+    if (tag) {
+      chips.push({
+        key: `tag-${tagId}`,
+        label: `#${tag.name}`,
+        onRemove: () =>
+          onChange({
+            ...filters,
+            tagIds: filters.tagIds.filter((id) => id !== tagId),
+          }),
+      });
+    }
+  }
+
   if (chips.length === 0) return null;
 
   return (
@@ -684,7 +814,7 @@ export function ActiveFilterChips({
           <button
             type="button"
             onClick={chip.onRemove}
-            className="hover:bg-secondary-foreground/20 rounded-full p-0.5"
+            className="hover:bg-secondary-foreground/20 rounded-full p-0.5  cursor-pointer"
           >
             <X className="size-3" />
           </button>

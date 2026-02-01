@@ -44,6 +44,7 @@ export const mockRecipe: Recipe = {
     confidenceScore: 0.85,
   },
   collectionIds: [],
+  tagIds: [],
   createdAt: new Date("2024-01-15"),
   updatedAt: new Date("2024-01-15"),
 };
@@ -141,6 +142,7 @@ export const mockEmptyRecipe: Recipe = {
   equipment: [],
   tipsAndNotes: [],
   collectionIds: [],
+  tagIds: [],
   source: {
     url: "https://www.tiktok.com/@minimal/video/999",
     platform: "tiktok",

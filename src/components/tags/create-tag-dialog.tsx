@@ -14,39 +14,41 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateCollection } from "@/hooks/use-collections";
-import { cn } from "@/lib/utils";
-import {
-  COLLECTION_COLORS,
-  COLLECTION_LIMITS,
-  DEFAULT_COLLECTION_COLOR,
-} from "@/types/collection";
+import { useCreateTag } from "@/hooks/use-tags";
 import type { PlanTier } from "@/types/subscription";
+import { TAG_LIMITS } from "@/types/tag";
 
-interface CreateCollectionDialogProps {
+const TAG_NAME_REGEX = /^[a-zA-Z0-9_]+$/;
+
+interface CreateTagDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated?: (collectionId: string) => void;
+  onCreated?: (tagId: string) => void;
   currentCount: number;
   planTier: PlanTier;
 }
 
-export function CreateCollectionDialog({
+export function CreateTagDialog({
   open,
   onOpenChange,
   onCreated,
   currentCount,
   planTier,
-}: CreateCollectionDialogProps) {
+}: CreateTagDialogProps) {
   const [name, setName] = useState("");
-  const [color, setColor] = useState<string>(DEFAULT_COLLECTION_COLOR);
   const [error, setError] = useState<string | null>(null);
 
-  const createMutation = useCreateCollection();
+  const createMutation = useCreateTag();
 
-  const limit = COLLECTION_LIMITS[planTier];
+  const limit = TAG_LIMITS[planTier];
   const atLimit = currentCount >= limit;
-  const canCreate = name.trim().length > 0 && !atLimit && !createMutation.isPending;
+  const isValidName = name.length > 0 && TAG_NAME_REGEX.test(name);
+  const canCreate = isValidName && !atLimit && !createMutation.isPending;
+
+  const handleNameChange = (value: string) => {
+    const sanitized = value.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase();
+    setName(sanitized);
+  };
 
   const handleCreate = async () => {
     if (!canCreate) return;
@@ -54,16 +56,15 @@ export function CreateCollectionDialog({
     setError(null);
 
     try {
-      const newCollection = await createMutation.mutateAsync({ name: name.trim(), color });
+      const newTag = await createMutation.mutateAsync({ name });
       setName("");
-      setColor(DEFAULT_COLLECTION_COLOR);
       onOpenChange(false);
-      onCreated?.(newCollection._id);
+      onCreated?.(newTag._id);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Failed to create collection");
+        setError("Failed to create tag");
       }
     }
   };
@@ -71,7 +72,6 @@ export function CreateCollectionDialog({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setName("");
-      setColor(DEFAULT_COLLECTION_COLOR);
       setError(null);
     }
     onOpenChange(open);
@@ -81,51 +81,38 @@ export function CreateCollectionDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Collection</DialogTitle>
+          <DialogTitle>Create Tag</DialogTitle>
           <DialogDescription>
-            Organize your recipes into collections for easy access.
+            Add hashtags to categorize your recipes.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Weeknight Dinners"
-              maxLength={50}
-              disabled={atLimit}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Color</Label>
-            <div className="flex flex-wrap gap-2">
-              {COLLECTION_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  disabled={atLimit}
-                  className={cn(
-                    "size-8 rounded-full transition-all cursor-pointer",
-                    color === c
-                      ? "ring-2 ring-offset-2 ring-primary"
-                      : "hover:scale-110",
-                    atLimit && "opacity-50 cursor-not-allowed",
-                  )}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                #
+              </span>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="weeknight"
+                maxLength={30}
+                disabled={atLimit}
+                className="pl-7"
+              />
             </div>
+            <p className="text-xs text-muted-foreground">
+              Letters, numbers, and underscores only
+            </p>
           </div>
 
           {atLimit && (
             <div className="rounded-md bg-amber-50 dark:bg-amber-950/50 p-3 text-sm">
               <p className="font-medium text-amber-800 dark:text-amber-200">
-                Collection limit reached ({currentCount}/{limit})
+                Tag limit reached ({currentCount}/{limit})
               </p>
               <p className="text-amber-700 dark:text-amber-300 mt-1">
                 <Link
@@ -134,14 +121,12 @@ export function CreateCollectionDialog({
                 >
                   Upgrade to Pro
                 </Link>{" "}
-                for unlimited collections.
+                for unlimited tags.
               </p>
             </div>
           )}
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
 
         <DialogFooter>
@@ -149,7 +134,9 @@ export function CreateCollectionDialog({
             Cancel
           </Button>
           <Button onClick={handleCreate} disabled={!canCreate}>
-            {createMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {createMutation.isPending && (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            )}
             Create
           </Button>
         </DialogFooter>

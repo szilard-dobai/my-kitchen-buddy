@@ -1,7 +1,11 @@
 "use client";
 
+import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { CreateTagDialog } from "@/components/tags/create-tag-dialog";
+import { DeleteTagDialog } from "@/components/tags/delete-tag-dialog";
+import { EditTagDialog } from "@/components/tags/edit-tag-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,12 +24,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTags } from "@/hooks/use-tags";
 import { authClient, useSession } from "@/lib/auth-client";
 import { trackEvent } from "@/lib/tracking";
 import type { UsageInfo } from "@/types/subscription";
+import type { Tag } from "@/types/tag";
 
 function ProfileTab() {
   const router = useRouter();
@@ -817,11 +829,124 @@ function BillingTab() {
   );
 }
 
+function TagsTab() {
+  const { data: tags = [], isLoading } = useTags();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [deletingTag, setDeletingTag] = useState<Tag | null>(null);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-8">
+          <p className="text-center text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Tags</CardTitle>
+              <CardDescription>
+                Manage your recipe tags. Tags help you categorize and find recipes.
+              </CardDescription>
+            </div>
+            <Button onClick={() => setCreateDialogOpen(true)} size="sm">
+              <Plus className="size-4 mr-1" />
+              Create tag
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {tags.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                You haven&apos;t created any tags yet.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                <Plus className="size-4 mr-1" />
+                Create your first tag
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {tags.map((tag) => (
+                <div
+                  key={tag._id}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium">#{tag.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {tag.recipeCount} recipe{tag.recipeCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="size-8 flex items-center justify-center rounded hover:bg-accent cursor-pointer">
+                        <MoreHorizontal className="size-4 text-muted-foreground" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                      <DropdownMenuItem onClick={() => setEditingTag(tag)}>
+                        <Pencil className="size-3.5 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDeletingTag(tag)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="size-3.5 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <CreateTagDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        currentCount={tags.length}
+        planTier="free"
+      />
+
+      {editingTag && (
+        <EditTagDialog
+          open={!!editingTag}
+          onOpenChange={(open) => !open && setEditingTag(null)}
+          tag={editingTag}
+        />
+      )}
+
+      {deletingTag && (
+        <DeleteTagDialog
+          open={!!deletingTag}
+          onOpenChange={(open) => !open && setDeletingTag(null)}
+          tag={deletingTag}
+        />
+      )}
+    </div>
+  );
+}
+
 function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["profile", "telegram", "billing"].includes(tabParam || "")
+  const defaultTab = ["profile", "telegram", "billing", "tags"].includes(tabParam || "")
     ? tabParam!
     : "profile";
   const hasTrackedRef = useRef(false);
@@ -851,12 +976,17 @@ function SettingsContent() {
       <Tabs value={defaultTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="tags">Tags</TabsTrigger>
           <TabsTrigger value="telegram">Telegram</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
           <ProfileTab />
+        </TabsContent>
+
+        <TabsContent value="tags">
+          <TagsTab />
         </TabsContent>
 
         <TabsContent value="telegram">
