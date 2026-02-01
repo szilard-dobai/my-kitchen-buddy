@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import {
   mockInstagramAuthor,
   mockSession,
@@ -113,7 +112,7 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(getInstagramAuthorAvatar).mockResolvedValueOnce(
         "https://example.com/new-ig-avatar.jpg",
       );
-      vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(undefined);
+      vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(true);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
       const request = new Request("http://localhost/api/refresh-author-avatar", {
@@ -147,7 +146,7 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(getTikTokAuthorAvatar).mockResolvedValueOnce(
         "https://example.com/new-tt-avatar.jpg",
       );
-      vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(undefined);
+      vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(true);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
       const request = new Request("http://localhost/api/refresh-author-avatar", {

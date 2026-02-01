@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { mockProSubscription } from "../../mocks/fixtures";
 
 vi.mock("@/lib/stripe", () => ({

@@ -18,9 +18,16 @@ export const mockRecipe: Recipe = {
     { name: "Parmesan cheese", quantity: "100", unit: "g", notes: "grated" },
   ],
   instructions: [
-    { stepNumber: 1, description: "Boil water and cook pasta", duration: "10 minutes" },
+    {
+      stepNumber: 1,
+      description: "Boil water and cook pasta",
+      duration: "10 minutes",
+    },
     { stepNumber: 2, description: "Heat tomato sauce in a pan" },
-    { stepNumber: 3, description: "Mix pasta with sauce and serve with cheese" },
+    {
+      stepNumber: 3,
+      description: "Mix pasta with sauce and serve with cheese",
+    },
   ],
   equipment: ["Large pot", "Pan", "Colander"],
   tipsAndNotes: ["Add pasta water to sauce for better consistency"],
@@ -36,6 +43,7 @@ export const mockRecipe: Recipe = {
     extractedAt: new Date("2024-01-15"),
     confidenceScore: 0.85,
   },
+  collectionIds: [],
   createdAt: new Date("2024-01-15"),
   updatedAt: new Date("2024-01-15"),
 };
@@ -132,6 +140,7 @@ export const mockEmptyRecipe: Recipe = {
   instructions: [],
   equipment: [],
   tipsAndNotes: [],
+  collectionIds: [],
   source: {
     url: "https://www.tiktok.com/@minimal/video/999",
     platform: "tiktok",

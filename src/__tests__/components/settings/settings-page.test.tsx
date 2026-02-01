@@ -1,9 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { http, HttpResponse } from "msw";
-
-import { server } from "../../mocks/server";
 
 const mockPush = vi.fn();
 
@@ -44,7 +41,8 @@ describe("SettingsPage", () => {
 
   describe("Profile Tab", () => {
     it("renders name and email fields", async () => {
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
       await waitFor(() => {
@@ -55,7 +53,8 @@ describe("SettingsPage", () => {
 
     it("enables save button when name changed", async () => {
       const user = userEvent.setup();
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
       await waitFor(() => {
@@ -71,43 +70,55 @@ describe("SettingsPage", () => {
     });
 
     it("shows delete account button", async () => {
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /delete account/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: /delete account/i }),
+        ).toBeInTheDocument();
       });
     });
 
     it("opens delete account dialog", async () => {
       const user = userEvent.setup();
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /delete account/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: /delete account/i }),
+        ).toBeInTheDocument();
       });
 
       await user.click(screen.getByRole("button", { name: /delete account/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/this action cannot be undone/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/this action cannot be undone/i),
+        ).toBeInTheDocument();
       });
     });
   });
 
   describe("Telegram Tab", () => {
     it("renders telegram tab button", async () => {
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
-      expect(screen.getByRole("tab", { name: /telegram/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: /telegram/i }),
+      ).toBeInTheDocument();
     });
   });
 
   describe("Billing Tab", () => {
     it("renders billing tab button", async () => {
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
       expect(screen.getByRole("tab", { name: /billing/i })).toBeInTheDocument();
@@ -118,11 +129,14 @@ describe("SettingsPage", () => {
     it("tracks settings_view event on mount", async () => {
       const { trackEvent } = await import("@/lib/tracking");
 
-      const SettingsPage = (await import("@/app/(dashboard)/settings/page")).default;
+      const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
+        .default;
       render(<SettingsPage />);
 
       await waitFor(() => {
-        expect(trackEvent).toHaveBeenCalledWith("settings_view", { tab: "profile" });
+        expect(trackEvent).toHaveBeenCalledWith("settings_view", {
+          tab: "profile",
+        });
       });
     });
   });

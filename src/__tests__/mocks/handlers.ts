@@ -1,5 +1,4 @@
 import { http, HttpResponse } from "msw";
-
 import {
   mockCompletedJob,
   mockFreeUsageInfo,
@@ -32,7 +31,7 @@ export const handlers = [
   }),
 
   http.put("/api/recipes/:id", async ({ params, request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({ ...mockRecipe, ...body, _id: params.id });
   }),
 

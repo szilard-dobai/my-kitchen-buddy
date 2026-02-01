@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import {
   mockCompletedJob,
   mockExhaustedFreeSubscription,
-  mockFreeSubscription,
   mockOtherUserJob,
   mockPendingJob,
   mockRecipe,
@@ -67,9 +65,8 @@ describe("/api/extract", () => {
 
     it("returns 429 when extraction limit reached", async () => {
       const { getSession } = await import("@/lib/session");
-      const { canUserExtract, getOrCreateSubscription } = await import(
-        "@/models/subscription"
-      );
+      const { canUserExtract, getOrCreateSubscription } =
+        await import("@/models/subscription");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(canUserExtract).mockResolvedValueOnce(false);
@@ -103,7 +100,10 @@ describe("/api/extract", () => {
       vi.mocked(validateBody).mockResolvedValueOnce({
         success: false,
         response: new Response(
-          JSON.stringify({ error: "Validation failed", details: { url: ["Invalid URL"] } }),
+          JSON.stringify({
+            error: "Validation failed",
+            details: { url: ["Invalid URL"] },
+          }),
           { status: 400 },
         ),
       } as never);
@@ -123,17 +123,21 @@ describe("/api/extract", () => {
       const { getSession } = await import("@/lib/session");
       const { canUserExtract } = await import("@/models/subscription");
       const { validateBody } = await import("@/lib/validation");
-      const { resolveUrl, detectPlatform } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { resolveUrl, detectPlatform } =
+        await import("@/services/extraction/platform-detector");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(canUserExtract).mockResolvedValueOnce(true);
       vi.mocked(validateBody).mockResolvedValueOnce({
         success: true,
-        data: { url: "https://unsupported.com/video", targetLanguage: "original" },
+        data: {
+          url: "https://unsupported.com/video",
+          targetLanguage: "original",
+        },
       } as never);
-      vi.mocked(resolveUrl).mockResolvedValueOnce("https://unsupported.com/video");
+      vi.mocked(resolveUrl).mockResolvedValueOnce(
+        "https://unsupported.com/video",
+      );
       vi.mocked(detectPlatform).mockReturnValueOnce({
         isValid: false,
         platform: "other",
@@ -157,18 +161,22 @@ describe("/api/extract", () => {
       const { getSession } = await import("@/lib/session");
       const { canUserExtract } = await import("@/models/subscription");
       const { validateBody } = await import("@/lib/validation");
-      const { resolveUrl, detectPlatform } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { resolveUrl, detectPlatform } =
+        await import("@/services/extraction/platform-detector");
       const { findRecipeBySourceUrl } = await import("@/models/recipe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(canUserExtract).mockResolvedValueOnce(true);
       vi.mocked(validateBody).mockResolvedValueOnce({
         success: true,
-        data: { url: "https://tiktok.com/video/123", targetLanguage: "original" },
+        data: {
+          url: "https://tiktok.com/video/123",
+          targetLanguage: "original",
+        },
       } as never);
-      vi.mocked(resolveUrl).mockResolvedValueOnce("https://tiktok.com/video/123");
+      vi.mocked(resolveUrl).mockResolvedValueOnce(
+        "https://tiktok.com/video/123",
+      );
       vi.mocked(detectPlatform).mockReturnValueOnce({
         isValid: true,
         platform: "tiktok",
@@ -193,9 +201,8 @@ describe("/api/extract", () => {
       const { getSession } = await import("@/lib/session");
       const { canUserExtract } = await import("@/models/subscription");
       const { validateBody } = await import("@/lib/validation");
-      const { resolveUrl, detectPlatform } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { resolveUrl, detectPlatform } =
+        await import("@/services/extraction/platform-detector");
       const { findRecipeBySourceUrl } = await import("@/models/recipe");
       const { createExtractionJob } = await import("@/models/extraction-job");
       const { processExtraction } = await import("@/services/extraction");
@@ -204,9 +211,14 @@ describe("/api/extract", () => {
       vi.mocked(canUserExtract).mockResolvedValueOnce(true);
       vi.mocked(validateBody).mockResolvedValueOnce({
         success: true,
-        data: { url: "https://tiktok.com/video/123", targetLanguage: "original" },
+        data: {
+          url: "https://tiktok.com/video/123",
+          targetLanguage: "original",
+        },
       } as never);
-      vi.mocked(resolveUrl).mockResolvedValueOnce("https://tiktok.com/video/123");
+      vi.mocked(resolveUrl).mockResolvedValueOnce(
+        "https://tiktok.com/video/123",
+      );
       vi.mocked(detectPlatform).mockReturnValueOnce({
         isValid: true,
         platform: "tiktok",
@@ -240,9 +252,8 @@ describe("/api/extract", () => {
       const { getSession } = await import("@/lib/session");
       const { canUserExtract } = await import("@/models/subscription");
       const { validateBody } = await import("@/lib/validation");
-      const { resolveUrl, detectPlatform } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { resolveUrl, detectPlatform } =
+        await import("@/services/extraction/platform-detector");
       const { findRecipeBySourceUrl } = await import("@/models/recipe");
       const { createExtractionJob } = await import("@/models/extraction-job");
       const { processExtraction } = await import("@/services/extraction");
@@ -253,7 +264,9 @@ describe("/api/extract", () => {
         success: true,
         data: { url: "https://instagram.com/p/ABC123", targetLanguage: "en" },
       } as never);
-      vi.mocked(resolveUrl).mockResolvedValueOnce("https://instagram.com/p/ABC123");
+      vi.mocked(resolveUrl).mockResolvedValueOnce(
+        "https://instagram.com/p/ABC123",
+      );
       vi.mocked(detectPlatform).mockReturnValueOnce({
         isValid: true,
         platform: "instagram",
@@ -269,7 +282,10 @@ describe("/api/extract", () => {
       const { POST } = await import("@/app/api/extract/route");
       const request = new Request("http://localhost/api/extract", {
         method: "POST",
-        body: JSON.stringify({ url: "https://instagram.com/p/ABC123", targetLanguage: "en" }),
+        body: JSON.stringify({
+          url: "https://instagram.com/p/ABC123",
+          targetLanguage: "en",
+        }),
       });
 
       const response = await POST(request);
@@ -308,10 +324,9 @@ describe("/api/extract", () => {
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(validateQuery).mockReturnValueOnce({
         success: false,
-        response: new Response(
-          JSON.stringify({ error: "Validation failed" }),
-          { status: 400 },
-        ),
+        response: new Response(JSON.stringify({ error: "Validation failed" }), {
+          status: 400,
+        }),
       } as never);
 
       const { GET } = await import("@/app/api/extract/route");
@@ -335,7 +350,9 @@ describe("/api/extract", () => {
       vi.mocked(getExtractionJobById).mockResolvedValueOnce(null);
 
       const { GET } = await import("@/app/api/extract/route");
-      const request = new Request("http://localhost/api/extract?jobId=nonexistent-job");
+      const request = new Request(
+        "http://localhost/api/extract?jobId=nonexistent-job",
+      );
 
       const response = await GET(request);
       const data = await response.json();
@@ -357,7 +374,9 @@ describe("/api/extract", () => {
       vi.mocked(getExtractionJobById).mockResolvedValueOnce(mockOtherUserJob);
 
       const { GET } = await import("@/app/api/extract/route");
-      const request = new Request("http://localhost/api/extract?jobId=job-other");
+      const request = new Request(
+        "http://localhost/api/extract?jobId=job-other",
+      );
 
       const response = await GET(request);
       const data = await response.json();
@@ -402,7 +421,9 @@ describe("/api/extract", () => {
       vi.mocked(getExtractionJobById).mockResolvedValueOnce(mockCompletedJob);
 
       const { GET } = await import("@/app/api/extract/route");
-      const request = new Request("http://localhost/api/extract?jobId=job-completed");
+      const request = new Request(
+        "http://localhost/api/extract?jobId=job-completed",
+      );
 
       const response = await GET(request);
       const data = await response.json();
