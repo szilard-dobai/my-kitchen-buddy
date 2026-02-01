@@ -37,7 +37,7 @@ export interface SimilarRecipesResponse {
 
 **Step 2: Verify types compile**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 **Step 3: Commit**
@@ -67,7 +67,7 @@ export const SIMILAR_RECIPES_LIMITS: Record<PlanTier, number> = {
 
 **Step 2: Verify types compile**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 **Step 3: Commit**
@@ -819,7 +819,7 @@ export function SimilarRecipeCard({ recipe }: SimilarRecipeCardProps) {
 
 **Step 2: Verify it compiles**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 **Step 3: Commit**
@@ -861,7 +861,7 @@ export function SimilarRecipePlaceholder() {
 
 **Step 2: Verify it compiles**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 **Step 3: Commit**
@@ -964,7 +964,7 @@ export function SimilarRecipesSection({
 
 **Step 2: Verify it compiles**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 **Step 3: Commit**
@@ -1007,7 +1007,7 @@ Insert before it:
 
 **Step 3: Verify it compiles and renders**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 Run: `npm run dev`
@@ -1031,7 +1031,7 @@ Expected: All tests pass
 
 **Step 2: Run type check**
 
-Run: `npx tsc --noEmit`
+Run: `npm run lint:types`
 Expected: No errors
 
 **Step 3: Run linter**
