@@ -1,8 +1,8 @@
 "use client";
 
 import { Crown } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { UpgradePrompt } from "@/components/upgrade/upgrade-prompt";
 import type { SimilarRecipesResponse } from "@/types/recipe";
 import type { PlanTier } from "@/types/subscription";
 import { SimilarRecipeCard } from "./similar-recipe-card";
@@ -19,6 +19,7 @@ export function SimilarRecipesSection({
 }: SimilarRecipesSectionProps) {
   const [data, setData] = useState<SimilarRecipesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   useEffect(() => {
     async function fetchSimilarRecipes() {
@@ -63,17 +64,25 @@ export function SimilarRecipesSection({
             )}
         </div>
         {planTier === "free" && data.hasMore && (
-          <div className="absolute right-0 top-0 bottom-2 w-32 bg-gradient-to-l from-background via-background/80 to-transparent flex items-center justify-end pr-2">
-            <Link
-              href="/settings?tab=billing"
+          <div className="absolute right-0 top-0 bottom-2 w-32 bg-linear-to-l from-background via-background/80 to-transparent flex items-center justify-end pr-2">
+            <button
+              type="button"
+              onClick={() => setShowUpgradePrompt(true)}
               className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
               <Crown className="size-4" />
               See {data.totalSimilar - 1} more
-            </Link>
+            </button>
           </div>
         )}
       </div>
+
+      <UpgradePrompt
+        feature="similar_recipes"
+        open={showUpgradePrompt}
+        onOpenChange={setShowUpgradePrompt}
+        extraCount={data.totalSimilar - 1}
+      />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UpgradePrompt } from "@/components/upgrade/upgrade-prompt";
 import { useCreateCollection } from "@/hooks/use-collections";
 import { cn } from "@/lib/utils";
 import {
@@ -41,11 +41,13 @@ export function CreateCollectionDialog({
   const [name, setName] = useState("");
   const [color, setColor] = useState<string>(DEFAULT_COLLECTION_COLOR);
   const [error, setError] = useState<string | null>(null);
+  const [upgradePromptDismissed, setUpgradePromptDismissed] = useState(false);
 
   const createMutation = useCreateCollection();
 
   const limit = COLLECTION_LIMITS[planTier];
   const atLimit = currentCount >= limit;
+  const showUpgradePrompt = open && atLimit && !upgradePromptDismissed;
   const canCreate = name.trim().length > 0 && !atLimit && !createMutation.isPending;
 
   const handleCreate = async () => {
@@ -68,13 +70,20 @@ export function CreateCollectionDialog({
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
       setName("");
       setColor(DEFAULT_COLLECTION_COLOR);
       setError(null);
+      setUpgradePromptDismissed(false);
     }
-    onOpenChange(open);
+    onOpenChange(newOpen);
+  };
+
+  const handleUpgradePromptChange = (promptOpen: boolean) => {
+    if (!promptOpen) {
+      setUpgradePromptDismissed(true);
+    }
   };
 
   return (
@@ -128,16 +137,25 @@ export function CreateCollectionDialog({
                 Collection limit reached ({currentCount}/{limit})
               </p>
               <p className="text-amber-700 dark:text-amber-300 mt-1">
-                <Link
-                  href="/settings?tab=billing"
+                <button
+                  type="button"
+                  onClick={() => setUpgradePromptDismissed(false)}
                   className="underline hover:no-underline"
                 >
                   Upgrade to Pro
-                </Link>{" "}
+                </button>{" "}
                 for unlimited collections.
               </p>
             </div>
           )}
+
+          <UpgradePrompt
+            feature="collections"
+            open={showUpgradePrompt}
+            onOpenChange={handleUpgradePromptChange}
+            currentUsage={currentCount}
+            limit={limit}
+          />
 
           {error && (
             <p className="text-sm text-destructive">{error}</p>

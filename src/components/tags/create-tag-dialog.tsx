@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UpgradePrompt } from "@/components/upgrade/upgrade-prompt";
 import { useCreateTag } from "@/hooks/use-tags";
 import type { PlanTier } from "@/types/subscription";
 import { TAG_LIMITS } from "@/types/tag";
@@ -37,11 +37,13 @@ export function CreateTagDialog({
 }: CreateTagDialogProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [upgradePromptDismissed, setUpgradePromptDismissed] = useState(false);
 
   const createMutation = useCreateTag();
 
   const limit = TAG_LIMITS[planTier];
   const atLimit = currentCount >= limit;
+  const showUpgradePrompt = open && atLimit && !upgradePromptDismissed;
   const isValidName = name.length > 0 && TAG_NAME_REGEX.test(name);
   const canCreate = isValidName && !atLimit && !createMutation.isPending;
 
@@ -69,12 +71,19 @@ export function CreateTagDialog({
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
       setName("");
       setError(null);
+      setUpgradePromptDismissed(false);
     }
-    onOpenChange(open);
+    onOpenChange(newOpen);
+  };
+
+  const handleUpgradePromptChange = (promptOpen: boolean) => {
+    if (!promptOpen) {
+      setUpgradePromptDismissed(true);
+    }
   };
 
   return (
@@ -115,16 +124,25 @@ export function CreateTagDialog({
                 Tag limit reached ({currentCount}/{limit})
               </p>
               <p className="text-amber-700 dark:text-amber-300 mt-1">
-                <Link
-                  href="/settings?tab=billing"
+                <button
+                  type="button"
+                  onClick={() => setUpgradePromptDismissed(false)}
                   className="underline hover:no-underline"
                 >
                   Upgrade to Pro
-                </Link>{" "}
+                </button>{" "}
                 for unlimited tags.
               </p>
             </div>
           )}
+
+          <UpgradePrompt
+            feature="tags"
+            open={showUpgradePrompt}
+            onOpenChange={handleUpgradePromptChange}
+            currentUsage={currentCount}
+            limit={limit}
+          />
 
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
