@@ -41,6 +41,18 @@ function matchesSearch(recipe: Recipe, searchTerm: string): boolean {
     if (ingredient.name.toLowerCase().includes(term)) return true;
   }
 
+  for (const tag of recipe.dietaryTags) {
+    if (tag.toLowerCase().includes(term)) return true;
+  }
+
+  for (const item of recipe.equipment) {
+    if (item.toLowerCase().includes(term)) return true;
+  }
+
+  for (const tip of recipe.tipsAndNotes) {
+    if (tip.toLowerCase().includes(term)) return true;
+  }
+
   return false;
 }
 
@@ -143,6 +155,24 @@ function calculateRelevanceScore(recipe: Recipe, searchTerm: string): number {
   for (const ingredient of recipe.ingredients) {
     if (ingredient.name.toLowerCase().includes(term)) {
       score += 10;
+    }
+  }
+
+  for (const tag of recipe.dietaryTags) {
+    if (tag.toLowerCase().includes(term)) {
+      score += tag.toLowerCase() === term ? 40 : 25;
+    }
+  }
+
+  for (const item of recipe.equipment) {
+    if (item.toLowerCase().includes(term)) {
+      score += 10;
+    }
+  }
+
+  for (const tip of recipe.tipsAndNotes) {
+    if (tip.toLowerCase().includes(term)) {
+      score += 5;
     }
   }
 
