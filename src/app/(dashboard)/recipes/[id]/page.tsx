@@ -4,6 +4,7 @@ import {
   Clock,
   ExternalLink,
   Lightbulb,
+  Pencil,
   Timer,
   Users,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import { notFound, redirect } from "next/navigation";
 import { AuthorAvatar } from "@/components/recipes/author-avatar";
 import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { NutritionCard } from "@/components/recipes/nutrition-card";
+import { RecipeCollectionButton } from "@/components/recipes/recipe-collection-button";
 import { VideoEmbed } from "@/components/recipes/video-embed";
 import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,8 @@ import { DietaryTag } from "@/components/ui/dietary-tag";
 import { DifficultyBadge } from "@/components/ui/difficulty-badge";
 import { PlatformBadge } from "@/components/ui/platform-badge";
 import { getSession } from "@/lib/session";
-import { getRecipeById } from "@/models/recipe";
+import { getRecipeById, getRecipeWithCollections } from "@/models/recipe";
+import { getOrCreateSubscription } from "@/models/subscription";
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
@@ -55,7 +58,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
   }
 
   const { id } = await params;
-  const recipe = await getRecipeById(id);
+  const [recipe, subscription] = await Promise.all([
+    getRecipeWithCollections(id, session.user.id),
+    getOrCreateSubscription(session.user.id),
+  ]);
 
   if (!recipe || recipe.userId !== session.user.id) {
     notFound();
@@ -64,33 +70,46 @@ export default async function RecipePage({ params }: RecipePageProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <PageTracker event="recipe_detail_view" metadata={{ recipeId: id }} />
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <Link
-            href="/recipes"
-            className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to recipes
-          </Link>
-          <h1 className="text-3xl font-bold">{recipe.title}</h1>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <PlatformBadge platform={recipe.source.platform} />
-            {recipe.difficulty && (
-              <DifficultyBadge
-                difficulty={recipe.difficulty as "Easy" | "Medium" | "Hard"}
-              />
-            )}
-            {recipe.dietaryTags.map((tag) => (
-              <DietaryTag key={tag} tag={tag} />
-            ))}
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <Link
+              href="/recipes"
+              className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to recipes
+            </Link>
+            <h1 className="text-3xl font-bold">{recipe.title}</h1>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Link href={`/recipes/${recipe._id}/edit`}>
+              <Button variant="outline" size="sm" className="hidden sm:flex">
+                Edit
+              </Button>
+              <Button variant="outline" size="icon" className="sm:hidden">
+                <Pencil className="size-4" />
+                <span className="sr-only">Edit</span>
+              </Button>
+            </Link>
+            <DeleteRecipeButton recipeId={recipe._id!} />
           </div>
         </div>
-        <div className="flex gap-2">
-          <Link href={`/recipes/${recipe._id}/edit`}>
-            <Button variant="outline">Edit</Button>
-          </Link>
-          <DeleteRecipeButton recipeId={recipe._id!} />
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          <PlatformBadge platform={recipe.source.platform} />
+          {recipe.difficulty && (
+            <DifficultyBadge
+              difficulty={recipe.difficulty as "Easy" | "Medium" | "Hard"}
+            />
+          )}
+          {recipe.dietaryTags.map((tag) => (
+            <DietaryTag key={tag} tag={tag} />
+          ))}
+          <RecipeCollectionButton
+            recipeId={recipe._id!}
+            collectionIds={recipe.collectionIds}
+            planTier={subscription.planTier}
+          />
         </div>
       </div>
 

@@ -23,6 +23,8 @@ export type TrackingEventType =
   | "filters_cleared"
   | "recipe_search"
   | "recipe_deleted"
+  // Collection interactions
+  | "collection_selected"
   // Extraction
   | "extraction_attempt"
   | "extraction_success"

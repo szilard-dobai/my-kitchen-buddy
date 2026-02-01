@@ -11,6 +11,7 @@ export interface RecipeFilters {
   difficulties: string[];
   recency: RecencyOption | null;
   cuisines: string[];
+  collectionId: string | null;
 }
 
 export const DEFAULT_FILTERS: RecipeFilters = {
@@ -20,6 +21,7 @@ export const DEFAULT_FILTERS: RecipeFilters = {
   difficulties: [],
   recency: null,
   cuisines: [],
+  collectionId: null,
 };
 
 export const DEFAULT_SORT: SortOption = "newest";
@@ -88,10 +90,18 @@ function matchesCuisine(recipe: Recipe, cuisines: string[]): boolean {
   return cuisines.includes(recipe.cuisineType || "");
 }
 
-export function filterRecipes(
-  recipes: Recipe[],
+function matchesCollection(
+  recipe: Recipe,
+  collectionId: string | null,
+): boolean {
+  if (!collectionId) return true;
+  return recipe.collectionIds.includes(collectionId);
+}
+
+export function filterRecipes<T extends Recipe>(
+  recipes: T[],
   filters: RecipeFilters,
-): Recipe[] {
+): T[] {
   return recipes.filter((recipe) => {
     if (!matchesSearch(recipe, filters.search)) return false;
     if (!matchesPlatform(recipe, filters.platforms)) return false;
@@ -99,6 +109,7 @@ export function filterRecipes(
     if (!matchesDifficulty(recipe, filters.difficulties)) return false;
     if (!matchesRecency(recipe, filters.recency)) return false;
     if (!matchesCuisine(recipe, filters.cuisines)) return false;
+    if (!matchesCollection(recipe, filters.collectionId)) return false;
     return true;
   });
 }
@@ -130,11 +141,11 @@ function calculateRelevanceScore(recipe: Recipe, searchTerm: string): number {
   return score;
 }
 
-export function sortRecipes(
-  recipes: Recipe[],
+export function sortRecipes<T extends Recipe>(
+  recipes: T[],
   sortBy: SortOption,
   searchTerm: string = "",
-): Recipe[] {
+): T[] {
   const sorted = [...recipes];
 
   switch (sortBy) {
@@ -217,7 +228,8 @@ export function hasActiveFilters(filters: RecipeFilters): boolean {
     filters.creators.length > 0 ||
     filters.difficulties.length > 0 ||
     filters.recency !== null ||
-    filters.cuisines.length > 0
+    filters.cuisines.length > 0 ||
+    filters.collectionId !== null
   );
 }
 
@@ -229,5 +241,6 @@ export function countActiveFilters(filters: RecipeFilters): number {
   count += filters.difficulties.length;
   if (filters.recency) count++;
   count += filters.cuisines.length;
+  if (filters.collectionId) count++;
   return count;
 }

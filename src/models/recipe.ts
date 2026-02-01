@@ -19,6 +19,7 @@ export async function createRecipe(input: CreateRecipeInput): Promise<Recipe> {
 
   const recipe = {
     ...input,
+    collectionIds: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -47,12 +48,114 @@ export async function getRecipeById(id: string): Promise<Recipe | null> {
   }
 }
 
+export async function getRecipeWithCollections(
+  id: string,
+  userId: string,
+): Promise<Recipe | null> {
+  const db = await getDb();
+  const collection = db.collection(COLLECTION_NAME);
+
+  try {
+    const recipes = await collection
+      .aggregate([
+        { $match: { _id: new ObjectId(id) } },
+        {
+          $lookup: {
+            from: "recipeCollections",
+            let: { recipeId: { $toString: "$_id" } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$recipeId", "$$recipeId"] },
+                      { $eq: ["$userId", userId] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "collections",
+          },
+        },
+        {
+          $addFields: {
+            collectionIds: "$collections.collectionId",
+          },
+        },
+        {
+          $project: {
+            collections: 0,
+          },
+        },
+      ])
+      .toArray();
+
+    if (recipes.length === 0) return null;
+
+    return {
+      ...recipes[0],
+      _id: recipes[0]._id.toString(),
+    } as Recipe;
+  } catch {
+    return null;
+  }
+}
+
 export async function getRecipesByUserId(userId: string): Promise<Recipe[]> {
   const collection = await getRecipesCollection();
 
   const recipes = await collection
     .find({ userId })
     .sort({ createdAt: -1 })
+    .toArray();
+
+  return recipes.map((recipe) => ({
+    ...recipe,
+    _id: recipe._id.toString(),
+  })) as Recipe[];
+}
+
+export async function getRecipesWithCollectionsByUserId(
+  userId: string,
+): Promise<Recipe[]> {
+  const db = await getDb();
+  const collection = db.collection(COLLECTION_NAME);
+
+  const recipes = await collection
+    .aggregate([
+      { $match: { userId } },
+      {
+        $lookup: {
+          from: "recipeCollections",
+          let: { recipeId: { $toString: "$_id" } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$recipeId", "$$recipeId"] },
+                    { $eq: ["$userId", userId] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "collections",
+        },
+      },
+      {
+        $addFields: {
+          collectionIds: "$collections.collectionId",
+        },
+      },
+      {
+        $project: {
+          collections: 0,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+    ])
     .toArray();
 
   return recipes.map((recipe) => ({
@@ -153,7 +256,10 @@ export async function updateRecipeAuthorAvatar(
     const result = await collection.updateOne(
       { _id: new ObjectId(id), userId },
       {
-        $set: { "source.authorAvatarUrl": authorAvatarUrl, updatedAt: new Date() },
+        $set: {
+          "source.authorAvatarUrl": authorAvatarUrl,
+          updatedAt: new Date(),
+        },
       },
     );
 

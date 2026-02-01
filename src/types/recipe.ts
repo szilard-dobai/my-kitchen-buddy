@@ -69,11 +69,12 @@ export interface Recipe {
   equipment: string[];
   source: RecipeSource;
   extractionMetadata?: ExtractionMetadata;
+  collectionIds: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type CreateRecipeInput = Omit<Recipe, "_id" | "createdAt" | "updatedAt">;
+export type CreateRecipeInput = Omit<Recipe, "_id" | "collectionIds" | "createdAt" | "updatedAt">;
 
 export type UpdateRecipeInput = Partial<
   Omit<Recipe, "_id" | "userId" | "createdAt" | "updatedAt">

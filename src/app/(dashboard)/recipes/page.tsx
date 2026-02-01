@@ -5,7 +5,9 @@ import { RecipeLibrary } from "@/components/recipes/recipe-library";
 import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/session";
-import { getRecipesByUserId } from "@/models/recipe";
+import { getCollectionsWithCountByUserId } from "@/models/collection";
+import { getRecipesWithCollectionsByUserId } from "@/models/recipe";
+import { getOrCreateSubscription } from "@/models/subscription";
 
 export const metadata: Metadata = {
   title: "My Recipes",
@@ -19,7 +21,11 @@ export default async function RecipesPage() {
     redirect("/login");
   }
 
-  const recipes = await getRecipesByUserId(session.user.id);
+  const [recipes, collections, subscription] = await Promise.all([
+    getRecipesWithCollectionsByUserId(session.user.id),
+    getCollectionsWithCountByUserId(session.user.id),
+    getOrCreateSubscription(session.user.id),
+  ]);
 
   return (
     <div>
@@ -31,7 +37,11 @@ export default async function RecipesPage() {
         </Link>
       </div>
 
-      <RecipeLibrary recipes={recipes} />
+      <RecipeLibrary
+        recipes={recipes}
+        initialCollections={collections}
+        planTier={subscription.planTier}
+      />
     </div>
   );
 }

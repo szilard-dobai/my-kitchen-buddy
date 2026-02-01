@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronDown, Filter, Search, X } from "lucide-react";
+import { ChevronDown, Filter, FolderOpen, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { AuthorAvatar } from "@/components/recipes/author-avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +25,8 @@ import type {
 } from "@/lib/recipe-filters";
 import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
+import type { Collection } from "@/types/collection";
+import type { PlanTier } from "@/types/subscription";
 
 interface FilterOptions {
   platforms: string[];
@@ -36,6 +39,14 @@ interface RecipeFiltersProps {
   onChange: (filters: RecipeFilters) => void;
   options: FilterOptions;
   activeCount: number;
+}
+
+interface RecipeFiltersMobileProps extends RecipeFiltersProps {
+  collections?: Collection[];
+  selectedCollectionId?: string | null;
+  onSelectCollection?: (collectionId: string | null) => void;
+  totalRecipeCount?: number;
+  planTier?: PlanTier;
 }
 
 const platformIcons: Record<
@@ -397,8 +408,14 @@ export function RecipeFiltersMobile({
   onChange,
   options,
   activeCount,
-}: RecipeFiltersProps) {
+  collections,
+  selectedCollectionId,
+  onSelectCollection,
+  totalRecipeCount,
+  planTier,
+}: RecipeFiltersMobileProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const toggleArrayFilter = (key: keyof RecipeFilters, value: string) => {
     const current = filters[key] as string[];
@@ -409,6 +426,11 @@ export function RecipeFiltersMobile({
     trackEvent("filter_applied", { filterType: key, value });
   };
 
+  const hasCollections = collections && collections.length > 0;
+  const selectedCollection = selectedCollectionId
+    ? collections?.find((c) => c._id === selectedCollectionId)
+    : null;
+
   return (
     <div className="lg:hidden">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -417,6 +439,11 @@ export function RecipeFiltersMobile({
             <span className="flex items-center gap-2">
               <Filter className="size-4" />
               Filters
+              {selectedCollection && (
+                <span className="text-muted-foreground">
+                  · {selectedCollection.name}
+                </span>
+              )}
             </span>
             {activeCount > 0 && (
               <span className="bg-primary text-primary-foreground flex size-5 items-center justify-center rounded-full text-xs">
@@ -430,6 +457,61 @@ export function RecipeFiltersMobile({
           className="max-h-[70vh] w-[calc(100vw-2rem)] overflow-y-auto"
         >
           <div className="space-y-6">
+            {(hasCollections || onSelectCollection) && (
+              <div>
+                <h4 className="mb-2 text-sm font-medium flex items-center gap-2">
+                  <FolderOpen className="size-4" />
+                  Collections
+                </h4>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => onSelectCollection?.(null)}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left cursor-pointer",
+                      !selectedCollectionId
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent/50",
+                    )}
+                  >
+                    <span className="flex-1">All Recipes</span>
+                    <span className="text-xs text-muted-foreground">
+                      {totalRecipeCount}
+                    </span>
+                  </button>
+                  {collections?.map((collection) => (
+                    <button
+                      key={collection._id}
+                      onClick={() => onSelectCollection?.(collection._id!)}
+                      className={cn(
+                        "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left cursor-pointer",
+                        selectedCollectionId === collection._id
+                          ? "bg-accent text-accent-foreground"
+                          : "hover:bg-accent/50",
+                      )}
+                    >
+                      <span
+                        className="size-3 rounded-full shrink-0"
+                        style={{ backgroundColor: collection.color }}
+                      />
+                      <span className="truncate flex-1">{collection.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {collection.recipeCount}
+                      </span>
+                    </button>
+                  ))}
+                  {planTier && (
+                    <button
+                      onClick={() => setCreateDialogOpen(true)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left cursor-pointer hover:bg-accent/50 text-muted-foreground"
+                    >
+                      <Plus className="size-3" />
+                      <span>New collection</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {options.platforms.length > 0 && (
               <div>
                 <h4 className="mb-2 text-sm font-medium">Platform</h4>
@@ -508,6 +590,15 @@ export function RecipeFiltersMobile({
           </div>
         </PopoverContent>
       </Popover>
+
+      {planTier && (
+        <CreateCollectionDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          currentCount={collections?.length ?? 0}
+          planTier={planTier}
+        />
+      )}
     </div>
   );
 }
