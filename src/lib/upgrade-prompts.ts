@@ -57,3 +57,47 @@ export function clearDismissedPrompts(): void {
     // Ignore storage errors
   }
 }
+
+const MILESTONES_STORAGE_KEY = "mkb_seen_milestones";
+export const MILESTONES = [5, 10, 25, 50] as const;
+export type Milestone = (typeof MILESTONES)[number];
+
+function getSeenMilestones(): number[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const stored = localStorage.getItem(MILESTONES_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSeenMilestones(milestones: number[]): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    localStorage.setItem(MILESTONES_STORAGE_KEY, JSON.stringify(milestones));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function getUnseenMilestone(recipeCount: number): Milestone | null {
+  const seen = getSeenMilestones();
+
+  for (const milestone of MILESTONES) {
+    if (recipeCount >= milestone && !seen.includes(milestone)) {
+      return milestone;
+    }
+  }
+
+  return null;
+}
+
+export function markMilestoneSeen(milestone: number): void {
+  const seen = getSeenMilestones();
+  if (!seen.includes(milestone)) {
+    saveSeenMilestones([...seen, milestone]);
+  }
+}
