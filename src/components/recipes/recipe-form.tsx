@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DietaryTag } from "@/components/ui/dietary-tag";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,6 +17,19 @@ import {
 } from "@/components/ui/select";
 import { trackEvent } from "@/lib/tracking";
 import type { Ingredient, Instruction, Recipe } from "@/types/recipe";
+
+const KNOWN_DIETARY_TAGS = [
+  "vegan",
+  "vegetarian",
+  "gluten-free",
+  "dairy-free",
+  "keto",
+  "pescatarian",
+  "nut-free",
+  "egg-free",
+  "paleo",
+  "low-carb",
+] as const;
 
 interface RecipeFormProps {
   recipe: Recipe;
@@ -43,6 +58,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const [tipsAndNotes, setTipsAndNotes] = useState<string[]>(
     recipe.tipsAndNotes,
   );
+  const [dietaryTags, setDietaryTags] = useState<string[]>(recipe.dietaryTags);
 
   const [nutritionPerServing, setNutritionPerServing] = useState({
     calories: recipe.nutrition?.perServing?.calories?.toString() || "",
@@ -165,6 +181,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           totalTime: totalTime || undefined,
           servings: servings || undefined,
           nutrition: buildNutritionObject(),
+          dietaryTags,
           ingredients: filteredIngredients,
           instructions: filteredInstructions,
           equipment: filteredEquipment,
@@ -253,6 +270,22 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const removeTip = (index: number) => {
     setTipsAndNotes(tipsAndNotes.filter((_, i) => i !== index));
   };
+
+  const toggleDietaryTag = (tag: string) => {
+    if (dietaryTags.includes(tag)) {
+      setDietaryTags(dietaryTags.filter((t) => t !== tag));
+    } else {
+      setDietaryTags([...dietaryTags, tag]);
+    }
+  };
+
+  const removeCustomDietaryTag = (tag: string) => {
+    setDietaryTags(dietaryTags.filter((t) => t !== tag));
+  };
+
+  const customDietaryTags = dietaryTags.filter(
+    (tag) => !KNOWN_DIETARY_TAGS.includes(tag.toLowerCase() as typeof KNOWN_DIETARY_TAGS[number]),
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -355,6 +388,53 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Dietary Tags</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {KNOWN_DIETARY_TAGS.map((tag) => {
+              const isChecked = dietaryTags.some(
+                (t) => t.toLowerCase() === tag.toLowerCase(),
+              );
+              return (
+                <label
+                  key={tag}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={() => toggleDietaryTag(tag)}
+                  />
+                  <DietaryTag tag={tag} />
+                </label>
+              );
+            })}
+          </div>
+          {customDietaryTags.length > 0 && (
+            <div className="pt-3 border-t">
+              <p className="text-sm text-muted-foreground mb-2">
+                Custom tags from extraction (click to remove):
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {customDietaryTags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => removeCustomDietaryTag(tag)}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-secondary text-secondary-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors cursor-pointer"
+                  >
+                    {tag}
+                    <span className="ml-1">×</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
