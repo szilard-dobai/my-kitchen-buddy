@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import {
   findSubscriptionByStripeCustomerId,
+  getNextMonthStart,
   resetExtractionCount,
   updateSubscription,
 } from "@/models/subscription";
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
             stripeSubscriptionId: undefined,
             planTier: "free",
             extractionsLimit: 10,
-            currentPeriodEnd: undefined,
+            currentPeriodEnd: getNextMonthStart(),
           });
         }
         break;

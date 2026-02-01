@@ -6,6 +6,7 @@ export const mockFreeSubscription: Subscription = {
   planTier: "free",
   extractionsUsed: 5,
   extractionsLimit: 10,
+  currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   createdAt: new Date("2024-01-01"),
   updatedAt: new Date("2024-01-15"),
 };
@@ -29,6 +30,7 @@ export const mockExhaustedFreeSubscription: Subscription = {
   planTier: "free",
   extractionsUsed: 10,
   extractionsLimit: 10,
+  currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   createdAt: new Date("2024-01-01"),
   updatedAt: new Date("2024-01-15"),
 };
@@ -50,6 +52,7 @@ export const mockFreeUsageInfo: UsageInfo = {
   used: 5,
   limit: 10,
   planTier: "free",
+  currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
 };
 
 export const mockProUsageInfo: UsageInfo = {

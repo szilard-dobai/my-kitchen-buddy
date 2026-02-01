@@ -13,6 +13,7 @@ vi.mock("@/models/subscription", () => ({
   findSubscriptionByStripeCustomerId: vi.fn(),
   updateSubscription: vi.fn(),
   resetExtractionCount: vi.fn(),
+  getNextMonthStart: vi.fn(() => new Date("2026-03-01T00:00:00.000Z")),
 }));
 
 describe("/api/billing/webhook", () => {
@@ -188,7 +189,7 @@ describe("/api/billing/webhook", () => {
           stripeSubscriptionId: undefined,
           planTier: "free",
           extractionsLimit: 10,
-          currentPeriodEnd: undefined,
+          currentPeriodEnd: expect.any(Date),
         }),
       );
     });

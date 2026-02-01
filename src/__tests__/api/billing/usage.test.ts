@@ -46,7 +46,7 @@ describe("/api/billing/usage", () => {
       expect(data.used).toBe(5);
       expect(data.limit).toBe(10);
       expect(data.planTier).toBe("free");
-      expect(data.currentPeriodEnd).toBeUndefined();
+      expect(data.currentPeriodEnd).toBeDefined();
     });
 
     it("returns usage info for pro tier user", async () => {
