@@ -313,6 +313,120 @@ export async function updateRecipeAuthorAvatar(
   }
 }
 
+const CUISINE_GROUPS: Record<string, string[]> = {
+  "latin-american": [
+    "mexican",
+    "southwest",
+    "tex-mex",
+    "latin",
+    "spanish",
+    "cuban",
+  ],
+  asian: ["chinese", "japanese", "korean", "thai", "vietnamese", "asian"],
+  mediterranean: ["italian", "greek", "mediterranean", "middle eastern"],
+  american: ["american", "southern", "cajun", "bbq", "comfort food"],
+  indian: ["indian", "curry", "south asian"],
+};
+
+function getCuisineGroup(cuisine: string): string | null {
+  const normalized = cuisine.toLowerCase().trim();
+  for (const [group, cuisines] of Object.entries(CUISINE_GROUPS)) {
+    if (cuisines.some((c) => normalized.includes(c) || c.includes(normalized))) {
+      return group;
+    }
+  }
+  return null;
+}
+
+function extractKeyIngredientWords(ingredients: string[]): string[] {
+  const stopWords = new Set([
+    "fresh",
+    "dried",
+    "ground",
+    "chopped",
+    "diced",
+    "sliced",
+    "minced",
+    "grated",
+    "shredded",
+    "lean",
+    "low",
+    "fat",
+    "reduced",
+    "light",
+    "extra",
+    "virgin",
+    "organic",
+    "whole",
+    "raw",
+    "cooked",
+    "frozen",
+    "canned",
+    "large",
+    "small",
+    "medium",
+    "thin",
+    "thick",
+    "fine",
+    "coarse",
+    "hot",
+    "cold",
+    "warm",
+    "room",
+    "temperature",
+  ]);
+
+  const keyWords = new Set<string>();
+
+  for (const ingredient of ingredients) {
+    const words = ingredient
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !stopWords.has(w));
+
+    for (const word of words) {
+      keyWords.add(word);
+    }
+  }
+
+  return Array.from(keyWords);
+}
+
+function extractTitleWords(title: string): string[] {
+  const stopWords = new Set([
+    "the",
+    "a",
+    "an",
+    "and",
+    "or",
+    "with",
+    "for",
+    "in",
+    "on",
+    "my",
+    "best",
+    "easy",
+    "quick",
+    "simple",
+    "homemade",
+    "style",
+    "recipe",
+    "high",
+    "low",
+    "protein",
+    "calorie",
+    "fat",
+    "carb",
+  ]);
+
+  return title
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, "")
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !stopWords.has(w));
+}
+
 export async function getSimilarRecipes(
   recipeId: string,
   userId: string,
@@ -329,215 +443,87 @@ export async function getSimilarRecipes(
 
     if (!sourceRecipe) return null;
 
-    const sourceIngredients = (sourceRecipe.ingredients || []).map(
+    const sourceIngredientsFull = (sourceRecipe.ingredients || []).map(
       (i: { name: string }) => i.name.toLowerCase().trim(),
     );
+    const sourceIngredientWords = extractKeyIngredientWords(sourceIngredientsFull);
     const sourceCuisine = sourceRecipe.cuisineType || "";
-    const sourceAuthorId = sourceRecipe.source?.authorId || "";
+    const sourceCuisineGroup = getCuisineGroup(sourceCuisine);
+    const sourceTitle = sourceRecipe.title || "";
+    const sourceTitleWords = extractTitleWords(sourceTitle);
 
-    const pipeline = [
-      {
-        $match: {
-          userId,
-          _id: { $ne: new ObjectId(recipeId) },
-        },
-      },
-      {
-        $addFields: {
-          ingredientNames: {
-            $map: {
-              input: { $ifNull: ["$ingredients", []] },
-              as: "ing",
-              in: { $toLower: { $trim: { input: "$$ing.name" } } },
-            },
-          },
-        },
-      },
-      {
-        $addFields: {
-          commonIngredients: {
-            $size: {
-              $setIntersection: ["$ingredientNames", sourceIngredients],
-            },
-          },
-          totalIngredients: {
-            $size: {
-              $setUnion: ["$ingredientNames", sourceIngredients],
-            },
-          },
-          cuisineMatch: {
-            $cond: [
-              {
-                $and: [
-                  { $ne: ["$cuisineType", null] },
-                  { $ne: ["$cuisineType", ""] },
-                  { $eq: ["$cuisineType", sourceCuisine] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-          authorMatch: {
-            $cond: [
-              {
-                $and: [
-                  { $ne: ["$source.authorId", null] },
-                  { $ne: ["$source.authorId", ""] },
-                  { $eq: ["$source.authorId", sourceAuthorId] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
-      },
-      {
-        $addFields: {
-          ingredientScore: {
-            $cond: [
-              { $eq: ["$totalIngredients", 0] },
-              0,
-              { $divide: ["$commonIngredients", "$totalIngredients"] },
-            ],
-          },
-        },
-      },
-      {
-        $addFields: {
-          similarityScore: {
-            $add: [
-              { $multiply: ["$ingredientScore", 0.5] },
-              { $multiply: ["$cuisineMatch", 0.25] },
-              { $multiply: ["$authorMatch", 0.25] },
-            ],
-          },
-        },
-      },
-      {
-        $match: {
-          similarityScore: { $gte: 0.1 },
-        },
-      },
-      {
-        $sort: { similarityScore: -1 as const },
-      },
-      {
-        $limit: limit,
-      },
-      {
-        $project: {
-          _id: 1,
-          title: 1,
-          "source.thumbnailUrl": 1,
-          "source.authorAvatarUrl": 1,
-          "source.authorUsername": 1,
-          similarityScore: 1,
-        },
-      },
-    ];
+    const allUserRecipes = await collection
+      .find({ userId, _id: { $ne: new ObjectId(recipeId) } })
+      .project({
+        _id: 1,
+        title: 1,
+        cuisineType: 1,
+        ingredients: 1,
+        "source.thumbnailUrl": 1,
+        "source.authorAvatarUrl": 1,
+        "source.authorUsername": 1,
+      })
+      .toArray();
 
-    const similarRecipes = await collection.aggregate(pipeline).toArray();
+    const scoredRecipes = allUserRecipes
+      .map((recipe) => {
+        const recipeIngredientsFull = (recipe.ingredients || []).map(
+          (i: { name: string }) => i.name.toLowerCase().trim(),
+        );
+        const recipeIngredientWords = extractKeyIngredientWords(recipeIngredientsFull);
 
-    const countPipeline = [
-      {
-        $match: {
-          userId,
-          _id: { $ne: new ObjectId(recipeId) },
-        },
-      },
-      {
-        $addFields: {
-          ingredientNames: {
-            $map: {
-              input: { $ifNull: ["$ingredients", []] },
-              as: "ing",
-              in: { $toLower: { $trim: { input: "$$ing.name" } } },
-            },
-          },
-        },
-      },
-      {
-        $addFields: {
-          commonIngredients: {
-            $size: {
-              $setIntersection: ["$ingredientNames", sourceIngredients],
-            },
-          },
-          totalIngredients: {
-            $size: {
-              $setUnion: ["$ingredientNames", sourceIngredients],
-            },
-          },
-          cuisineMatch: {
-            $cond: [
-              {
-                $and: [
-                  { $ne: ["$cuisineType", null] },
-                  { $ne: ["$cuisineType", ""] },
-                  { $eq: ["$cuisineType", sourceCuisine] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-          authorMatch: {
-            $cond: [
-              {
-                $and: [
-                  { $ne: ["$source.authorId", null] },
-                  { $ne: ["$source.authorId", ""] },
-                  { $eq: ["$source.authorId", sourceAuthorId] },
-                ],
-              },
-              1,
-              0,
-            ],
-          },
-        },
-      },
-      {
-        $addFields: {
-          ingredientScore: {
-            $cond: [
-              { $eq: ["$totalIngredients", 0] },
-              0,
-              { $divide: ["$commonIngredients", "$totalIngredients"] },
-            ],
-          },
-        },
-      },
-      {
-        $addFields: {
-          similarityScore: {
-            $add: [
-              { $multiply: ["$ingredientScore", 0.5] },
-              { $multiply: ["$cuisineMatch", 0.25] },
-              { $multiply: ["$authorMatch", 0.25] },
-            ],
-          },
-        },
-      },
-      {
-        $match: {
-          similarityScore: { $gte: 0.1 },
-        },
-      },
-      {
-        $limit: 9,
-      },
-      {
-        $count: "count",
-      },
-    ];
+        const commonWords = sourceIngredientWords.filter((w) =>
+          recipeIngredientWords.includes(w),
+        );
+        const unionWords = new Set([
+          ...sourceIngredientWords,
+          ...recipeIngredientWords,
+        ]);
+        const ingredientScore =
+          unionWords.size > 0 ? commonWords.length / unionWords.size : 0;
 
-    const countResult = await collection.aggregate(countPipeline).toArray();
-    const totalSimilar = countResult[0]?.count || 0;
+        const recipeCuisine = recipe.cuisineType || "";
+        const recipeCuisineGroup = getCuisineGroup(recipeCuisine);
+        let cuisineScore = 0;
+        if (sourceCuisine && recipeCuisine) {
+          if (sourceCuisine.toLowerCase() === recipeCuisine.toLowerCase()) {
+            cuisineScore = 1;
+          } else if (
+            sourceCuisineGroup &&
+            sourceCuisineGroup === recipeCuisineGroup
+          ) {
+            cuisineScore = 0.7;
+          }
+        }
 
-    const recipes = similarRecipes.map((r) => ({
-      _id: r._id.toString(),
+        const recipeTitleWords = extractTitleWords(recipe.title || "");
+        const commonTitleWords = sourceTitleWords.filter((w) =>
+          recipeTitleWords.includes(w),
+        );
+        const unionTitleWords = new Set([...sourceTitleWords, ...recipeTitleWords]);
+        const titleScore =
+          unionTitleWords.size > 0 ? commonTitleWords.length / unionTitleWords.size : 0;
+
+        const similarityScore =
+          ingredientScore * 0.5 +
+          cuisineScore * 0.25 +
+          titleScore * 0.25;
+
+        return {
+          _id: recipe._id.toString(),
+          title: recipe.title,
+          source: recipe.source,
+          similarityScore,
+        };
+      })
+      .filter((r) => r.similarityScore >= 0.05)
+      .sort((a, b) => b.similarityScore - a.similarityScore);
+
+    const totalSimilar = Math.min(scoredRecipes.length, 9);
+    const limitedRecipes = scoredRecipes.slice(0, limit);
+
+    const recipes = limitedRecipes.map((r) => ({
+      _id: r._id,
       title: r.title,
       thumbnailUrl: r.source?.thumbnailUrl,
       authorAvatarUrl: r.source?.authorAvatarUrl,
@@ -547,7 +533,7 @@ export async function getSimilarRecipes(
     return {
       recipes,
       hasMore: totalSimilar > limit,
-      totalSimilar: Math.min(totalSimilar, 9),
+      totalSimilar,
     };
   } catch {
     return null;
