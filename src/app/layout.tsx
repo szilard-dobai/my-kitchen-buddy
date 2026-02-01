@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
+import { QueryProvider } from "@/providers/query-provider";
 import { SentryUserProvider } from "@/providers/sentry-user-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
@@ -67,9 +68,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextTopLoader color="var(--primary)" showSpinner={false} />
-        <SentryUserProvider>
-          <ThemeProvider>{children}</ThemeProvider>
-        </SentryUserProvider>
+        <QueryProvider>
+          <SentryUserProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </SentryUserProvider>
+        </QueryProvider>
         <Analytics />
       </body>
     </html>
