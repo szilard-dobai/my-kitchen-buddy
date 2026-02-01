@@ -15,6 +15,11 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 - `authors` - Video creator profiles (username, display name, avatar)
 - `telegramLinks` - Links Telegram users to app accounts
 - `subscriptions` - User plan tiers, extraction limits, usage tracking, Stripe customer IDs
+- `collections` - User recipe collections (name, color, recipeCount)
+- `recipe_collections` - Many-to-many relationship between recipes and collections
+- `tags` - User tags (name, color, recipeCount)
+- `recipe_tags` - Many-to-many relationship between recipes and tags
+- `tracking` - Analytics events (page views, recipe interactions, upgrade prompts, etc.)
 - `users`, `sessions` - Auth tables managed by better-auth
 
 ### Key Flows
@@ -45,8 +50,45 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 - Pro tier: 100 extractions/month ($5/month or $50/year)
 - Stripe checkout at `/api/billing/checkout`
 - Customer portal at `/api/billing/portal`
-- Usage tracking at `/api/billing/usage`
+- Usage tracking at `/api/billing/usage` (includes extractions, collections, tags)
 - Webhook at `/api/billing/webhook` handles subscription events
+- Monthly auto-reset for free tier based on `currentPeriodEnd`
+
+### Plan Tier Limits
+
+| Feature | Free | Pro |
+|---------|------|-----|
+| Extractions/month | 10 | 100 |
+| Collections | 3 | Unlimited |
+| Tags | 5 | Unlimited |
+| Similar recipes shown | 1 | 9 |
+
+### Collections & Tags
+
+- Users can organize recipes into collections and add custom tags
+- Both support colored chips (8 color options)
+- Plan tier limits enforced via upgrade prompts
+- React Query hooks with optimistic updates (`use-collections.ts`, `use-tags.ts`)
+
+### Similar Recipes (`src/app/api/recipes/[id]/similar/route.ts`)
+
+- Algorithm scores similarity based on ingredient overlap, cuisine matching, and title similarity
+- Cuisine family grouping (e.g., Italian/French/Spanish grouped as Mediterranean)
+- Results limited by plan tier (Free: 1, Pro: 9)
+
+### Analytics Tracking (`src/lib/tracking/`)
+
+- Client-side `trackEvent()` posts to `/api/tracking`
+- Tracks page views, recipe interactions, upgrade prompts, extractions, billing events
+- Persistent `deviceId` in localStorage for cross-session tracking
+- Captures device type, country, region from Vercel headers
+
+### Milestone Prompts (`src/lib/upgrade-prompts.ts`)
+
+- Celebratory upgrade prompts at 5, 10, 25, 50 saved recipes
+- localStorage-based tracking to prevent duplicate prompts
+- Only shown to free tier users
+- 7-day dismissal window for all upgrade prompts
 
 ### URL Normalization
 
@@ -61,22 +103,35 @@ src/
 │   ├── (dashboard)/       # Protected pages
 │   │   ├── extract/       # Video extraction page
 │   │   ├── recipes/       # Recipe library and detail pages
-│   │   └── settings/      # Unified settings (Profile, Telegram, Billing tabs)
+│   │   └── settings/      # Unified settings (Profile, Telegram, Billing, Tags tabs)
 │   └── api/               # API routes
 │       ├── extract/       # Recipe extraction
 │       ├── billing/       # Stripe checkout, portal, usage, webhook
+│       ├── collections/   # Collection CRUD + recipe relationships
+│       ├── tags/          # Tag CRUD + recipe relationships
+│       ├── recipes/       # Recipe CRUD + similar recipes endpoint
+│       ├── tracking/      # Analytics events POST/GET
 │       ├── telegram/      # Bot webhook
 │       └── telegram-link/ # Account linking
 ├── components/            # React components
-│   ├── layout/           # Header, layout components
-│   ├── recipes/          # Recipe-specific components
+│   ├── collections/      # Collection sidebar, dropdown, dialogs
+│   ├── layout/           # Header, footer components
+│   ├── recipes/          # Recipe cards, filters, similar recipes
+│   ├── tags/             # Tag chips, dropdown, dialogs
+│   ├── tracking/         # PageTracker, CTALink components
+│   ├── upgrade/          # UpgradePrompt, MilestonePromptTrigger
 │   └── ui/               # UI primitives (Radix UI based)
+├── hooks/                 # Custom React hooks
+│   ├── use-collections.ts # React Query hooks for collections
+│   └── use-tags.ts       # React Query hooks for tags
 ├── lib/                   # Utilities (db, auth, session, stripe, telegram)
+│   ├── tracking/         # Analytics client and types
+│   └── upgrade-prompts.ts # Milestone detection and dismissal logic
 ├── models/                # Database operations
 ├── services/
 │   ├── extraction/        # Core extraction logic
 │   └── telegram/          # Bot handlers and notifications
-└── types/                 # TypeScript interfaces
+└── types/                 # TypeScript interfaces (includes plan limits)
 ```
 
 ## Code Style
@@ -109,3 +164,12 @@ The AI extraction only populates nutrition fields when explicitly mentioned in t
 - **OpenAI**: GPT-4o for recipe extraction with JSON mode (extracts nutrition info when mentioned)
 - **Telegram Bot API**: Via grammy library, webhook at `/api/telegram/webhook`
 - **Stripe**: Subscription billing, webhook at `/api/billing/webhook`
+
+## Key Types
+
+Plan limits are defined in type files for easy reference:
+
+- `PLAN_LIMITS` in `types/subscription.ts` - extraction limits per tier
+- `SIMILAR_RECIPES_LIMITS` in `types/subscription.ts` - similar recipes visible per tier
+- `COLLECTION_LIMITS` in `types/collection.ts` - collection limits per tier
+- `TAG_LIMITS` in `types/tag.ts` - tag limits per tier

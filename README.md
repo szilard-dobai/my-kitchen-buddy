@@ -12,7 +12,13 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
 - Manually add/edit nutrition data (calories, protein, carbs, fat, fiber, sugar, sodium)
 - Caches extractions to avoid redundant API calls
 - Telegram bot integration: send video URLs directly to the bot to extract recipes
-- Pro subscription with Stripe billing (100 extractions/month vs 10 on Free)
+- **Collections**: Organize recipes into colored collections
+- **Custom tags**: Add personalized tags to recipes with color customization
+- **Similar recipes**: Discover related recipes based on ingredients and cuisine
+- **Milestone celebrations**: Achievement prompts when saving 5, 10, 25, or 50 recipes
+- Pro subscription with Stripe billing:
+  - Free: 10 extractions/month, 3 collections, 5 tags, 1 similar recipe shown
+  - Pro: 100 extractions/month, unlimited collections/tags, 9 similar recipes shown
 
 ## Tech Stack
 
@@ -26,6 +32,7 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
 - Stripe for subscription billing
 - grammy for Telegram bot
 - Tailwind CSS 4
+- React Query for data fetching and caching
 
 ## Setup
 
