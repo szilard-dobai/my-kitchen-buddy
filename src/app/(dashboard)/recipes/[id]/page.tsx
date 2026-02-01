@@ -16,6 +16,7 @@ import { DeleteRecipeButton } from "@/components/recipes/delete-recipe-button";
 import { NutritionCard } from "@/components/recipes/nutrition-card";
 import { RecipeCollectionButton } from "@/components/recipes/recipe-collection-button";
 import { RecipeTagButton } from "@/components/recipes/recipe-tag-button";
+import { SimilarRecipesSection } from "@/components/recipes/similar-recipes-section";
 import { VideoEmbed } from "@/components/recipes/video-embed";
 import { PageTracker } from "@/components/tracking/page-tracker";
 import { Button } from "@/components/ui/button";
@@ -285,6 +286,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
           )}
         </div>
       )}
+
+      <SimilarRecipesSection
+        recipeId={recipe._id!}
+        planTier={subscription.planTier}
+      />
 
       {recipe.source.url && (
         <div className="mt-8 pt-6 border-t">
