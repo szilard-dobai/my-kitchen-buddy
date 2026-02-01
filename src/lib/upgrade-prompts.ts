@@ -5,7 +5,11 @@ export type UpgradeFeature =
   | "collections"
   | "tags"
   | "bulk_actions"
-  | "similar_recipes";
+  | "similar_recipes"
+  | "milestone_5"
+  | "milestone_10"
+  | "milestone_25"
+  | "milestone_50";
 
 interface DismissedPrompts {
   [feature: string]: number;

@@ -22,6 +22,7 @@ interface FeatureConfig {
   title: string;
   description: string;
   getDescription?: (current: number, limit: number, extra?: number) => string;
+  celebratoryOnly?: boolean;
 }
 
 const FEATURE_CONFIG: Record<UpgradeFeature, FeatureConfig> = {
@@ -47,6 +48,27 @@ const FEATURE_CONFIG: Record<UpgradeFeature, FeatureConfig> = {
     description: "Upgrade to Pro to see all similar recipes.",
     getDescription: (_, __, extra) =>
       `See ${extra} more similar recipes with Pro. Find inspiration from your saved recipes.`,
+  },
+  milestone_5: {
+    title: "You're building a collection!",
+    description:
+      "You've saved 5 recipes. Keep discovering and saving your favorites!",
+    celebratoryOnly: true,
+  },
+  milestone_10: {
+    title: "10 recipes saved!",
+    description:
+      "Nice collection! Pro users organize with unlimited tags to categorize recipes by cuisine, mood, or meal type.",
+  },
+  milestone_25: {
+    title: "25 recipes and counting!",
+    description:
+      "Your library is growing! Pro users discover connections with unlimited similar recipe suggestions.",
+  },
+  milestone_50: {
+    title: "50 recipes — impressive!",
+    description:
+      "You're a power user! Pro users organize large collections with unlimited folders to keep everything findable.",
   },
 };
 
@@ -105,19 +127,27 @@ export function UpgradePrompt({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col gap-2 sm:flex-col">
-          <Button asChild className="w-full">
-            <Link href="/settings?tab=billing">
-              <Crown className="size-4" />
-              Upgrade to Pro
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={handleDismiss}
-          >
-            Maybe Later
-          </Button>
+          {config.celebratoryOnly ? (
+            <Button className="w-full" onClick={handleDismiss}>
+              Got it!
+            </Button>
+          ) : (
+            <>
+              <Button asChild className="w-full">
+                <Link href="/settings?tab=billing">
+                  <Crown className="size-4" />
+                  Upgrade to Pro
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={handleDismiss}
+              >
+                Maybe Later
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
