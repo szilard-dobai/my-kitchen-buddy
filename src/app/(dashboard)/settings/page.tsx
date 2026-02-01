@@ -3,6 +3,9 @@
 import { Check, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
+import { DeleteCollectionDialog } from "@/components/collections/delete-collection-dialog";
+import { EditCollectionDialog } from "@/components/collections/edit-collection-dialog";
 import { CreateTagDialog } from "@/components/tags/create-tag-dialog";
 import { DeleteTagDialog } from "@/components/tags/delete-tag-dialog";
 import { EditTagDialog } from "@/components/tags/edit-tag-dialog";
@@ -33,9 +36,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCollections } from "@/hooks/use-collections";
 import { useTags } from "@/hooks/use-tags";
 import { authClient, useSession } from "@/lib/auth-client";
 import { trackEvent } from "@/lib/tracking";
+import type { Collection } from "@/types/collection";
 import type { UsageInfo } from "@/types/subscription";
 import type { Tag } from "@/types/tag";
 
@@ -958,6 +963,124 @@ function BillingTab() {
   );
 }
 
+function CollectionsTab() {
+  const { data: collections = [], isLoading } = useCollections();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+  const [deletingCollection, setDeletingCollection] = useState<Collection | null>(null);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-8">
+          <p className="text-center text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Collections</CardTitle>
+              <CardDescription>
+                Manage your recipe collections. Collections help you organize
+                recipes into groups.
+              </CardDescription>
+            </div>
+            <Button onClick={() => setCreateDialogOpen(true)} size="sm">
+              <Plus className="size-4 mr-1" />
+              Create collection
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {collections.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">
+                You haven&apos;t created any collections yet.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                <Plus className="size-4 mr-1" />
+                Create your first collection
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {collections.map((collection) => (
+                <div
+                  key={collection._id}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="size-3 rounded-full"
+                      style={{ backgroundColor: collection.color }}
+                    />
+                    <span className="text-sm font-medium">{collection.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {collection.recipeCount} recipe{collection.recipeCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="size-8 flex items-center justify-center rounded hover:bg-accent cursor-pointer">
+                        <MoreHorizontal className="size-4 text-muted-foreground" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                      <DropdownMenuItem onClick={() => setEditingCollection(collection)}>
+                        <Pencil className="size-3.5 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDeletingCollection(collection)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="size-3.5 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <CreateCollectionDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        currentCount={collections.length}
+        planTier="free"
+      />
+
+      {editingCollection && (
+        <EditCollectionDialog
+          open={!!editingCollection}
+          onOpenChange={(open) => !open && setEditingCollection(null)}
+          collection={editingCollection}
+        />
+      )}
+
+      {deletingCollection && (
+        <DeleteCollectionDialog
+          open={!!deletingCollection}
+          onOpenChange={(open) => !open && setDeletingCollection(null)}
+          collection={deletingCollection}
+        />
+      )}
+    </div>
+  );
+}
+
 function TagsTab() {
   const { data: tags = [], isLoading } = useTags();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -1076,7 +1199,7 @@ function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["profile", "telegram", "billing", "tags"].includes(
+  const defaultTab = ["profile", "collections", "tags", "telegram", "billing"].includes(
     tabParam || "",
   )
     ? tabParam!
@@ -1108,6 +1231,7 @@ function SettingsContent() {
       <Tabs value={defaultTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="collections">Collections</TabsTrigger>
           <TabsTrigger value="tags">Tags</TabsTrigger>
           <TabsTrigger value="telegram">Telegram</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
@@ -1115,6 +1239,10 @@ function SettingsContent() {
 
         <TabsContent value="profile">
           <ProfileTab />
+        </TabsContent>
+
+        <TabsContent value="collections">
+          <CollectionsTab />
         </TabsContent>
 
         <TabsContent value="tags">
