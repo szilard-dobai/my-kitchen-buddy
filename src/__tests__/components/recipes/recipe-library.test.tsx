@@ -19,6 +19,7 @@ import {
   vi,
 } from "vitest";
 import { RecipeLibrary } from "@/components/recipes/recipe-library";
+import { markMilestoneSeen } from "@/lib/upgrade-prompts";
 import { mockRecipeList } from "../../mocks/fixtures";
 
 vi.mock("@/lib/tracking", () => ({
@@ -85,6 +86,8 @@ describe("RecipeLibrary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    localStorage.clear();
+    markMilestoneSeen(5);
   });
 
   afterEach(() => {
@@ -336,5 +339,35 @@ describe("RecipeLibrary", () => {
     );
 
     expect(screen.getByText("Minimal Recipe")).toBeInTheDocument();
+  });
+
+  it("shows milestone prompt for free user with 5+ recipes", () => {
+    localStorage.clear();
+
+    renderWithQueryClient(
+      <RecipeLibrary
+        initialTags={[]}
+        initialRecipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
+
+    expect(screen.getByText("You're building a collection!")).toBeInTheDocument();
+  });
+
+  it("does not show milestone prompt for pro user", () => {
+    localStorage.clear();
+
+    renderWithQueryClient(
+      <RecipeLibrary
+        initialTags={[]}
+        initialRecipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="pro"
+      />,
+    );
+
+    expect(screen.queryByText("You're building a collection!")).not.toBeInTheDocument();
   });
 });

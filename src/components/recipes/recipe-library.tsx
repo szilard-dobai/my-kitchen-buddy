@@ -16,6 +16,7 @@ import {
 import { RecipeSearch } from "@/components/recipes/recipe-search";
 import { RecipeSort } from "@/components/recipes/recipe-sort";
 import { Button } from "@/components/ui/button";
+import { MilestonePromptTrigger } from "@/components/upgrade/milestone-prompt-trigger";
 import { useCollections } from "@/hooks/use-collections";
 import { useTags } from "@/hooks/use-tags";
 import {
@@ -126,6 +127,7 @@ export function RecipeLibrary({
 
   return (
     <div className="flex gap-6">
+      <MilestonePromptTrigger recipeCount={recipes.length} planTier={planTier} />
       <aside
         className={`hidden lg:block shrink-0 transition-[width] duration-200 ${
           isSidebarCollapsed ? "w-10" : "w-[180px]"
