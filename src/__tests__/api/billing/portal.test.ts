@@ -75,7 +75,7 @@ describe("/api/billing/portal", () => {
       expect(data.url).toBe("https://billing.stripe.com/portal_session");
       expect(stripe.billingPortal.sessions.create).toHaveBeenCalledWith({
         customer: mockProSubscription.stripeCustomerId,
-        return_url: expect.stringContaining("/settings/billing"),
+        return_url: expect.stringContaining("/settings?tab=billing"),
       });
     });
 

@@ -130,6 +130,10 @@ export const handlers = [
   http.get("/api/tags", () => {
     return HttpResponse.json(mockTagList);
   }),
+
+  http.post("/api/tracking", () => {
+    return HttpResponse.json({ success: true });
+  }),
 ];
 
 export const linkedTelegramHandler = http.get("/api/telegram-link", () => {

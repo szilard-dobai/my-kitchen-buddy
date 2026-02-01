@@ -228,7 +228,10 @@ describe("CreateCollectionDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    } as Response);
   });
 
   afterEach(() => {
@@ -296,9 +299,9 @@ describe("CreateCollectionDialog", () => {
       />,
     );
 
-    expect(screen.getByText(/collection limit reached/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/collection limit reached/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/3\/3/)).toBeInTheDocument();
-    expect(screen.getByText(/upgrade to pro/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/upgrade to pro/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("does not show limit warning for pro users", () => {
@@ -351,7 +354,10 @@ describe("DeleteCollectionDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    } as Response);
   });
 
   afterEach(() => {

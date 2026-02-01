@@ -197,7 +197,7 @@ describe("RecipeForm", () => {
 
     server.use(
       http.put(`/api/recipes/${mockRecipe._id}`, () => {
-        return HttpResponse.json({ error: "Failed" }, { status: 500 });
+        return HttpResponse.json({ error: "Failed to update recipe" }, { status: 500 });
       }),
     );
 

@@ -13,6 +13,14 @@ vi.mock("@/models/subscription", () => ({
   getOrCreateSubscription: vi.fn(),
 }));
 
+vi.mock("@/models/collection", () => ({
+  getCollectionCount: vi.fn(),
+}));
+
+vi.mock("@/models/tag", () => ({
+  getTagCount: vi.fn(),
+}));
+
 describe("/api/billing/usage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,9 +42,13 @@ describe("/api/billing/usage", () => {
     it("returns usage info for free tier user", async () => {
       const { getSession } = await import("@/lib/session");
       const { getOrCreateSubscription } = await import("@/models/subscription");
+      const { getCollectionCount } = await import("@/models/collection");
+      const { getTagCount } = await import("@/models/tag");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockFreeSubscription);
+      vi.mocked(getCollectionCount).mockResolvedValueOnce(2);
+      vi.mocked(getTagCount).mockResolvedValueOnce(3);
 
       const { GET } = await import("@/app/api/billing/usage/route");
       const response = await GET();
@@ -52,9 +64,13 @@ describe("/api/billing/usage", () => {
     it("returns usage info for pro tier user", async () => {
       const { getSession } = await import("@/lib/session");
       const { getOrCreateSubscription } = await import("@/models/subscription");
+      const { getCollectionCount } = await import("@/models/collection");
+      const { getTagCount } = await import("@/models/tag");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getCollectionCount).mockResolvedValueOnce(5);
+      vi.mocked(getTagCount).mockResolvedValueOnce(10);
 
       const { GET } = await import("@/app/api/billing/usage/route");
       const response = await GET();
@@ -70,6 +86,8 @@ describe("/api/billing/usage", () => {
     it("creates subscription if none exists", async () => {
       const { getSession } = await import("@/lib/session");
       const { getOrCreateSubscription } = await import("@/models/subscription");
+      const { getCollectionCount } = await import("@/models/collection");
+      const { getTagCount } = await import("@/models/tag");
 
       const newSubscription = {
         ...mockFreeSubscription,
@@ -78,6 +96,8 @@ describe("/api/billing/usage", () => {
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(newSubscription);
+      vi.mocked(getCollectionCount).mockResolvedValueOnce(0);
+      vi.mocked(getTagCount).mockResolvedValueOnce(0);
 
       const { GET } = await import("@/app/api/billing/usage/route");
       const response = await GET();
