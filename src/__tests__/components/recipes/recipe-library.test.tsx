@@ -1,9 +1,24 @@
-import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  act,
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-
+import type { ReactNode } from "react";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { RecipeLibrary } from "@/components/recipes/recipe-library";
-
 import { mockRecipeList } from "../../mocks/fixtures";
 
 vi.mock("@/lib/tracking", () => ({
@@ -14,8 +29,50 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  useSearchParams: () => ({
+    get: () => null,
+    toString: () => "",
   }),
 }));
+
+vi.mock("@/hooks/use-collections", () => ({
+  useCollections: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+  }),
+  useAddRecipeToCollection: () => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+  useRemoveRecipeFromCollection: () => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+  useCreateCollection: () => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+}));
+
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+}
+
+function renderWithQueryClient(ui: ReactNode) {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
 
 // Mock for Radix UI pointer capture (not available in jsdom)
 beforeAll(() => {
@@ -36,16 +93,22 @@ describe("RecipeLibrary", () => {
   });
 
   it("renders empty state when no recipes", async () => {
-    
-    render(<RecipeLibrary recipes={[]} />);
+    renderWithQueryClient(
+      <RecipeLibrary recipes={[]} initialCollections={[]} planTier="free" />,
+    );
 
     expect(screen.getByText("No recipes yet.")).toBeInTheDocument();
     expect(screen.getByText("Extract your first recipe")).toBeInTheDocument();
   });
 
   it("renders recipe cards for each recipe", async () => {
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     expect(screen.getByText("Test Pasta Recipe")).toBeInTheDocument();
     expect(screen.getByText("Healthy Salad Recipe")).toBeInTheDocument();
@@ -54,16 +117,26 @@ describe("RecipeLibrary", () => {
   });
 
   it("renders search input", async () => {
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     expect(searchInput).toBeInTheDocument();
   });
 
   it("displays correct recipe count", async () => {
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     expect(screen.getByText(/Showing 6 recipes/i)).toBeInTheDocument();
   });
@@ -71,7 +144,13 @@ describe("RecipeLibrary", () => {
   it("allows typing in search input", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     await user.type(searchInput, "Pasta");
@@ -81,8 +160,14 @@ describe("RecipeLibrary", () => {
 
   it("filters recipes by search term (description match)", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     await user.type(searchInput, "TikTok");
@@ -98,8 +183,14 @@ describe("RecipeLibrary", () => {
 
   it("filters recipes by search term (ingredient match)", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     await user.type(searchInput, "Parmesan");
@@ -115,8 +206,14 @@ describe("RecipeLibrary", () => {
 
   it("shows no results message when filters match nothing", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     await user.type(searchInput, "nonexistentzzzxxx");
@@ -126,14 +223,21 @@ describe("RecipeLibrary", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/No recipes match your search/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/No recipes match your search/i),
+      ).toBeInTheDocument();
     });
     expect(screen.getByText(/Clear all filters/i)).toBeInTheDocument();
   });
 
   it("sorts by newest first (default)", async () => {
-    
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const cards = screen.getAllByRole("link");
     expect(cards.length).toBe(6);
@@ -141,7 +245,13 @@ describe("RecipeLibrary", () => {
   });
 
   it("renders sort dropdown", async () => {
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     const sortButton = screen.getByRole("combobox");
     expect(sortButton).toBeInTheDocument();
@@ -150,10 +260,18 @@ describe("RecipeLibrary", () => {
   it("shows reset button when search has value", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-    render(<RecipeLibrary recipes={mockRecipeList} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={mockRecipeList}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     // Initially no reset button
-    expect(screen.queryByRole("button", { name: /reset/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /reset/i }),
+    ).not.toBeInTheDocument();
 
     const searchInput = screen.getByPlaceholderText(/search/i);
     await user.type(searchInput, "Pasta");
@@ -165,10 +283,11 @@ describe("RecipeLibrary", () => {
 
     // Reset button appears after search is applied
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /reset/i }),
+      ).toBeInTheDocument();
     });
   });
-
 
   it("handles recipes with missing optional fields", async () => {
     const recipesWithMissing = [
@@ -181,6 +300,7 @@ describe("RecipeLibrary", () => {
         instructions: [],
         equipment: [],
         tipsAndNotes: [],
+        collectionIds: [],
         source: {
           url: "https://www.tiktok.com/@test/video/123",
           platform: "tiktok" as const,
@@ -190,8 +310,13 @@ describe("RecipeLibrary", () => {
       },
     ];
 
-    
-    render(<RecipeLibrary recipes={recipesWithMissing} />);
+    renderWithQueryClient(
+      <RecipeLibrary
+        recipes={recipesWithMissing}
+        initialCollections={[]}
+        planTier="free"
+      />,
+    );
 
     expect(screen.getByText("Minimal Recipe")).toBeInTheDocument();
   });
