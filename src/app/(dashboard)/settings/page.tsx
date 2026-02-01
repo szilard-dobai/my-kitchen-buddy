@@ -696,12 +696,12 @@ function FeatureComparisonTable({ isPro }: { isPro: boolean }) {
           <tr className="bg-muted/50">
             <th className="text-left p-3 font-medium">Feature</th>
             <th
-              className={`text-center p-3 font-medium ${!isPro ? "bg-muted" : ""}`}
+              className={`text-center p-3 font-medium ${!isPro ? "bg-muted dark:bg-muted/50" : ""}`}
             >
               Free
             </th>
             <th
-              className={`text-center p-3 font-medium ${isPro ? "bg-orange-50" : ""}`}
+              className={`text-center p-3 font-medium ${isPro ? "bg-orange-50 dark:bg-orange-950/30" : ""}`}
             >
               Pro
             </th>
@@ -712,12 +712,12 @@ function FeatureComparisonTable({ isPro }: { isPro: boolean }) {
             <tr key={feature.name} className="border-t">
               <td className="p-3">{feature.name}</td>
               <td
-                className={`text-center p-3 text-muted-foreground ${!isPro ? "bg-muted/30" : ""}`}
+                className={`text-center p-3 text-muted-foreground ${!isPro ? "bg-muted/30 dark:bg-muted/20" : ""}`}
               >
                 {feature.free}
               </td>
               <td
-                className={`text-center p-3 ${isPro ? "bg-orange-50/50 text-foreground font-medium" : ""}`}
+                className={`text-center p-3 ${isPro ? "bg-orange-50/50 dark:bg-orange-950/20 text-foreground font-medium" : ""}`}
               >
                 {feature.pro}
               </td>
