@@ -239,7 +239,7 @@ export default function ExtractPage() {
             {usage.used >= usage.limit && (
               <span className="text-red-500 ml-2">
                 Limit reached.{" "}
-                <a href="/settings/billing" className="underline">
+                <a href="/settings?tab=billing" className="underline">
                   Upgrade to Pro
                 </a>
               </span>
