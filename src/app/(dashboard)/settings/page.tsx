@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { Check, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -41,17 +42,14 @@ import { useTags } from "@/hooks/use-tags";
 import { authClient, useSession } from "@/lib/auth-client";
 import { trackEvent } from "@/lib/tracking";
 import type { Collection } from "@/types/collection";
-import type { UsageInfo } from "@/types/subscription";
+import type { PlanTier, UsageInfo } from "@/types/subscription";
 import type { Tag } from "@/types/tag";
 
-function ProfileTab() {
+function ProfileTab({ planTier }: { planTier: PlanTier }) {
   const router = useRouter();
   const { data: session, refetch } = useSession();
 
   const [name, setName] = useState("");
-  const [nameLoading, setNameLoading] = useState(false);
-  const [nameError, setNameError] = useState("");
-  const [nameSuccess, setNameSuccess] = useState(false);
 
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
 
@@ -107,28 +105,18 @@ function ProfileTab() {
     checkAccountType();
   }, []);
 
-  async function handleNameSave() {
-    if (!name.trim()) return;
-    setNameLoading(true);
-    setNameError("");
-    setNameSuccess(false);
-
-    try {
-      const result = await authClient.updateUser({ name: name.trim() });
+  const nameMutation = useMutation({
+    mutationFn: async (newName: string) => {
+      const result = await authClient.updateUser({ name: newName });
       if (result.error) {
         throw new Error(result.error.message || "Failed to update name");
       }
-      await refetch();
-      setNameSuccess(true);
-      setTimeout(() => setNameSuccess(false), 3000);
-    } catch (err) {
-      setNameError(
-        err instanceof Error ? err.message : "Failed to update name",
-      );
-    } finally {
-      setNameLoading(false);
-    }
-  }
+      return result;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
   async function handleEmailChange() {
     if (!newEmail.trim() || !emailPassword) return;
@@ -228,16 +216,6 @@ function ProfileTab() {
           <CardDescription>Manage your account details.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {nameError && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-              {nameError}
-            </div>
-          )}
-          {nameSuccess && (
-            <div className="p-3 text-sm text-green-700 bg-green-50 rounded-md">
-              Name updated successfully
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <div className="flex gap-2">
@@ -248,10 +226,10 @@ function ProfileTab() {
                 placeholder="Your name"
               />
               <Button
-                onClick={handleNameSave}
-                disabled={nameLoading || !nameChanged}
+                onClick={() => nameMutation.mutate(name.trim())}
+                disabled={nameMutation.isPending || !nameChanged}
               >
-                {nameLoading ? "Saving..." : "Save"}
+                {nameMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
@@ -583,7 +561,7 @@ function ProfileTab() {
         open={createCollectionDialogOpen}
         onOpenChange={setCreateCollectionDialogOpen}
         currentCount={collections.length}
-        planTier="free"
+        planTier={planTier}
       />
 
       {editingCollection && (
@@ -606,7 +584,7 @@ function ProfileTab() {
         open={createTagDialogOpen}
         onOpenChange={setCreateTagDialogOpen}
         currentCount={tags.length}
-        planTier="free"
+        planTier={planTier}
       />
 
       {editingTag && (
@@ -927,10 +905,8 @@ function FeatureComparisonTable({ isPro }: { isPro: boolean }) {
   );
 }
 
-function BillingTab() {
+function BillingTab({ usage }: { usage: UsageInfo | null }) {
   const searchParams = useSearchParams();
-  const [usage, setUsage] = useState<UsageInfo | null>(null);
-  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
@@ -939,23 +915,6 @@ function BillingTab() {
 
   const success = searchParams.get("success");
   const canceled = searchParams.get("canceled");
-
-  useEffect(() => {
-    fetchUsage();
-  }, []);
-
-  async function fetchUsage() {
-    try {
-      const response = await fetch("/api/billing/usage");
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setUsage(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load usage");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleUpgrade(priceType: "monthly" | "yearly") {
     setActionLoading(true);
@@ -987,16 +946,6 @@ function BillingTab() {
       setError(err instanceof Error ? err.message : "Failed to open portal");
       setActionLoading(false);
     }
-  }
-
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="py-8">
-          <p className="text-center text-muted-foreground">Loading...</p>
-        </CardContent>
-      </Card>
-    );
   }
 
   const isPro = usage?.planTier === "pro";
@@ -1168,12 +1117,31 @@ function SettingsContent() {
     : "profile";
   const hasTrackedRef = useRef(false);
 
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
+
   useEffect(() => {
     if (!hasTrackedRef.current) {
       trackEvent("settings_view", { tab: defaultTab });
       hasTrackedRef.current = true;
     }
   }, [defaultTab]);
+
+  useEffect(() => {
+    async function fetchUsage() {
+      try {
+        const response = await fetch("/api/billing/usage");
+        const data = await response.json();
+        if (response.ok) {
+          setUsage(data);
+        }
+      } catch {
+        // Default to null on error
+      }
+    }
+    fetchUsage();
+  }, []);
+
+  const planTier: PlanTier = usage?.planTier ?? "free";
 
   function handleTabChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -1198,7 +1166,7 @@ function SettingsContent() {
         </TabsList>
 
         <TabsContent value="profile">
-          <ProfileTab />
+          <ProfileTab planTier={planTier} />
         </TabsContent>
 
         <TabsContent value="integrations">
@@ -1206,7 +1174,7 @@ function SettingsContent() {
         </TabsContent>
 
         <TabsContent value="billing">
-          <BillingTab />
+          <BillingTab usage={usage} />
         </TabsContent>
       </Tabs>
     </div>
