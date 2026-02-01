@@ -80,3 +80,17 @@ export type CreateRecipeInput = Omit<Recipe, "_id" | "collectionIds" | "tagIds" 
 export type UpdateRecipeInput = Partial<
   Omit<Recipe, "_id" | "userId" | "createdAt" | "updatedAt">
 >;
+
+export interface SimilarRecipe {
+  _id: string;
+  title: string;
+  thumbnailUrl?: string;
+  authorAvatarUrl?: string;
+  authorUsername?: string;
+}
+
+export interface SimilarRecipesResponse {
+  recipes: SimilarRecipe[];
+  hasMore: boolean;
+  totalSimilar: number;
+}
