@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { CreateTagDialog } from "@/components/tags/create-tag-dialog";
@@ -102,7 +102,9 @@ function ProfileTab() {
       setNameSuccess(true);
       setTimeout(() => setNameSuccess(false), 3000);
     } catch (err) {
-      setNameError(err instanceof Error ? err.message : "Failed to update name");
+      setNameError(
+        err instanceof Error ? err.message : "Failed to update name",
+      );
     } finally {
       setNameLoading(false);
     }
@@ -117,7 +119,10 @@ function ProfileTab() {
       const response = await fetch("/api/account", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: newEmail.trim(), currentPassword: emailPassword }),
+        body: JSON.stringify({
+          email: newEmail.trim(),
+          currentPassword: emailPassword,
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -128,7 +133,9 @@ function ProfileTab() {
       setNewEmail("");
       setEmailPassword("");
     } catch (err) {
-      setEmailError(err instanceof Error ? err.message : "Failed to update email");
+      setEmailError(
+        err instanceof Error ? err.message : "Failed to update email",
+      );
     } finally {
       setEmailLoading(false);
     }
@@ -162,7 +169,9 @@ function ProfileTab() {
       setPasswordSuccess(true);
       setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : "Failed to change password");
+      setPasswordError(
+        err instanceof Error ? err.message : "Failed to change password",
+      );
     } finally {
       setPasswordLoading(false);
     }
@@ -182,7 +191,9 @@ function ProfileTab() {
       await authClient.signOut();
       router.push("/login");
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "Failed to delete account");
+      setDeleteError(
+        err instanceof Error ? err.message : "Failed to delete account",
+      );
       setDeleteLoading(false);
     }
   }
@@ -235,7 +246,10 @@ function ProfileTab() {
                 placeholder="Your email"
               />
               {hasPassword && (
-                <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+                <Dialog
+                  open={emailDialogOpen}
+                  onOpenChange={setEmailDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button variant="outline">Change</Button>
                   </DialogTrigger>
@@ -279,7 +293,9 @@ function ProfileTab() {
                       </DialogClose>
                       <Button
                         onClick={handleEmailChange}
-                        disabled={emailLoading || !newEmail.trim() || !emailPassword}
+                        disabled={
+                          emailLoading || !newEmail.trim() || !emailPassword
+                        }
                       >
                         {emailLoading ? "Updating..." : "Update Email"}
                       </Button>
@@ -341,7 +357,12 @@ function ProfileTab() {
             </div>
             <Button
               onClick={handlePasswordChange}
-              disabled={passwordLoading || !currentPassword || !newPassword || !confirmPassword}
+              disabled={
+                passwordLoading ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword
+              }
             >
               {passwordLoading ? "Updating..." : "Update Password"}
             </Button>
@@ -365,9 +386,9 @@ function ProfileTab() {
               <DialogHeader>
                 <DialogTitle>Delete Account</DialogTitle>
                 <DialogDescription>
-                  This action cannot be undone. This will permanently delete your
-                  account and all associated data including recipes, subscription,
-                  and Telegram link.
+                  This action cannot be undone. This will permanently delete
+                  your account and all associated data including recipes,
+                  subscription, and Telegram link.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -378,7 +399,8 @@ function ProfileTab() {
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="delete-confirmation">
-                    Type <span className="font-mono font-bold">DELETE</span> to confirm
+                    Type <span className="font-mono font-bold">DELETE</span> to
+                    confirm
                   </Label>
                   <Input
                     id="delete-confirmation"
@@ -613,6 +635,100 @@ function TelegramTab() {
   );
 }
 
+function FeatureUsageRow({
+  label,
+  used,
+  limit,
+  atLimit,
+}: {
+  label: string;
+  used: number;
+  limit: number;
+  atLimit: boolean;
+}) {
+  const isUnlimited = !Number.isFinite(limit);
+  const percent = isUnlimited ? 0 : Math.round((used / limit) * 100);
+
+  return (
+    <div>
+      <div className="flex justify-between text-sm mb-2">
+        <span>{label}</span>
+        <span className={atLimit ? "text-orange-600 font-medium" : ""}>
+          {used} / {isUnlimited ? "∞" : limit}
+          {atLimit && !isUnlimited && " (maxed)"}
+        </span>
+      </div>
+      {!isUnlimited && (
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full ${
+              atLimit
+                ? "bg-orange-500"
+                : percent >= 80
+                  ? "bg-orange-500"
+                  : "bg-primary"
+            }`}
+            style={{ width: `${Math.min(percent, 100)}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FeatureComparisonTable({ isPro }: { isPro: boolean }) {
+  const features = [
+    { name: "Recipe extractions", free: "10/month", pro: "100/month" },
+    { name: "Collections", free: "3", pro: "Unlimited" },
+    { name: "Custom tags", free: "5", pro: "Unlimited" },
+    {
+      name: "Bulk actions",
+      free: "—",
+      pro: <Check className="h-4 w-4 mx-auto text-green-600" />,
+    },
+    { name: "Similar recipes shown", free: "1", pro: "All" },
+  ];
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-muted/50">
+            <th className="text-left p-3 font-medium">Feature</th>
+            <th
+              className={`text-center p-3 font-medium ${!isPro ? "bg-muted" : ""}`}
+            >
+              Free
+            </th>
+            <th
+              className={`text-center p-3 font-medium ${isPro ? "bg-orange-50" : ""}`}
+            >
+              Pro
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {features.map((feature) => (
+            <tr key={feature.name} className="border-t">
+              <td className="p-3">{feature.name}</td>
+              <td
+                className={`text-center p-3 text-muted-foreground ${!isPro ? "bg-muted/30" : ""}`}
+              >
+                {feature.free}
+              </td>
+              <td
+                className={`text-center p-3 ${isPro ? "bg-orange-50/50 text-foreground font-medium" : ""}`}
+              >
+                {feature.pro}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function BillingTab() {
   const searchParams = useSearchParams();
   const [usage, setUsage] = useState<UsageInfo | null>(null);
@@ -686,14 +802,17 @@ function BillingTab() {
   }
 
   const isPro = usage?.planTier === "pro";
-  const usagePercent = usage ? Math.round((usage.used / usage.limit) * 100) : 0;
+  const hasMaxedFeatures = usage?.features
+    ? Object.values(usage.features).some(
+        (f) => f.atLimit && Number.isFinite(f.limit),
+      )
+    : false;
 
   return (
     <div className="space-y-6">
       {success && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-          Successfully upgraded to Pro! Your extraction limit has been
-          increased.
+          Successfully upgraded to Pro! Your limits have been removed.
         </div>
       )}
 
@@ -714,27 +833,34 @@ function BillingTab() {
           <CardTitle>Current Plan</CardTitle>
           <CardDescription>{isPro ? "Pro Plan" : "Free Plan"}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Extractions this month</span>
-              <span>
-                {usage?.used} / {usage?.limit}
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full ${
-                  usagePercent >= 80 ? "bg-orange-500" : "bg-primary"
-                }`}
-                style={{ width: `${Math.min(usagePercent, 100)}%` }}
+        <CardContent className="space-y-6">
+          {usage?.features && (
+            <div className="space-y-4">
+              <FeatureUsageRow
+                label="Extractions this month"
+                used={usage.features.extractions.used}
+                limit={usage.features.extractions.limit}
+                atLimit={usage.features.extractions.atLimit}
+              />
+              <FeatureUsageRow
+                label="Collections"
+                used={usage.features.collections.used}
+                limit={usage.features.collections.limit}
+                atLimit={usage.features.collections.atLimit}
+              />
+              <FeatureUsageRow
+                label="Custom tags"
+                used={usage.features.tags.used}
+                limit={usage.features.tags.limit}
+                atLimit={usage.features.tags.atLimit}
               />
             </div>
-          </div>
+          )}
 
           {usage?.currentPeriodEnd && (
             <p className="text-sm text-muted-foreground">
-              Resets on {new Date(usage.currentPeriodEnd).toLocaleDateString()}
+              Extraction limit resets on{" "}
+              {new Date(usage.currentPeriodEnd).toLocaleDateString()}
             </p>
           )}
 
@@ -747,6 +873,13 @@ function BillingTab() {
               {actionLoading ? "Loading..." : "Manage Subscription"}
             </Button>
           )}
+
+          {!isPro && hasMaxedFeatures && (
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-sm">
+              You&apos;ve reached the limit on some features. Upgrade to Pro for
+              unlimited access.
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -755,24 +888,10 @@ function BillingTab() {
           <CardHeader>
             <CardTitle>Upgrade to Pro</CardTitle>
             <CardDescription>
-              Get 100 recipe extractions per month
+              Unlock unlimited collections, tags, and more extractions
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="text-green-600 font-bold">✓</span>
-                <span>
-                  <strong>100 extractions/month</strong> (vs {usage?.limit} on
-                  Free)
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600 font-bold">✓</span>
-                <span>more coming soon</span>
-              </li>
-            </ul>
-
             <div className="grid gap-4 sm:grid-cols-2">
               <button
                 type="button"
@@ -825,6 +944,16 @@ function BillingTab() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Plan Comparison</CardTitle>
+          <CardDescription>See what you get with each plan</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FeatureComparisonTable isPro={isPro} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -853,7 +982,8 @@ function TagsTab() {
             <div>
               <CardTitle>Tags</CardTitle>
               <CardDescription>
-                Manage your recipe tags. Tags help you categorize and find recipes.
+                Manage your recipe tags. Tags help you categorize and find
+                recipes.
               </CardDescription>
             </div>
             <Button onClick={() => setCreateDialogOpen(true)} size="sm">
@@ -946,7 +1076,9 @@ function SettingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
-  const defaultTab = ["profile", "telegram", "billing", "tags"].includes(tabParam || "")
+  const defaultTab = ["profile", "telegram", "billing", "tags"].includes(
+    tabParam || "",
+  )
     ? tabParam!
     : "profile";
   const hasTrackedRef = useRef(false);

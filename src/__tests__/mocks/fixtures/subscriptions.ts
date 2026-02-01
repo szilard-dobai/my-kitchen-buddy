@@ -53,6 +53,11 @@ export const mockFreeUsageInfo: UsageInfo = {
   limit: 10,
   planTier: "free",
   currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  features: {
+    extractions: { used: 5, limit: 10, atLimit: false },
+    collections: { used: 2, limit: 3, atLimit: false },
+    tags: { used: 3, limit: 5, atLimit: false },
+  },
 };
 
 export const mockProUsageInfo: UsageInfo = {
@@ -60,4 +65,9 @@ export const mockProUsageInfo: UsageInfo = {
   limit: 100,
   planTier: "pro",
   currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  features: {
+    extractions: { used: 25, limit: 100, atLimit: false },
+    collections: { used: 10, limit: Infinity, atLimit: false },
+    tags: { used: 15, limit: Infinity, atLimit: false },
+  },
 };

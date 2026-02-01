@@ -13,11 +13,22 @@ export interface Subscription {
   updatedAt: Date;
 }
 
+export interface FeatureUsage {
+  used: number;
+  limit: number;
+  atLimit: boolean;
+}
+
 export interface UsageInfo {
   used: number;
   limit: number;
   planTier: PlanTier;
   currentPeriodEnd?: Date;
+  features: {
+    extractions: FeatureUsage;
+    collections: FeatureUsage;
+    tags: FeatureUsage;
+  };
 }
 
 export const PLAN_LIMITS: Record<PlanTier, number> = {
