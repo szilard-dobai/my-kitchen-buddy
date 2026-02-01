@@ -16,6 +16,7 @@ const trackingEventTypes = [
   "header_dropdown_open",
   "header_mobile_menu_toggle",
   "recipe_card_click",
+  "similar_recipe_click",
   "filter_applied",
   "sort_applied",
   "filters_cleared",

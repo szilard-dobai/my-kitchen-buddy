@@ -18,6 +18,7 @@ export type TrackingEventType =
   | "header_mobile_menu_toggle"
   // Recipe interactions
   | "recipe_card_click"
+  | "similar_recipe_click"
   | "filter_applied"
   | "sort_applied"
   | "filters_cleared"
