@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteTag } from "@/hooks/use-tags";
+import { trackEvent } from "@/lib/tracking";
 import type { Tag } from "@/types/tag";
 
 interface DeleteTagDialogProps {
@@ -36,6 +37,7 @@ export function DeleteTagDialog({
 
     try {
       await deleteMutation.mutateAsync(tag._id!);
+      trackEvent("tag_deleted");
       onOpenChange(false);
       onDeleted?.();
     } catch (err) {

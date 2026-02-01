@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UpgradePrompt } from "@/components/upgrade/upgrade-prompt";
 import { useCreateTag } from "@/hooks/use-tags";
+import { trackEvent } from "@/lib/tracking";
 import type { PlanTier } from "@/types/subscription";
 import { TAG_LIMITS } from "@/types/tag";
 
@@ -59,6 +60,7 @@ export function CreateTagDialog({
 
     try {
       const newTag = await createMutation.mutateAsync({ name });
+      trackEvent("tag_created");
       setName("");
       onOpenChange(false);
       onCreated?.(newTag._id);

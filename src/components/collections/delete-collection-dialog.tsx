@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useDeleteCollection } from "@/hooks/use-collections";
+import { trackEvent } from "@/lib/tracking";
 import type { Collection } from "@/types/collection";
 
 interface DeleteCollectionDialogProps {
@@ -36,6 +37,7 @@ export function DeleteCollectionDialog({
 
     try {
       await deleteMutation.mutateAsync(collection._id!);
+      trackEvent("collection_deleted");
       onOpenChange(false);
       onDeleted?.();
     } catch (err) {

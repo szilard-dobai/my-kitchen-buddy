@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UpgradePrompt } from "@/components/upgrade/upgrade-prompt";
 import { useCreateCollection } from "@/hooks/use-collections";
+import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import {
   COLLECTION_COLORS,
@@ -57,6 +58,7 @@ export function CreateCollectionDialog({
 
     try {
       const newCollection = await createMutation.mutateAsync({ name: name.trim(), color });
+      trackEvent("collection_created");
       setName("");
       setColor(DEFAULT_COLLECTION_COLOR);
       onOpenChange(false);

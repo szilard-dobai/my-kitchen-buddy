@@ -15,6 +15,7 @@ import {
   useAddRecipeToCollection,
   useRemoveRecipeFromCollection,
 } from "@/hooks/use-collections";
+import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import type { Collection } from "@/types/collection";
 import type { PlanTier } from "@/types/subscription";
@@ -79,9 +80,11 @@ export function CollectionDropdown({
     try {
       if (isInCollection) {
         await removeMutation.mutateAsync({ collectionId, recipeId });
+        trackEvent("recipe_removed_from_collection");
         onCollectionChange?.(recipeId, collectionId, "remove");
       } else {
         await addMutation.mutateAsync({ collectionId, recipeId });
+        trackEvent("recipe_added_to_collection");
         onCollectionChange?.(recipeId, collectionId, "add");
       }
     } catch {

@@ -26,6 +26,19 @@ export type TrackingEventType =
   | "recipe_deleted"
   // Collection interactions
   | "collection_selected"
+  | "collection_created"
+  | "collection_deleted"
+  | "recipe_added_to_collection"
+  | "recipe_removed_from_collection"
+  // Tag interactions
+  | "tag_created"
+  | "tag_deleted"
+  | "tag_added_to_recipe"
+  | "tag_removed_from_recipe"
+  // Upgrade prompts
+  | "upgrade_prompt_shown"
+  | "upgrade_prompt_dismissed"
+  | "upgrade_prompt_cta_click"
   // Extraction
   | "extraction_attempt"
   | "extraction_success"

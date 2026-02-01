@@ -2,7 +2,7 @@
 
 import { Crown } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { trackEvent } from "@/lib/tracking";
 import {
   dismissPrompt,
   isPromptDismissed,
@@ -92,15 +93,31 @@ export function UpgradePrompt({
   skipDismissCheck = false,
 }: UpgradePromptProps) {
   const config = FEATURE_CONFIG[feature];
+  const hasTrackedShow = useRef(false);
 
   const shouldShow = useMemo(() => {
     if (skipDismissCheck) return true;
     return !isPromptDismissed(feature);
   }, [feature, skipDismissCheck]);
 
+  useEffect(() => {
+    if (open && shouldShow && !hasTrackedShow.current) {
+      trackEvent("upgrade_prompt_shown", { feature });
+      hasTrackedShow.current = true;
+    }
+    if (!open) {
+      hasTrackedShow.current = false;
+    }
+  }, [open, shouldShow, feature]);
+
   const handleDismiss = () => {
+    trackEvent("upgrade_prompt_dismissed", { feature });
     dismissPrompt(feature);
     onOpenChange(false);
+  };
+
+  const handleUpgradeClick = () => {
+    trackEvent("upgrade_prompt_cta_click", { feature });
   };
 
   const description =
@@ -133,7 +150,7 @@ export function UpgradePrompt({
             </Button>
           ) : (
             <>
-              <Button asChild className="w-full">
+              <Button asChild className="w-full" onClick={handleUpgradeClick}>
                 <Link href="/settings?tab=billing">
                   <Crown className="size-4" />
                   Upgrade to Pro

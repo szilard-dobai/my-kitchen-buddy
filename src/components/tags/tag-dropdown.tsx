@@ -20,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAddRecipeToTag, useRemoveRecipeFromTag } from "@/hooks/use-tags";
+import { trackEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import type { PlanTier } from "@/types/subscription";
 import type { Tag as TagType } from "@/types/tag";
@@ -83,9 +84,11 @@ export function TagDropdown({
     try {
       if (isTagged) {
         await removeMutation.mutateAsync({ tagId, recipeId });
+        trackEvent("tag_removed_from_recipe");
         onTagChange?.(recipeId, tagId, "remove");
       } else {
         await addMutation.mutateAsync({ tagId, recipeId });
+        trackEvent("tag_added_to_recipe");
         onTagChange?.(recipeId, tagId, "add");
       }
     } catch {
