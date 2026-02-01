@@ -5,6 +5,18 @@ vi.mock("@/lib/db", () => ({
   default: vi.fn(),
 }));
 
+vi.mock("mongodb", () => ({
+  ObjectId: class MockObjectId {
+    id: string;
+    constructor(id: string) {
+      this.id = id;
+    }
+    toString() {
+      return this.id;
+    }
+  },
+}));
+
 describe("getSimilarRecipes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,9 +68,16 @@ describe("getSimilarRecipes", () => {
       },
     ];
 
-    const mockAggregate = vi.fn().mockReturnValue({
-      toArray: vi.fn().mockResolvedValue(similarRecipes),
-    });
+    const countResult = [{ count: 2 }];
+
+    const mockAggregate = vi
+      .fn()
+      .mockReturnValueOnce({
+        toArray: vi.fn().mockResolvedValue(similarRecipes),
+      })
+      .mockReturnValueOnce({
+        toArray: vi.fn().mockResolvedValue(countResult),
+      });
     const mockCollection = vi.fn().mockReturnValue({
       aggregate: mockAggregate,
       findOne: vi.fn().mockResolvedValue({

@@ -4,6 +4,7 @@ import type {
   Recipe,
   CreateRecipeInput,
   UpdateRecipeInput,
+  SimilarRecipesResponse,
 } from "@/types/recipe";
 
 const COLLECTION_NAME = "recipes";
@@ -309,5 +310,246 @@ export async function updateRecipeAuthorAvatar(
     return result.modifiedCount === 1;
   } catch {
     return false;
+  }
+}
+
+export async function getSimilarRecipes(
+  recipeId: string,
+  userId: string,
+  limit: number,
+): Promise<SimilarRecipesResponse | null> {
+  const db = await getDb();
+  const collection = db.collection(COLLECTION_NAME);
+
+  try {
+    const sourceRecipe = await collection.findOne({
+      _id: new ObjectId(recipeId),
+      userId,
+    });
+
+    if (!sourceRecipe) return null;
+
+    const sourceIngredients = (sourceRecipe.ingredients || []).map(
+      (i: { name: string }) => i.name.toLowerCase().trim(),
+    );
+    const sourceCuisine = sourceRecipe.cuisineType || "";
+    const sourceAuthorId = sourceRecipe.source?.authorId || "";
+
+    const pipeline = [
+      {
+        $match: {
+          userId,
+          _id: { $ne: new ObjectId(recipeId) },
+        },
+      },
+      {
+        $addFields: {
+          ingredientNames: {
+            $map: {
+              input: { $ifNull: ["$ingredients", []] },
+              as: "ing",
+              in: { $toLower: { $trim: { input: "$$ing.name" } } },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          commonIngredients: {
+            $size: {
+              $setIntersection: ["$ingredientNames", sourceIngredients],
+            },
+          },
+          totalIngredients: {
+            $size: {
+              $setUnion: ["$ingredientNames", sourceIngredients],
+            },
+          },
+          cuisineMatch: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ["$cuisineType", null] },
+                  { $ne: ["$cuisineType", ""] },
+                  { $eq: ["$cuisineType", sourceCuisine] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+          authorMatch: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ["$source.authorId", null] },
+                  { $ne: ["$source.authorId", ""] },
+                  { $eq: ["$source.authorId", sourceAuthorId] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          ingredientScore: {
+            $cond: [
+              { $eq: ["$totalIngredients", 0] },
+              0,
+              { $divide: ["$commonIngredients", "$totalIngredients"] },
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          similarityScore: {
+            $add: [
+              { $multiply: ["$ingredientScore", 0.5] },
+              { $multiply: ["$cuisineMatch", 0.25] },
+              { $multiply: ["$authorMatch", 0.25] },
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          similarityScore: { $gte: 0.1 },
+        },
+      },
+      {
+        $sort: { similarityScore: -1 as const },
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          "source.thumbnailUrl": 1,
+          "source.authorAvatarUrl": 1,
+          "source.authorUsername": 1,
+          similarityScore: 1,
+        },
+      },
+    ];
+
+    const similarRecipes = await collection.aggregate(pipeline).toArray();
+
+    const countPipeline = [
+      {
+        $match: {
+          userId,
+          _id: { $ne: new ObjectId(recipeId) },
+        },
+      },
+      {
+        $addFields: {
+          ingredientNames: {
+            $map: {
+              input: { $ifNull: ["$ingredients", []] },
+              as: "ing",
+              in: { $toLower: { $trim: { input: "$$ing.name" } } },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          commonIngredients: {
+            $size: {
+              $setIntersection: ["$ingredientNames", sourceIngredients],
+            },
+          },
+          totalIngredients: {
+            $size: {
+              $setUnion: ["$ingredientNames", sourceIngredients],
+            },
+          },
+          cuisineMatch: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ["$cuisineType", null] },
+                  { $ne: ["$cuisineType", ""] },
+                  { $eq: ["$cuisineType", sourceCuisine] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+          authorMatch: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ["$source.authorId", null] },
+                  { $ne: ["$source.authorId", ""] },
+                  { $eq: ["$source.authorId", sourceAuthorId] },
+                ],
+              },
+              1,
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          ingredientScore: {
+            $cond: [
+              { $eq: ["$totalIngredients", 0] },
+              0,
+              { $divide: ["$commonIngredients", "$totalIngredients"] },
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          similarityScore: {
+            $add: [
+              { $multiply: ["$ingredientScore", 0.5] },
+              { $multiply: ["$cuisineMatch", 0.25] },
+              { $multiply: ["$authorMatch", 0.25] },
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          similarityScore: { $gte: 0.1 },
+        },
+      },
+      {
+        $limit: 9,
+      },
+      {
+        $count: "count",
+      },
+    ];
+
+    const countResult = await collection.aggregate(countPipeline).toArray();
+    const totalSimilar = countResult[0]?.count || 0;
+
+    const recipes = similarRecipes.map((r) => ({
+      _id: r._id.toString(),
+      title: r.title,
+      thumbnailUrl: r.source?.thumbnailUrl,
+      authorAvatarUrl: r.source?.authorAvatarUrl,
+      authorUsername: r.source?.authorUsername,
+    }));
+
+    return {
+      recipes,
+      hasMore: totalSimilar > limit,
+      totalSimilar: Math.min(totalSimilar, 9),
+    };
+  } catch {
+    return null;
   }
 }
