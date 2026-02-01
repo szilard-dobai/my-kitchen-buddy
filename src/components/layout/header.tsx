@@ -61,7 +61,7 @@ export function Header() {
                 <Link
                   href="/settings"
                   onClick={() => setUserMenuOpen(false)}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors"
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors cursor-pointer"
                 >
                   <Settings className="h-4 w-4" />
                   Settings

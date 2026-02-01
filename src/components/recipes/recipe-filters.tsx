@@ -135,7 +135,7 @@ function MultiSelectFilter({
             checked={selected.includes(option)}
             onCheckedChange={() => onToggle(option)}
           />
-          {renderOption ? renderOption(option) : <span>{option}</span>}
+          {renderOption ? renderOption(option) : <span className="text-sm">{option}</span>}
         </label>
       ))}
     </div>
@@ -269,7 +269,7 @@ export function RecipeFiltersDesktop({
               renderOption={(platform) => {
                 const Icon = platformIcons[platform];
                 return (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 text-sm">
                     {Icon && <Icon className="size-4" />}
                     {platformLabels[platform] || platform}
                   </span>
@@ -361,7 +361,7 @@ export function RecipeFiltersDesktop({
                 className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md p-1.5"
               >
                 <RadioGroupItem value={option.value} />
-                <span>{option.label}</span>
+                <span className="text-sm">{option.label}</span>
               </label>
             ))}
           </RadioGroup>
@@ -435,7 +435,7 @@ export function RecipeFiltersDesktop({
                     checked={filters.tagIds.includes(tag._id!)}
                     onCheckedChange={() => toggleArrayFilter("tagIds", tag._id!)}
                   />
-                  <span className="truncate text-sm text-muted-foreground">
+                  <span className="truncate text-sm">
                     #{tag.name}
                   </span>
                 </label>
@@ -592,7 +592,7 @@ export function RecipeFiltersMobile({
                   renderOption={(platform) => {
                     const Icon = platformIcons[platform];
                     return (
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 text-sm">
                         {Icon && <Icon className="size-4" />}
                         {platformLabels[platform] || platform}
                       </span>
@@ -641,7 +641,7 @@ export function RecipeFiltersMobile({
                     className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md p-1.5"
                   >
                     <RadioGroupItem value={option.value} />
-                    <span>{option.label}</span>
+                    <span className="text-sm">{option.label}</span>
                   </label>
                 ))}
               </RadioGroup>
@@ -674,7 +674,7 @@ export function RecipeFiltersMobile({
                         checked={filters.tagIds.includes(tag._id!)}
                         onCheckedChange={() => toggleArrayFilter("tagIds", tag._id!)}
                       />
-                      <span className="truncate text-sm text-muted-foreground">
+                      <span className="truncate text-sm">
                         #{tag.name}
                       </span>
                     </label>

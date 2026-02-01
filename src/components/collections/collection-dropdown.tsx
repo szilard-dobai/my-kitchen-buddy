@@ -201,7 +201,7 @@ export function CollectionDropdown({
               })}
               <div className="border-t mt-2 pt-2">
                 <button
-                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
                   onClick={() => {
                     setIsOpen(false);
                     setCreateDialogOpen(true);

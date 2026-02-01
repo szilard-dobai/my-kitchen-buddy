@@ -122,7 +122,7 @@ export function CollectionSidebar({
                   : "hover:bg-accent/50",
               )}
             >
-              <FolderOpen className="size-4 text-muted-foreground" />
+              <FolderOpen className="size-4 text-foreground/70 dark:text-foreground/80" />
               <span className="sr-only">All Recipes</span>
             </button>
           </TooltipTrigger>
@@ -169,7 +169,7 @@ export function CollectionSidebar({
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between mb-2">
-        <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+        <span className="flex items-center gap-1.5 text-sm font-medium">
           <Folders className="size-4" />
           Collections
         </span>
@@ -204,7 +204,7 @@ export function CollectionSidebar({
             : "hover:bg-accent/50",
         )}
       >
-        <FolderOpen className="size-4 text-muted-foreground" />
+        <FolderOpen className="size-4 text-foreground/70 dark:text-foreground/80" />
         <span className="flex-1">All Recipes</span>
         <span className="text-xs text-muted-foreground">{totalRecipeCount}</span>
       </button>

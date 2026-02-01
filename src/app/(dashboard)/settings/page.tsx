@@ -598,7 +598,7 @@ function TelegramTab() {
                     Link expires in 10 minutes.{" "}
                     <button
                       onClick={handleConnect}
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-600 hover:underline cursor-pointer"
                     >
                       Generate new link
                     </button>
