@@ -289,3 +289,51 @@ export async function getTikTokAuthorAvatar(
     return null;
   }
 }
+
+export async function getYouTubeAuthorAvatar(
+  url: string,
+): Promise<string | null> {
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return null;
+
+  try {
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const response = await fetch(videoUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+
+    const channelAvatarMatch = html.match(
+      /"channelThumbnail":\s*\{\s*"thumbnails":\s*\[\s*\{\s*"url":\s*"([^"]+)"/,
+    );
+    if (channelAvatarMatch?.[1]) {
+      return channelAvatarMatch[1].replace(/\\u0026/g, "&");
+    }
+
+    const ownerAvatarMatch = html.match(
+      /"ownerProfileUrl"[\s\S]*?"thumbnail":\s*\{\s*"thumbnails":\s*\[\s*\{\s*"url":\s*"([^"]+)"/,
+    );
+    if (ownerAvatarMatch?.[1]) {
+      return ownerAvatarMatch[1].replace(/\\u0026/g, "&");
+    }
+
+    const authorImageMatch = html.match(
+      /<link[^>]*itemprop=["']thumbnailUrl["'][^>]*href=["']([^"']+)["']/i,
+    );
+    if (authorImageMatch?.[1]) {
+      return authorImageMatch[1];
+    }
+
+    return null;
+  } catch (error) {
+    console.warn("Failed to fetch YouTube author avatar:", error);
+    return null;
+  }
+}

@@ -26,6 +26,7 @@ import {
   getInstagramAuthorAvatar,
   getInstagramThumbnail,
   getTikTokAuthorAvatar,
+  getYouTubeAuthorAvatar,
   getYouTubeStableThumbnail,
 } from "./platform-detector";
 import {
@@ -88,8 +89,11 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
       if (!metadataResult.error) {
         let authorId: string | undefined;
 
-        if (metadataResult.author?.username) {
-          let authorAvatarUrl = metadataResult.author.avatarUrl;
+        const authorUsername =
+          metadataResult.author?.username || metadataResult.author?.displayName;
+
+        if (authorUsername) {
+          let authorAvatarUrl = metadataResult.author?.avatarUrl;
 
           if (platform === "instagram") {
             const freshAvatar = await getInstagramAuthorAvatar(sourceUrl);
@@ -101,14 +105,19 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
             if (freshAvatar) {
               authorAvatarUrl = freshAvatar;
             }
+          } else if (platform === "youtube") {
+            const freshAvatar = await getYouTubeAuthorAvatar(sourceUrl);
+            if (freshAvatar) {
+              authorAvatarUrl = freshAvatar;
+            }
           }
 
           const author = await upsertAuthor({
             platform,
-            username: metadataResult.author.username,
-            displayName: metadataResult.author.displayName,
+            username: authorUsername,
+            displayName: metadataResult.author?.displayName,
             avatarUrl: authorAvatarUrl,
-            verified: metadataResult.author.verified,
+            verified: metadataResult.author?.verified,
           });
           authorId = author._id;
         }
@@ -230,7 +239,9 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
 
     if (platform === "youtube") {
       thumbnailUrl = getYouTubeStableThumbnail(sourceUrl);
-      authorAvatarUrl = metadataForRecipe?.metadata.author?.avatarUrl;
+      const scrapedAvatar = await getYouTubeAuthorAvatar(sourceUrl);
+      authorAvatarUrl =
+        scrapedAvatar || metadataForRecipe?.metadata.author?.avatarUrl;
     } else if (platform === "instagram") {
       const [freshThumbnail, freshAvatar] = await Promise.all([
         getInstagramThumbnail(sourceUrl),
@@ -273,7 +284,8 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         platform,
         authorUsername:
           extractedRecipe.source?.authorUsername ||
-          metadataForRecipe?.metadata.author?.username,
+          metadataForRecipe?.metadata.author?.username ||
+          metadataForRecipe?.metadata.author?.displayName,
         authorId: metadataForRecipe?.authorId,
         authorAvatarUrl: authorAvatarUrl ?? undefined,
         thumbnailUrl: thumbnailUrl ?? undefined,

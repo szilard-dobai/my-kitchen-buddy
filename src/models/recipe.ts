@@ -340,6 +340,23 @@ export async function updateRecipesByAuthorId(
   }
 }
 
+export async function findRecipeSourceUrlByAuthorId(
+  authorId: string,
+): Promise<string | null> {
+  const collection = await getRecipesCollection();
+
+  try {
+    const recipe = await collection.findOne(
+      { "source.authorId": authorId },
+      { projection: { "source.url": 1 } },
+    );
+
+    return recipe?.source?.url || null;
+  } catch {
+    return null;
+  }
+}
+
 const CUISINE_GROUPS: Record<string, string[]> = {
   "latin-american": [
     "mexican",

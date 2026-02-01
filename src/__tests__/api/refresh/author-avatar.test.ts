@@ -16,12 +16,14 @@ vi.mock("@/models/author", () => ({
 }));
 
 vi.mock("@/models/recipe", () => ({
+  findRecipeSourceUrlByAuthorId: vi.fn(),
   updateRecipesByAuthorId: vi.fn(),
 }));
 
 vi.mock("@/services/extraction/platform-detector", () => ({
   getInstagramAuthorAvatar: vi.fn(),
   getTikTokAuthorAvatar: vi.fn(),
+  getYouTubeAuthorAvatar: vi.fn(),
 }));
 
 describe("/api/refresh-author-avatar", () => {
@@ -84,12 +86,24 @@ describe("/api/refresh-author-avatar", () => {
       expect(data.error).toBe("Author not found");
     });
 
-    it("returns 400 for unsupported platform (YouTube)", async () => {
+    it("refreshes YouTube author avatar successfully", async () => {
       const { getSession } = await import("@/lib/session");
-      const { findAuthorById } = await import("@/models/author");
+      const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { findRecipeSourceUrlByAuthorId, updateRecipesByAuthorId } = await import("@/models/recipe");
+      const { getYouTubeAuthorAvatar } = await import(
+        "@/services/extraction/platform-detector"
+      );
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(findAuthorById).mockResolvedValueOnce(mockYouTubeAuthor);
+      vi.mocked(findRecipeSourceUrlByAuthorId).mockResolvedValueOnce(
+        "https://www.youtube.com/watch?v=abc123",
+      );
+      vi.mocked(getYouTubeAuthorAvatar).mockResolvedValueOnce(
+        "https://yt3.ggpht.com/new-yt-avatar.jpg",
+      );
+      vi.mocked(updateAuthorAvatar).mockResolvedValueOnce(true);
+      vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(1);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
       const request = new Request("http://localhost/api/refresh-author-avatar", {
@@ -100,8 +114,43 @@ describe("/api/refresh-author-avatar", () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
-      expect(data.error).toBe("Avatar refresh is only supported for Instagram and TikTok");
+      expect(response.status).toBe(200);
+      expect(data.avatarUrl).toBe("https://yt3.ggpht.com/new-yt-avatar.jpg");
+      expect(data.authorId).toBe("author-789");
+      expect(findRecipeSourceUrlByAuthorId).toHaveBeenCalledWith("author-789");
+      expect(getYouTubeAuthorAvatar).toHaveBeenCalledWith(
+        "https://www.youtube.com/watch?v=abc123",
+      );
+      expect(updateAuthorAvatar).toHaveBeenCalledWith(
+        "author-789",
+        "https://yt3.ggpht.com/new-yt-avatar.jpg",
+      );
+      expect(updateRecipesByAuthorId).toHaveBeenCalledWith(
+        "author-789",
+        "https://yt3.ggpht.com/new-yt-avatar.jpg",
+      );
+    });
+
+    it("returns 404 when YouTube author has no recipe source URL", async () => {
+      const { getSession } = await import("@/lib/session");
+      const { findAuthorById } = await import("@/models/author");
+      const { findRecipeSourceUrlByAuthorId } = await import("@/models/recipe");
+
+      vi.mocked(getSession).mockResolvedValueOnce(mockSession);
+      vi.mocked(findAuthorById).mockResolvedValueOnce(mockYouTubeAuthor);
+      vi.mocked(findRecipeSourceUrlByAuthorId).mockResolvedValueOnce(null);
+
+      const { POST } = await import("@/app/api/refresh-author-avatar/route");
+      const request = new Request("http://localhost/api/refresh-author-avatar", {
+        method: "POST",
+        body: JSON.stringify({ authorId: "author-789" }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe("Could not fetch author avatar");
     });
 
     it("refreshes Instagram author avatar successfully", async () => {

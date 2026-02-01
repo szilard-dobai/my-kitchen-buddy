@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { findAuthorById, updateAuthorAvatar } from "@/models/author";
-import { updateRecipesByAuthorId } from "@/models/recipe";
+import {
+  findRecipeSourceUrlByAuthorId,
+  updateRecipesByAuthorId,
+} from "@/models/recipe";
 import {
   getInstagramAuthorAvatar,
   getTikTokAuthorAvatar,
+  getYouTubeAuthorAvatar,
 } from "@/services/extraction/platform-detector";
 
 export async function POST(request: Request) {
@@ -38,9 +42,14 @@ export async function POST(request: Request) {
     } else if (author.platform === "tiktok") {
       const profileUrl = `https://www.tiktok.com/@${author.username}`;
       avatarUrl = await getTikTokAuthorAvatar(profileUrl);
+    } else if (author.platform === "youtube") {
+      const videoUrl = await findRecipeSourceUrlByAuthorId(authorId);
+      if (videoUrl) {
+        avatarUrl = await getYouTubeAuthorAvatar(videoUrl);
+      }
     } else {
       return NextResponse.json(
-        { error: "Avatar refresh is only supported for Instagram and TikTok" },
+        { error: "Avatar refresh is only supported for Instagram, TikTok, and YouTube" },
         { status: 400 },
       );
     }
