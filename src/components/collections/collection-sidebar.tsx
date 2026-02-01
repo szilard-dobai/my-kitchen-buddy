@@ -50,6 +50,7 @@ interface CollectionSidebarProps {
   collections: Collection[];
   selectedCollectionId: string | null;
   onSelectCollection: (collectionId: string | null) => void;
+  onCollectionDeleted?: (collectionId: string) => void;
   totalRecipeCount: number;
   planTier: PlanTier;
 }
@@ -58,6 +59,7 @@ export function CollectionSidebar({
   collections,
   selectedCollectionId,
   onSelectCollection,
+  onCollectionDeleted,
   totalRecipeCount,
   planTier,
 }: CollectionSidebarProps) {
@@ -292,10 +294,12 @@ export function CollectionSidebar({
           onOpenChange={(open) => !open && setDeletingCollection(null)}
           collection={deletingCollection}
           onDeleted={() => {
+            const deletedId = deletingCollection._id!;
             setDeletingCollection(null);
-            if (selectedCollectionId === deletingCollection._id) {
+            if (selectedCollectionId === deletedId) {
               onSelectCollection(null);
             }
+            onCollectionDeleted?.(deletedId);
           }}
         />
       )}

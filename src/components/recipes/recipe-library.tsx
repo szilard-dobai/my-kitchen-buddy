@@ -33,20 +33,49 @@ import type { Recipe } from "@/types/recipe";
 import type { PlanTier } from "@/types/subscription";
 
 interface RecipeLibraryProps {
-  recipes: Recipe[];
+  initialRecipes: Recipe[];
   initialCollections: Collection[];
   planTier: PlanTier;
 }
 
 export function RecipeLibrary({
-  recipes,
+  initialRecipes,
   initialCollections,
   planTier,
 }: RecipeLibraryProps) {
+  const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes);
   const [filters, setFilters] = useState<RecipeFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortOption>(DEFAULT_SORT);
 
   const { data: collections = initialCollections } = useCollections();
+
+  const handleCollectionChange = (
+    recipeId: string,
+    collectionId: string,
+    action: "add" | "remove",
+  ) => {
+    setRecipes((prev) =>
+      prev.map((recipe) => {
+        if (recipe._id !== recipeId) return recipe;
+        return {
+          ...recipe,
+          collectionIds:
+            action === "add"
+              ? [...recipe.collectionIds, collectionId]
+              : recipe.collectionIds.filter((id) => id !== collectionId),
+        };
+      }),
+    );
+  };
+
+  const handleCollectionDeleted = (collectionId: string) => {
+    setRecipes((prev) =>
+      prev.map((recipe) => ({
+        ...recipe,
+        collectionIds: recipe.collectionIds.filter((id) => id !== collectionId),
+      })),
+    );
+  };
   const isSidebarCollapsed = useCollapsedState();
 
   const handleSelectCollection = (collectionId: string | null) => {
@@ -100,6 +129,7 @@ export function RecipeLibrary({
           collections={collections}
           selectedCollectionId={filters.collectionId}
           onSelectCollection={handleSelectCollection}
+          onCollectionDeleted={handleCollectionDeleted}
           totalRecipeCount={recipes.length}
           planTier={planTier}
         />
@@ -206,6 +236,7 @@ export function RecipeLibrary({
                 key={recipe._id}
                 recipe={recipe}
                 collections={collections}
+                onCollectionChange={handleCollectionChange}
               />
             ))}
           </div>

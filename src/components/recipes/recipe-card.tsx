@@ -16,11 +16,17 @@ import type { Recipe } from "@/types/recipe";
 interface RecipeCardProps {
   recipe: Recipe;
   collections?: Collection[];
+  onCollectionChange?: (
+    recipeId: string,
+    collectionId: string,
+    action: "add" | "remove",
+  ) => void;
 }
 
 export function RecipeCard({
   recipe,
   collections,
+  onCollectionChange,
 }: RecipeCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -146,6 +152,7 @@ export function RecipeCard({
             recipeId={recipe._id!}
             collections={collections}
             collectionIds={recipe.collectionIds}
+            onCollectionChange={onCollectionChange}
           />
         </div>
       )}

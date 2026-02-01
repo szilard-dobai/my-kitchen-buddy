@@ -38,7 +38,7 @@ export default async function RecipesPage() {
       </div>
 
       <RecipeLibrary
-        recipes={recipes}
+        initialRecipes={recipes}
         initialCollections={collections}
         planTier={subscription.planTier}
       />

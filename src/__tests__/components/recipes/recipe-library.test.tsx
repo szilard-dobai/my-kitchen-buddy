@@ -94,7 +94,7 @@ describe("RecipeLibrary", () => {
 
   it("renders empty state when no recipes", async () => {
     renderWithQueryClient(
-      <RecipeLibrary recipes={[]} initialCollections={[]} planTier="free" />,
+      <RecipeLibrary initialRecipes={[]} initialCollections={[]} planTier="free" />,
     );
 
     expect(screen.getByText("No recipes yet.")).toBeInTheDocument();
@@ -104,7 +104,7 @@ describe("RecipeLibrary", () => {
   it("renders recipe cards for each recipe", async () => {
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -119,7 +119,7 @@ describe("RecipeLibrary", () => {
   it("renders search input", async () => {
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -132,7 +132,7 @@ describe("RecipeLibrary", () => {
   it("displays correct recipe count", async () => {
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -146,7 +146,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -163,7 +163,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -186,7 +186,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -209,7 +209,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -233,7 +233,7 @@ describe("RecipeLibrary", () => {
   it("sorts by newest first (default)", async () => {
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -247,7 +247,7 @@ describe("RecipeLibrary", () => {
   it("renders sort dropdown", async () => {
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -262,7 +262,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={mockRecipeList}
+        initialRecipes={mockRecipeList}
         initialCollections={[]}
         planTier="free"
       />,
@@ -312,7 +312,7 @@ describe("RecipeLibrary", () => {
 
     renderWithQueryClient(
       <RecipeLibrary
-        recipes={recipesWithMissing}
+        initialRecipes={recipesWithMissing}
         initialCollections={[]}
         planTier="free"
       />,

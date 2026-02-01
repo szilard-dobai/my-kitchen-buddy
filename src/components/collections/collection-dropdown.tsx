@@ -2,6 +2,7 @@
 
 import { FolderPlus, Loader2, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +25,11 @@ interface CollectionDropdownProps {
   collectionIds?: string[];
   planTier?: PlanTier;
   variant?: "card" | "page" | "inline";
+  onCollectionChange?: (
+    recipeId: string,
+    collectionId: string,
+    action: "add" | "remove",
+  ) => void;
 }
 
 export function CollectionDropdown({
@@ -32,6 +38,7 @@ export function CollectionDropdown({
   collectionIds = [],
   planTier = "free",
   variant = "card",
+  onCollectionChange,
 }: CollectionDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loadingCollectionId, setLoadingCollectionId] = useState<string | null>(
@@ -72,8 +79,10 @@ export function CollectionDropdown({
     try {
       if (isInCollection) {
         await removeMutation.mutateAsync({ collectionId, recipeId });
+        onCollectionChange?.(recipeId, collectionId, "remove");
       } else {
         await addMutation.mutateAsync({ collectionId, recipeId });
+        onCollectionChange?.(recipeId, collectionId, "add");
       }
     } catch {
       // Revert optimistic update on error
@@ -82,6 +91,7 @@ export function CollectionDropdown({
       } else {
         setLocalCollectionIds((prev) => prev.filter((id) => id !== collectionId));
       }
+      toast.error("Failed to update collection");
     } finally {
       setLoadingCollectionId(null);
     }

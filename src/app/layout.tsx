@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
+import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/providers/query-provider";
 import { SentryUserProvider } from "@/providers/sentry-user-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -70,7 +71,10 @@ export default function RootLayout({
         <NextTopLoader color="var(--primary)" showSpinner={false} />
         <QueryProvider>
           <SentryUserProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster />
+            </ThemeProvider>
           </SentryUserProvider>
         </QueryProvider>
         <Analytics />

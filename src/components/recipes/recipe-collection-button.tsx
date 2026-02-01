@@ -1,6 +1,5 @@
 "use client";
 
-import { FolderPlus } from "lucide-react";
 import { useMemo } from "react";
 import { CollectionDropdown } from "@/components/collections/collection-dropdown";
 import {
@@ -15,12 +14,18 @@ interface RecipeCollectionButtonProps {
   recipeId: string;
   collectionIds: string[];
   planTier: PlanTier;
+  onCollectionChange?: (
+    recipeId: string,
+    collectionId: string,
+    action: "add" | "remove",
+  ) => void;
 }
 
 export function RecipeCollectionButton({
   recipeId,
   collectionIds,
   planTier,
+  onCollectionChange,
 }: RecipeCollectionButtonProps) {
   const { data: collections = [] } = useCollections();
 
@@ -48,6 +53,7 @@ export function RecipeCollectionButton({
         collectionIds={collectionIds}
         planTier={planTier}
         variant="inline"
+        onCollectionChange={onCollectionChange}
       />
     </div>
   );
