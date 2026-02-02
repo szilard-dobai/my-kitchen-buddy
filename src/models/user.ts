@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import getDb from "@/lib/db";
 import { getRecipesCollection } from "./recipe";
 
@@ -48,8 +49,9 @@ export async function deleteUserAndAllData(userId: string): Promise<void> {
 
 export async function hasPasswordAccount(userId: string): Promise<boolean> {
   const accountsCollection = await getAccountsCollection();
+  const userIdObj = new ObjectId(userId);
   const credentialAccount = await accountsCollection.findOne({
-    userId,
+    userId: userIdObj,
     providerId: "credential",
   });
   return !!credentialAccount;

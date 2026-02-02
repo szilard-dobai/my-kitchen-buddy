@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Check, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { DeleteCollectionDialog } from "@/components/collections/delete-collection-dialog";
 import { EditCollectionDialog } from "@/components/collections/edit-collection-dialog";
@@ -49,27 +50,21 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
   const router = useRouter();
   const { data: session, refetch } = useSession();
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(session?.user?.name || "");
+  const prevSessionName = useRef(session?.user?.name);
 
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
 
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
-  const [emailLoading, setEmailLoading] = useState(false);
-  const [emailError, setEmailError] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
 
   const { data: collections = [], isLoading: collectionsLoading } =
     useCollections();
@@ -86,11 +81,12 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [deletingTag, setDeletingTag] = useState<Tag | null>(null);
 
-  useEffect(() => {
+  if (session?.user?.name !== prevSessionName.current) {
+    prevSessionName.current = session?.user?.name;
     if (session?.user?.name) {
       setName(session.user.name);
     }
-  }, [session?.user?.name]);
+  }
 
   useEffect(() => {
     async function checkAccountType() {
@@ -118,52 +114,44 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
     },
   });
 
-  async function handleEmailChange() {
-    if (!newEmail.trim() || !emailPassword) return;
-    setEmailLoading(true);
-    setEmailError("");
-
-    try {
+  const emailMutation = useMutation({
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
       const response = await fetch("/api/account", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: newEmail.trim(),
-          currentPassword: emailPassword,
+          email: email.trim(),
+          currentPassword: password,
         }),
       });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Failed to update email");
       }
-      await refetch();
+      return data;
+    },
+    onSuccess: () => {
+      refetch();
       setEmailDialogOpen(false);
       setNewEmail("");
       setEmailPassword("");
-    } catch (err) {
-      setEmailError(
-        err instanceof Error ? err.message : "Failed to update email",
-      );
-    } finally {
-      setEmailLoading(false);
-    }
-  }
+    },
+  });
 
-  async function handlePasswordChange() {
-    if (!currentPassword || !newPassword || !confirmPassword) return;
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return;
-    }
-    if (newPassword.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-      return;
-    }
-    setPasswordLoading(true);
-    setPasswordError("");
-    setPasswordSuccess(false);
-
-    try {
+  const passwordMutation = useMutation({
+    mutationFn: async ({
+      currentPassword,
+      newPassword,
+    }: {
+      currentPassword: string;
+      newPassword: string;
+    }) => {
       const result = await authClient.changePassword({
         currentPassword,
         newPassword,
@@ -171,39 +159,44 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
       if (result.error) {
         throw new Error(result.error.message || "Failed to change password");
       }
+      return result;
+    },
+    onSuccess: () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordSuccess(true);
-      setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (err) {
-      setPasswordError(
-        err instanceof Error ? err.message : "Failed to change password",
-      );
-    } finally {
-      setPasswordLoading(false);
-    }
-  }
+    },
+  });
 
-  async function handleDeleteAccount() {
-    if (deleteConfirmation !== "DELETE") return;
-    setDeleteLoading(true);
-    setDeleteError("");
-
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
       const response = await fetch("/api/account/delete", { method: "DELETE" });
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Failed to delete account");
       }
+      return response;
+    },
+    onSuccess: async () => {
       await authClient.signOut();
       router.push("/login");
-    } catch (err) {
-      setDeleteError(
-        err instanceof Error ? err.message : "Failed to delete account",
-      );
-      setDeleteLoading(false);
+    },
+    meta: {
+      skipGlobalSuccess: true,
+    },
+  });
+
+  function handlePasswordChange() {
+    if (!currentPassword || !newPassword || !confirmPassword) return;
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
     }
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    passwordMutation.mutate({ currentPassword, newPassword });
   }
 
   const nameChanged = name.trim() !== (session?.user?.name || "");
@@ -259,11 +252,6 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                      {emailError && (
-                        <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-                          {emailError}
-                        </div>
-                      )}
                       <div className="space-y-2">
                         <Label htmlFor="new-email">New Email</Label>
                         <Input
@@ -290,12 +278,19 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
                         <Button variant="outline">Cancel</Button>
                       </DialogClose>
                       <Button
-                        onClick={handleEmailChange}
+                        onClick={() =>
+                          emailMutation.mutate({
+                            email: newEmail,
+                            password: emailPassword,
+                          })
+                        }
                         disabled={
-                          emailLoading || !newEmail.trim() || !emailPassword
+                          emailMutation.isPending ||
+                          !newEmail.trim() ||
+                          !emailPassword
                         }
                       >
-                        {emailLoading ? "Updating..." : "Update Email"}
+                        {emailMutation.isPending ? "Updating..." : "Update Email"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -313,16 +308,6 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
             <CardDescription>Change your account password.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {passwordError && (
-              <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-                {passwordError}
-              </div>
-            )}
-            {passwordSuccess && (
-              <div className="p-3 text-sm text-green-700 bg-green-50 rounded-md">
-                Password changed successfully
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="current-password">Current Password</Label>
               <Input
@@ -356,13 +341,13 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
             <Button
               onClick={handlePasswordChange}
               disabled={
-                passwordLoading ||
+                passwordMutation.isPending ||
                 !currentPassword ||
                 !newPassword ||
                 !confirmPassword
               }
             >
-              {passwordLoading ? "Updating..." : "Update Password"}
+              {passwordMutation.isPending ? "Updating..." : "Update Password"}
             </Button>
           </CardContent>
         </Card>
@@ -522,11 +507,6 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {deleteError && (
-                  <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-                    {deleteError}
-                  </div>
-                )}
                 <div className="space-y-2">
                   <Label htmlFor="delete-confirmation">
                     Type <span className="font-mono font-bold">DELETE</span> to
@@ -546,10 +526,12 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
                 </DialogClose>
                 <Button
                   variant="destructive"
-                  onClick={handleDeleteAccount}
-                  disabled={deleteLoading || deleteConfirmation !== "DELETE"}
+                  onClick={() => deleteMutation.mutate()}
+                  disabled={
+                    deleteMutation.isPending || deleteConfirmation !== "DELETE"
+                  }
                 >
-                  {deleteLoading ? "Deleting..." : "Delete Account"}
+                  {deleteMutation.isPending ? "Deleting..." : "Delete Account"}
                 </Button>
               </DialogFooter>
             </DialogContent>
