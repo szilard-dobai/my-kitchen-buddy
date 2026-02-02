@@ -13,6 +13,23 @@ import {
 } from "@/services/extraction/platform-detector";
 import { getOEmbed } from "@/services/oembed";
 
+async function validateImageUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, {
+      method: "HEAD",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      },
+    });
+    if (!response.ok) return false;
+    const contentType = response.headers.get("content-type");
+    return contentType?.startsWith("image/") ?? false;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getSession();
@@ -89,6 +106,14 @@ export async function POST(request: Request) {
     if (!thumbnailUrl) {
       return NextResponse.json(
         { error: "Could not fetch thumbnail" },
+        { status: 404 },
+      );
+    }
+
+    const isValidImage = await validateImageUrl(thumbnailUrl);
+    if (!isValidImage) {
+      return NextResponse.json(
+        { error: "Thumbnail URL is not accessible" },
         { status: 404 },
       );
     }
