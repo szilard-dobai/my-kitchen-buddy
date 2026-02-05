@@ -95,6 +95,14 @@ export default function TermsPage() {
                 account settings
               </li>
               <li>Refunds are handled on a case-by-case basis</li>
+              <li>
+                <strong>Subscription End:</strong> When your Pro subscription
+                ends, your account reverts to the Free tier. All your recipes,
+                collections, and tags are retained. You can continue to view,
+                edit, and delete existing content. However, creating new
+                collections or tags beyond Free tier limits (3 collections, 5
+                tags) will require resubscribing to Pro.
+              </li>
             </ul>
           </section>
 

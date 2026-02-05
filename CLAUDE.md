@@ -90,6 +90,15 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 - Only shown to free tier users
 - 7-day dismissal window for all upgrade prompts
 
+### Lapsed User Handling (`src/components/upgrade/lapsed-user-*.tsx`)
+
+Lapsed users are detected by: `planTier === "free" && stripeCustomerId exists`
+
+- **LapsedUserModal**: One-time modal shown on first visit after subscription ends
+- **LapsedUserBanner**: Dismissible banner on all dashboard pages (7-day dismissal)
+- **Graceful degradation**: Lapsed users can still view/edit/delete existing collections and tags, add recipes to existing collections, but cannot create new ones beyond free tier limits
+- **Improved messaging**: Create dialogs show "You have 10 collections. Free plan allows 3." instead of just "limit reached"
+
 ### URL Normalization
 
 `normalizeUrl()` in `platform-detector.ts` strips all query params and hash fragments for consistent cache lookups.
@@ -119,7 +128,7 @@ src/
 │   ├── recipes/          # Recipe cards, filters, similar recipes
 │   ├── tags/             # Tag chips, dropdown, dialogs
 │   ├── tracking/         # PageTracker, CTALink components
-│   ├── upgrade/          # UpgradePrompt, MilestonePromptTrigger
+│   ├── upgrade/          # UpgradePrompt, MilestonePromptTrigger, LapsedUserBanner/Modal
 │   └── ui/               # UI primitives (Radix UI based)
 ├── hooks/                 # Custom React hooks
 │   ├── use-collections.ts # React Query hooks for collections

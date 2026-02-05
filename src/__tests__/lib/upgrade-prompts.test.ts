@@ -1,6 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  dismissPrompt,
   getUnseenMilestone,
+  isPromptDismissed,
   markMilestoneSeen,
 } from "@/lib/upgrade-prompts";
 
@@ -73,6 +75,77 @@ describe("milestone prompts", () => {
       markMilestoneSeen(5);
       const stored = localStorage.getItem("mkb_seen_milestones");
       expect(JSON.parse(stored!)).toEqual([5]);
+    });
+  });
+});
+
+describe("prompt dismissal", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+    vi.useRealTimers();
+  });
+
+  describe("isPromptDismissed", () => {
+    it("returns false when prompt was never dismissed", () => {
+      expect(isPromptDismissed("lapsed_resubscribe")).toBe(false);
+    });
+
+    it("returns true when prompt was recently dismissed", () => {
+      dismissPrompt("lapsed_resubscribe");
+      expect(isPromptDismissed("lapsed_resubscribe")).toBe(true);
+    });
+
+    it("returns false when dismissal has expired (after 7 days)", () => {
+      dismissPrompt("lapsed_resubscribe");
+      expect(isPromptDismissed("lapsed_resubscribe")).toBe(true);
+
+      vi.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 + 1);
+      expect(isPromptDismissed("lapsed_resubscribe")).toBe(false);
+    });
+
+    it("returns true when dismissal is within 7 days", () => {
+      dismissPrompt("lapsed_resubscribe");
+
+      vi.advanceTimersByTime(6 * 24 * 60 * 60 * 1000);
+      expect(isPromptDismissed("lapsed_resubscribe")).toBe(true);
+    });
+  });
+
+  describe("dismissPrompt", () => {
+    it("persists dismissal to localStorage", () => {
+      dismissPrompt("lapsed_resubscribe");
+      const stored = localStorage.getItem("mkb_dismissed_prompts");
+      expect(stored).not.toBeNull();
+      const parsed = JSON.parse(stored!);
+      expect(parsed.lapsed_resubscribe).toBeDefined();
+    });
+
+    it("can dismiss multiple different prompts", () => {
+      dismissPrompt("lapsed_resubscribe");
+      dismissPrompt("collections");
+      expect(isPromptDismissed("lapsed_resubscribe")).toBe(true);
+      expect(isPromptDismissed("collections")).toBe(true);
+    });
+
+    it("updates timestamp when dismissing same prompt again", () => {
+      dismissPrompt("lapsed_resubscribe");
+      const stored1 = JSON.parse(
+        localStorage.getItem("mkb_dismissed_prompts")!,
+      );
+      const firstTimestamp = stored1.lapsed_resubscribe;
+
+      vi.advanceTimersByTime(1000);
+      dismissPrompt("lapsed_resubscribe");
+
+      const stored2 = JSON.parse(
+        localStorage.getItem("mkb_dismissed_prompts")!,
+      );
+      expect(stored2.lapsed_resubscribe).toBeGreaterThan(firstTimestamp);
     });
   });
 });

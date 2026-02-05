@@ -16,6 +16,7 @@ Extract recipes from social media cooking videos (TikTok, Instagram Reels, YouTu
 - **Custom tags**: Add personalized tags to recipes with color customization
 - **Similar recipes**: Discover related recipes based on ingredients and cuisine
 - **Milestone celebrations**: Achievement prompts when saving 5, 10, 25, or 50 recipes
+- **Lapsed user handling**: Former Pro users keep their data, with friendly prompts to re-subscribe
 - Pro subscription with Stripe billing:
   - Free: 10 extractions/month, 3 collections, 5 tags, 1 similar recipe shown
   - Pro: 100 extractions/month, unlimited collections/tags, 9 similar recipes shown

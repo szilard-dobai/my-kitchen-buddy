@@ -9,7 +9,8 @@ export type UpgradeFeature =
   | "milestone_5"
   | "milestone_10"
   | "milestone_25"
-  | "milestone_50";
+  | "milestone_50"
+  | "lapsed_resubscribe";
 
 interface DismissedPrompts {
   [feature: string]: number;

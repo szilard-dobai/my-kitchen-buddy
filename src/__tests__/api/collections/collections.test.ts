@@ -4,6 +4,7 @@ import {
   mockCollection,
   mockCollection2,
   mockFreeSubscription,
+  mockLapsedSubscription,
   mockProSubscription,
   mockSession,
 } from "../../mocks/fixtures";
@@ -215,6 +216,33 @@ describe("/api/collections", () => {
       const response = await POST(request);
 
       expect(response.status).toBe(201);
+    });
+
+    it("returns 409 when lapsed Pro user is over free limit", async () => {
+      const { getSession } = await import("@/lib/session");
+      const { getOrCreateSubscription } = await import("@/models/subscription");
+      const { getCollectionCount } = await import("@/models/collection");
+
+      vi.mocked(getSession).mockResolvedValueOnce(mockSession);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockLapsedSubscription,
+      );
+      vi.mocked(getCollectionCount).mockResolvedValueOnce(10);
+
+      const { POST } = await import("@/app/api/collections/route");
+      const request = new Request("http://localhost/api/collections", {
+        method: "POST",
+        body: JSON.stringify({ name: "New Collection", color: "#3B82F6" }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toBe("Collection limit reached");
+      expect(data.limitReached).toBe(true);
+      expect(data.currentCount).toBe(10);
+      expect(data.limit).toBe(3);
     });
   });
 });

@@ -71,6 +71,11 @@ const FEATURE_CONFIG: Record<UpgradeFeature, FeatureConfig> = {
     description:
       "You're a power user! Pro users organize large collections with unlimited folders to keep everything findable.",
   },
+  lapsed_resubscribe: {
+    title: "Welcome back!",
+    description:
+      "Your Pro subscription has ended, but your recipes and collections are safe. Re-subscribe to unlock unlimited collections, tags, and more.",
+  },
 };
 
 interface UpgradePromptProps {

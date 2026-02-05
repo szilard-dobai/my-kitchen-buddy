@@ -44,6 +44,7 @@ export function CreateTagDialog({
 
   const limit = TAG_LIMITS[planTier];
   const atLimit = currentCount >= limit;
+  const overLimit = currentCount > limit;
   const showUpgradePrompt = open && atLimit && !upgradePromptDismissed;
   const isValidName = name.length > 0 && TAG_NAME_REGEX.test(name);
   const canCreate = isValidName && !atLimit && !createMutation.isPending;
@@ -123,17 +124,35 @@ export function CreateTagDialog({
           {atLimit && (
             <div className="rounded-md bg-amber-50 dark:bg-amber-950/50 p-3 text-sm">
               <p className="font-medium text-amber-800 dark:text-amber-200">
-                Tag limit reached ({currentCount}/{limit})
+                {overLimit
+                  ? `You have ${currentCount} tags`
+                  : `Tag limit reached (${currentCount}/${limit})`}
               </p>
               <p className="text-amber-700 dark:text-amber-300 mt-1">
-                <button
-                  type="button"
-                  onClick={() => setUpgradePromptDismissed(false)}
-                  className="underline hover:no-underline"
-                >
-                  Upgrade to Pro
-                </button>{" "}
-                for unlimited tags.
+                {overLimit ? (
+                  <>
+                    Free plan allows {limit}.{" "}
+                    <button
+                      type="button"
+                      onClick={() => setUpgradePromptDismissed(false)}
+                      className="underline hover:no-underline"
+                    >
+                      Upgrade to Pro
+                    </button>{" "}
+                    to create more, or delete some to stay on free.
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setUpgradePromptDismissed(false)}
+                      className="underline hover:no-underline"
+                    >
+                      Upgrade to Pro
+                    </button>{" "}
+                    for unlimited tags.
+                  </>
+                )}
               </p>
             </div>
           )}

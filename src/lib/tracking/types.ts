@@ -39,6 +39,12 @@ export type TrackingEventType =
   | "upgrade_prompt_shown"
   | "upgrade_prompt_dismissed"
   | "upgrade_prompt_cta_click"
+  // Lapsed user prompts
+  | "lapsed_banner_shown"
+  | "lapsed_banner_dismissed"
+  | "lapsed_banner_cta_click"
+  | "lapsed_modal_shown"
+  | "lapsed_modal_cta_click"
   // Extraction
   | "extraction_attempt"
   | "extraction_success"

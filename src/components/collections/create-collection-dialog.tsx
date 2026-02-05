@@ -48,6 +48,7 @@ export function CreateCollectionDialog({
 
   const limit = COLLECTION_LIMITS[planTier];
   const atLimit = currentCount >= limit;
+  const overLimit = currentCount > limit;
   const showUpgradePrompt = open && atLimit && !upgradePromptDismissed;
   const canCreate = name.trim().length > 0 && !atLimit && !createMutation.isPending;
 
@@ -136,17 +137,35 @@ export function CreateCollectionDialog({
           {atLimit && (
             <div className="rounded-md bg-amber-50 dark:bg-amber-950/50 p-3 text-sm">
               <p className="font-medium text-amber-800 dark:text-amber-200">
-                Collection limit reached ({currentCount}/{limit})
+                {overLimit
+                  ? `You have ${currentCount} collections`
+                  : `Collection limit reached (${currentCount}/${limit})`}
               </p>
               <p className="text-amber-700 dark:text-amber-300 mt-1">
-                <button
-                  type="button"
-                  onClick={() => setUpgradePromptDismissed(false)}
-                  className="underline hover:no-underline"
-                >
-                  Upgrade to Pro
-                </button>{" "}
-                for unlimited collections.
+                {overLimit ? (
+                  <>
+                    Free plan allows {limit}.{" "}
+                    <button
+                      type="button"
+                      onClick={() => setUpgradePromptDismissed(false)}
+                      className="underline hover:no-underline"
+                    >
+                      Upgrade to Pro
+                    </button>{" "}
+                    to create more, or delete some to stay on free.
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setUpgradePromptDismissed(false)}
+                      className="underline hover:no-underline"
+                    >
+                      Upgrade to Pro
+                    </button>{" "}
+                    for unlimited collections.
+                  </>
+                )}
               </p>
             </div>
           )}
