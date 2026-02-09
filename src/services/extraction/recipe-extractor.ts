@@ -44,6 +44,44 @@ export function detectTranscriptLanguage(
   return ISO_639_3_TO_1[iso639_3] || "unknown";
 }
 
+function isNonRecipeContent(extracted: Record<string, unknown>): {
+  isNonRecipe: boolean;
+  reason?: string;
+} {
+  if (extracted.isRecipe === false) {
+    const reason =
+      (typeof extracted.reason === "string" && extracted.reason) ||
+      "This video does not contain recipe instructions.";
+    return {
+      isNonRecipe: true,
+      reason,
+    };
+  }
+
+  const hasTitle =
+    typeof extracted.title === "string" && extracted.title.length > 0;
+  const hasIngredients =
+    Array.isArray(extracted.ingredients) && extracted.ingredients.length > 0;
+  const hasInstructions =
+    Array.isArray(extracted.instructions) && extracted.instructions.length > 0;
+
+  if (!hasTitle) {
+    return {
+      isNonRecipe: true,
+      reason: "Could not identify recipe content in this video.",
+    };
+  }
+
+  if (!hasIngredients && !hasInstructions) {
+    return {
+      isNonRecipe: true,
+      reason: "No recipe ingredients or instructions found in this video.",
+    };
+  }
+
+  return { isNonRecipe: false };
+}
+
 function buildSystemPrompt(
   targetLanguage: TargetLanguage,
   detectedLanguage: DetectedLanguageCode,
@@ -63,6 +101,23 @@ function buildSystemPrompt(
   return `You are a recipe extraction system. Given a transcript from a cooking video (and optionally the post description/caption), extract the recipe information.
 
 ${languageInstruction}
+
+CONTENT TYPE DETECTION:
+If the video content is clearly NOT a recipe or cooking tutorial, you MUST indicate this by setting "isRecipe" to false.
+Examples of non-recipe content:
+- Dance videos, lip-sync videos, comedy skits, pranks
+- Product reviews (kitchen gadgets, cookware)
+- Restaurant visits, food reviews, taste tests
+- Lifestyle vlogs that happen to show food
+- ASMR eating videos without cooking instructions
+
+When content is non-recipe, return:
+{
+  "isRecipe": false,
+  "reason": "Brief explanation of why this is not a recipe (e.g., 'This video shows a restaurant visit without cooking instructions')"
+}
+
+When content IS a recipe or cooking tutorial, always include "isRecipe": true in your response.
 
 RULES:
 1. Extract instructions that ARE verbally described - if someone says "slice the apple, add sugar, bake it", those ARE instructions to extract
@@ -196,10 +251,12 @@ export async function extractRecipeFromTranscript(
 
     const extracted = JSON.parse(content);
 
-    if (!extracted.title) {
+    const nonRecipeCheck = isNonRecipeContent(extracted);
+    if (nonRecipeCheck.isNonRecipe) {
       return {
         recipe: null,
         error:
+          nonRecipeCheck.reason ||
           "Could not extract a recipe from this transcript. The video may not contain a recipe.",
       };
     }
