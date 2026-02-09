@@ -49,7 +49,10 @@ export async function POST(request: Request) {
 
     if (!detection.isValid) {
       return NextResponse.json(
-        { error: detection.error || "Invalid URL" },
+        {
+          error: detection.error || "Invalid URL",
+          validationLayer: "platform_detection",
+        },
         { status: 400 },
       );
     }

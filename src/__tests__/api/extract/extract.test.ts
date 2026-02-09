@@ -155,6 +155,46 @@ describe("/api/extract", () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toBe("Unsupported platform");
+      expect(data.validationLayer).toBe("platform_detection");
+    });
+
+    it("returns 400 for YouTube channel URLs with validationLayer", async () => {
+      const { getSession } = await import("@/lib/session");
+      const { canUserExtract } = await import("@/models/subscription");
+      const { validateBody } = await import("@/lib/validation");
+      const { resolveUrl, detectPlatform } =
+        await import("@/services/extraction/platform-detector");
+
+      vi.mocked(getSession).mockResolvedValueOnce(mockSession);
+      vi.mocked(canUserExtract).mockResolvedValueOnce(true);
+      vi.mocked(validateBody).mockResolvedValueOnce({
+        success: true,
+        data: {
+          url: "https://youtube.com/@channelname",
+          targetLanguage: "original",
+        },
+      } as never);
+      vi.mocked(resolveUrl).mockResolvedValueOnce(
+        "https://youtube.com/@channelname",
+      );
+      vi.mocked(detectPlatform).mockReturnValueOnce({
+        isValid: false,
+        platform: "youtube",
+        error: "This appears to be a YouTube channel page",
+      });
+
+      const { POST } = await import("@/app/api/extract/route");
+      const request = new Request("http://localhost/api/extract", {
+        method: "POST",
+        body: JSON.stringify({ url: "https://youtube.com/@channelname" }),
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toContain("channel");
+      expect(data.validationLayer).toBe("platform_detection");
     });
 
     it("returns existingRecipeId when user already has recipe from URL", async () => {
