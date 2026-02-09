@@ -25,16 +25,66 @@ const PLATFORM_PATTERNS: Record<Platform, RegExp[]> = {
   other: [],
 };
 
-export function detectPlatform(url: string): PlatformDetectionResult {
-  let parsedUrl: URL;
+const REJECTED_PATTERNS: Record<Platform, RegExp[]> = {
+  youtube: [
+    /youtube\.com\/@[\w-]+\/?$/i,
+    /youtube\.com\/channel\/[\w-]+/i,
+    /youtube\.com\/user\/[\w-]+/i,
+    /youtube\.com\/c\/[\w-]+/i,
+    /youtube\.com\/playlist\?list=/i,
+    /youtube\.com\/?$/i,
+  ],
+  instagram: [
+    /instagram\.com\/[\w.]+\/?$/i,
+    /instagram\.com\/explore/i,
+    /instagram\.com\/accounts/i,
+    /instagram\.com\/?$/i,
+  ],
+  tiktok: [
+    /tiktok\.com\/@[\w.-]+\/?$/i,
+    /tiktok\.com\/foryou/i,
+    /tiktok\.com\/following/i,
+    /tiktok\.com\/?$/i,
+  ],
+  other: [],
+};
+
+function getContentTypeErrorMessage(platform: Platform): string {
+  const messages: Record<Platform, string> = {
+    youtube:
+      "This appears to be a YouTube channel or playlist page. Please provide a specific video or Short URL (containing /watch, /shorts, or youtu.be).",
+    instagram:
+      "This appears to be an Instagram profile page. Please provide a specific post or Reel URL (containing /p/ or /reel/).",
+    tiktok:
+      "This appears to be a TikTok profile page. Please provide a specific video URL (containing /video/).",
+    other: "URL is not supported",
+  };
+  return messages[platform];
+}
+
+export function validateContentUrl(url: string): PlatformDetectionResult {
   try {
-    parsedUrl = new URL(url);
+    new URL(url);
   } catch {
     return {
       platform: "other",
       isValid: false,
       error: "Invalid URL format",
     };
+  }
+
+  for (const [platform, patterns] of Object.entries(REJECTED_PATTERNS)) {
+    if (platform === "other") continue;
+
+    for (const pattern of patterns) {
+      if (pattern.test(url)) {
+        return {
+          platform: platform as Platform,
+          isValid: false,
+          error: getContentTypeErrorMessage(platform as Platform),
+        };
+      }
+    }
   }
 
   for (const [platform, patterns] of Object.entries(PLATFORM_PATTERNS)) {
@@ -50,35 +100,16 @@ export function detectPlatform(url: string): PlatformDetectionResult {
     }
   }
 
-  const hostname = parsedUrl.hostname.toLowerCase();
-
-  if (hostname.includes("tiktok.com")) {
-    return {
-      platform: "tiktok",
-      isValid: true,
-    };
-  }
-
-  if (hostname.includes("instagram.com")) {
-    return {
-      platform: "instagram",
-      isValid: true,
-    };
-  }
-
-  if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) {
-    return {
-      platform: "youtube",
-      isValid: true,
-    };
-  }
-
   return {
     platform: "other",
     isValid: false,
     error:
       "URL is not from a supported platform (TikTok, Instagram, or YouTube)",
   };
+}
+
+export function detectPlatform(url: string): PlatformDetectionResult {
+  return validateContentUrl(url);
 }
 
 export function normalizeUrl(url: string): string {
