@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -34,16 +35,66 @@ vi.mock("@/lib/tracking", () => ({
   trackEvent: vi.fn(),
 }));
 
+function renderWithQueryClient(component: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>,
+  );
+}
+
 describe("SettingsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    global.fetch = vi.fn((url: string) => {
+      if (url === "/api/collections") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        } as Response);
+      }
+      if (url === "/api/tags") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        } as Response);
+      }
+      if (url === "/api/billing/usage") {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              planTier: "free",
+              features: {
+                extractions: { used: 0, limit: 10, atLimit: false },
+                collections: { used: 0, limit: 3, atLimit: false },
+                tags: { used: 0, limit: 5, atLimit: false },
+              },
+            }),
+        } as Response);
+      }
+      if (url === "/api/account") {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ hasPassword: true }),
+        } as Response);
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      } as Response);
+    }) as unknown as typeof fetch;
   });
 
   describe("Profile Tab", () => {
     it("renders name and email fields", async () => {
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       await waitFor(() => {
         expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
@@ -55,7 +106,7 @@ describe("SettingsPage", () => {
       const user = userEvent.setup();
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       await waitFor(() => {
         expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
@@ -72,7 +123,7 @@ describe("SettingsPage", () => {
     it("shows delete account button", async () => {
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       await waitFor(() => {
         expect(
@@ -85,7 +136,7 @@ describe("SettingsPage", () => {
       const user = userEvent.setup();
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       await waitFor(() => {
         expect(
@@ -103,14 +154,14 @@ describe("SettingsPage", () => {
     });
   });
 
-  describe("Telegram Tab", () => {
-    it("renders telegram tab button", async () => {
+  describe("Integrations Tab", () => {
+    it("renders integrations tab button", async () => {
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       expect(
-        screen.getByRole("tab", { name: /telegram/i }),
+        screen.getByRole("tab", { name: /integrations/i }),
       ).toBeInTheDocument();
     });
   });
@@ -119,7 +170,7 @@ describe("SettingsPage", () => {
     it("renders billing tab button", async () => {
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       expect(screen.getByRole("tab", { name: /billing/i })).toBeInTheDocument();
     });
@@ -131,7 +182,7 @@ describe("SettingsPage", () => {
 
       const SettingsPage = (await import("@/app/(dashboard)/settings/page"))
         .default;
-      render(<SettingsPage />);
+      renderWithQueryClient(<SettingsPage />);
 
       await waitFor(() => {
         expect(trackEvent).toHaveBeenCalledWith("settings_view", {
