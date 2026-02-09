@@ -71,10 +71,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     const isTagged = await isRecipeTagged(recipeId, tagId);
     if (!isTagged) {
-      return NextResponse.json(
-        { error: "Recipe not tagged" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Recipe not tagged" }, { status: 404 });
     }
 
     const removed = await removeRecipeFromTag(recipeId, tagId, session.user.id);

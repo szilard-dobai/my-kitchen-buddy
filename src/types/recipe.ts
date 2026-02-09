@@ -75,7 +75,10 @@ export interface Recipe {
   updatedAt: Date;
 }
 
-export type CreateRecipeInput = Omit<Recipe, "_id" | "collectionIds" | "tagIds" | "createdAt" | "updatedAt">;
+export type CreateRecipeInput = Omit<
+  Recipe,
+  "_id" | "collectionIds" | "tagIds" | "createdAt" | "updatedAt"
+>;
 
 export type UpdateRecipeInput = Partial<
   Omit<Recipe, "_id" | "userId" | "createdAt" | "updatedAt">

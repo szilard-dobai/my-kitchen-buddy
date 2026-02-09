@@ -56,12 +56,12 @@ My Kitchen Buddy extracts recipes from social media cooking videos using AI. Use
 
 ### Plan Tier Limits
 
-| Feature | Free | Pro |
-|---------|------|-----|
-| Extractions/month | 10 | 100 |
-| Collections | 3 | Unlimited |
-| Tags | 5 | Unlimited |
-| Similar recipes shown | 1 | 9 |
+| Feature               | Free | Pro       |
+| --------------------- | ---- | --------- |
+| Extractions/month     | 10   | 100       |
+| Collections           | 3    | Unlimited |
+| Tags                  | 5    | Unlimited |
+| Similar recipes shown | 1    | 9         |
 
 ### Collections & Tags
 

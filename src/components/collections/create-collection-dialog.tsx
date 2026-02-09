@@ -50,7 +50,8 @@ export function CreateCollectionDialog({
   const atLimit = currentCount >= limit;
   const overLimit = currentCount > limit;
   const showUpgradePrompt = open && atLimit && !upgradePromptDismissed;
-  const canCreate = name.trim().length > 0 && !atLimit && !createMutation.isPending;
+  const canCreate =
+    name.trim().length > 0 && !atLimit && !createMutation.isPending;
 
   const handleCreate = async () => {
     if (!canCreate) return;
@@ -58,7 +59,10 @@ export function CreateCollectionDialog({
     setError(null);
 
     try {
-      const newCollection = await createMutation.mutateAsync({ name: name.trim(), color });
+      const newCollection = await createMutation.mutateAsync({
+        name: name.trim(),
+        color,
+      });
       trackEvent("collection_created");
       setName("");
       setColor(DEFAULT_COLLECTION_COLOR);
@@ -178,9 +182,7 @@ export function CreateCollectionDialog({
             limit={limit}
           />
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
 
         <DialogFooter>
@@ -188,7 +190,9 @@ export function CreateCollectionDialog({
             Cancel
           </Button>
           <Button onClick={handleCreate} disabled={!canCreate}>
-            {createMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {createMutation.isPending && (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            )}
             Create
           </Button>
         </DialogFooter>

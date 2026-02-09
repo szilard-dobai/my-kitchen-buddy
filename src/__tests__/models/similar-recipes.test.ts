@@ -115,7 +115,9 @@ describe("getSimilarRecipes", () => {
 
     expect(result).not.toBeNull();
     expect(result!.recipes).toHaveLength(2);
-    expect(result!.recipes[0].thumbnailUrl).toBe("https://example.com/thumb.jpg");
+    expect(result!.recipes[0].thumbnailUrl).toBe(
+      "https://example.com/thumb.jpg",
+    );
     expect(result!.totalSimilar).toBe(2);
     expect(result!.hasMore).toBe(false);
   });

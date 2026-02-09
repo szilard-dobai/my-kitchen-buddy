@@ -284,7 +284,10 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   };
 
   const customDietaryTags = dietaryTags.filter(
-    (tag) => !KNOWN_DIETARY_TAGS.includes(tag.toLowerCase() as typeof KNOWN_DIETARY_TAGS[number]),
+    (tag) =>
+      !KNOWN_DIETARY_TAGS.includes(
+        tag.toLowerCase() as (typeof KNOWN_DIETARY_TAGS)[number],
+      ),
   );
 
   return (

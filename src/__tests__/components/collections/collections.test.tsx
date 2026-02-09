@@ -2,7 +2,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { CollectionDropdown } from "@/components/collections/collection-dropdown";
 import { CollectionSidebar } from "@/components/collections/collection-sidebar";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
@@ -14,9 +22,13 @@ import {
 } from "../../mocks/fixtures";
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -108,7 +120,9 @@ describe("CollectionSidebar", () => {
       />,
     );
 
-    const selectedItem = screen.getByText("Weeknight Dinners").closest("button")?.parentElement;
+    const selectedItem = screen
+      .getByText("Weeknight Dinners")
+      .closest("button")?.parentElement;
     expect(selectedItem).toHaveClass("bg-accent");
   });
 
@@ -123,7 +137,9 @@ describe("CollectionSidebar", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /create collection/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /create collection/i }),
+    ).toBeInTheDocument();
   });
 
   it("calls onSelectCollection when collection clicked", async () => {
@@ -175,13 +191,12 @@ describe("CollectionDropdown", () => {
 
   it("renders folder icon button", () => {
     renderWithQueryClient(
-      <CollectionDropdown
-        recipeId="recipe-123"
-        collections={[]}
-      />,
+      <CollectionDropdown recipeId="recipe-123" collections={[]} />,
     );
 
-    expect(screen.getByRole("button", { name: /add to collection/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add to collection/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders with correct accessible name", () => {
@@ -205,20 +220,21 @@ describe("CollectionDropdown", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /add to collection/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add to collection/i }),
+    ).toBeInTheDocument();
   });
 
   it("passes collections to component", () => {
     const collections = [mockCollection, mockCollection2];
 
     renderWithQueryClient(
-      <CollectionDropdown
-        recipeId="recipe-123"
-        collections={collections}
-      />,
+      <CollectionDropdown recipeId="recipe-123" collections={collections} />,
     );
 
-    expect(screen.getByRole("button", { name: /add to collection/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add to collection/i }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -299,9 +315,13 @@ describe("CreateCollectionDialog", () => {
       />,
     );
 
-    expect(screen.getAllByText(/collection limit reached/i).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(/collection limit reached/i).length,
+    ).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/3\/3/)).toBeInTheDocument();
-    expect(screen.getAllByText(/upgrade to pro/i).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(/upgrade to pro/i).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("does not show limit warning for pro users", () => {
@@ -315,7 +335,9 @@ describe("CreateCollectionDialog", () => {
       />,
     );
 
-    expect(screen.queryByText(/collection limit reached/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/collection limit reached/i),
+    ).not.toBeInTheDocument();
   });
 
   it("calls onCreated on successful submit", async () => {
@@ -400,7 +422,9 @@ describe("DeleteCollectionDialog", () => {
       />,
     );
 
-    expect(screen.queryByText(/recipes will be removed/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/recipes will be removed/i),
+    ).not.toBeInTheDocument();
   });
 
   it("calls onDeleted when confirmed", async () => {

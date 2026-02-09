@@ -10,7 +10,8 @@
     "lint:types": "npx tsc -p tsconfig.json",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "prettify": "npx prettier . --write"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

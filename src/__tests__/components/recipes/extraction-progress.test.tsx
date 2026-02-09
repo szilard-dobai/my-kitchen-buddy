@@ -5,7 +5,11 @@ import { ExtractionProgress } from "@/components/recipes/extraction-progress";
 describe("ExtractionProgress", () => {
   const mockSteps = [
     { id: "fetch", label: "Fetching video data", status: "completed" as const },
-    { id: "analyze", label: "Analyzing recipe with AI", status: "active" as const },
+    {
+      id: "analyze",
+      label: "Analyzing recipe with AI",
+      status: "active" as const,
+    },
     { id: "save", label: "Saving your recipe", status: "pending" as const },
   ];
 
@@ -88,8 +92,16 @@ describe("ExtractionProgress", () => {
 
   it("updates step statuses correctly as progress changes", () => {
     const allCompletedSteps = [
-      { id: "fetch", label: "Fetching video data", status: "completed" as const },
-      { id: "analyze", label: "Analyzing recipe with AI", status: "completed" as const },
+      {
+        id: "fetch",
+        label: "Fetching video data",
+        status: "completed" as const,
+      },
+      {
+        id: "analyze",
+        label: "Analyzing recipe with AI",
+        status: "completed" as const,
+      },
       { id: "save", label: "Saving your recipe", status: "active" as const },
     ];
 
@@ -113,7 +125,11 @@ describe("ExtractionProgress", () => {
   it("renders at 0% progress for pending state", () => {
     const pendingSteps = [
       { id: "fetch", label: "Fetching video data", status: "active" as const },
-      { id: "analyze", label: "Analyzing recipe with AI", status: "pending" as const },
+      {
+        id: "analyze",
+        label: "Analyzing recipe with AI",
+        status: "pending" as const,
+      },
       { id: "save", label: "Saving your recipe", status: "pending" as const },
     ];
 
@@ -130,8 +146,16 @@ describe("ExtractionProgress", () => {
 
   it("renders at 100% progress for completed state", () => {
     const completedSteps = [
-      { id: "fetch", label: "Fetching video data", status: "completed" as const },
-      { id: "analyze", label: "Analyzing recipe with AI", status: "completed" as const },
+      {
+        id: "fetch",
+        label: "Fetching video data",
+        status: "completed" as const,
+      },
+      {
+        id: "analyze",
+        label: "Analyzing recipe with AI",
+        status: "completed" as const,
+      },
       { id: "save", label: "Saving your recipe", status: "completed" as const },
     ];
 

@@ -12,7 +12,8 @@ export const createCollectionSchema = z.object({
     .string()
     .regex(hexColorRegex, "Color must be a valid hex color")
     .refine(
-      (color) => COLLECTION_COLORS.includes(color as typeof COLLECTION_COLORS[number]),
+      (color) =>
+        COLLECTION_COLORS.includes(color as (typeof COLLECTION_COLORS)[number]),
       "Color must be one of the allowed colors",
     ),
 });

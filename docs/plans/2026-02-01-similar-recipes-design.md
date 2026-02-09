@@ -39,8 +39,8 @@ interface SimilarRecipe {
 
 interface SimilarRecipesResponse {
   recipes: SimilarRecipe[];
-  hasMore: boolean;      // true if free user and more matches exist (up to 9)
-  totalSimilar: number;  // total similar recipes found (capped at 9)
+  hasMore: boolean; // true if free user and more matches exist (up to 9)
+  totalSimilar: number; // total similar recipes found (capped at 9)
 }
 ```
 
@@ -88,15 +88,15 @@ Section not rendered if no similar recipes found.
 
 ## Files to Create/Modify
 
-| File | Change |
-|------|--------|
-| `src/types/recipe.ts` | Add `SimilarRecipe` and `SimilarRecipesResponse` types |
-| `src/models/recipe.ts` | Add `getSimilarRecipes(recipeId, userId, limit)` function |
-| `src/app/api/recipes/[id]/similar/route.ts` | New API route |
-| `src/components/recipes/similar-recipes-section.tsx` | New carousel component |
-| `src/components/recipes/similar-recipe-card.tsx` | Square card component |
-| `src/components/recipes/similar-recipe-placeholder.tsx` | Blurred placeholder card |
-| `src/app/(dashboard)/recipes/[id]/page.tsx` | Add `SimilarRecipesSection` |
+| File                                                    | Change                                                    |
+| ------------------------------------------------------- | --------------------------------------------------------- |
+| `src/types/recipe.ts`                                   | Add `SimilarRecipe` and `SimilarRecipesResponse` types    |
+| `src/models/recipe.ts`                                  | Add `getSimilarRecipes(recipeId, userId, limit)` function |
+| `src/app/api/recipes/[id]/similar/route.ts`             | New API route                                             |
+| `src/components/recipes/similar-recipes-section.tsx`    | New carousel component                                    |
+| `src/components/recipes/similar-recipe-card.tsx`        | Square card component                                     |
+| `src/components/recipes/similar-recipe-placeholder.tsx` | Blurred placeholder card                                  |
+| `src/app/(dashboard)/recipes/[id]/page.tsx`             | Add `SimilarRecipesSection`                               |
 
 ## Database
 
@@ -105,6 +105,6 @@ No new collections needed. Similarity is computed on the fly from existing recip
 ## Plan Tier Limits
 
 | Tier | Visible Recipes |
-|------|-----------------|
-| Free | 1 |
-| Pro | 9 |
+| ---- | --------------- |
+| Free | 1               |
+| Pro  | 9               |

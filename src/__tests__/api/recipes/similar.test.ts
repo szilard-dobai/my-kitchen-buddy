@@ -92,7 +92,11 @@ describe("GET /api/recipes/[id]/similar", () => {
     expect(data.recipes).toHaveLength(1);
     expect(data.hasMore).toBe(true);
     expect(data.totalSimilar).toBe(5);
-    expect(getSimilarRecipes).toHaveBeenCalledWith("123", mockSession.user.id, 1);
+    expect(getSimilarRecipes).toHaveBeenCalledWith(
+      "123",
+      mockSession.user.id,
+      1,
+    );
   });
 
   it("returns up to 9 similar recipes for pro user", async () => {
@@ -122,6 +126,10 @@ describe("GET /api/recipes/[id]/similar", () => {
 
     expect(response.status).toBe(200);
     expect(data.recipes).toHaveLength(9);
-    expect(getSimilarRecipes).toHaveBeenCalledWith("123", mockSession.user.id, 9);
+    expect(getSimilarRecipes).toHaveBeenCalledWith(
+      "123",
+      mockSession.user.id,
+      9,
+    );
   });
 });

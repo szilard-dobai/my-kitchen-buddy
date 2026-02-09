@@ -95,13 +95,7 @@ export function useUpdateTag() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      tagId,
-      name,
-    }: {
-      tagId: string;
-      name?: string;
-    }) => {
+    mutationFn: async ({ tagId, name }: { tagId: string; name?: string }) => {
       const response = await fetch(`/api/tags/${tagId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

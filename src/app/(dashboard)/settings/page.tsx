@@ -290,7 +290,9 @@ function ProfileTab({ planTier }: { planTier: PlanTier }) {
                           !emailPassword
                         }
                       >
-                        {emailMutation.isPending ? "Updating..." : "Update Email"}
+                        {emailMutation.isPending
+                          ? "Updating..."
+                          : "Update Email"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>

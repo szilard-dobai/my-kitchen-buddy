@@ -44,7 +44,9 @@ describe("RegisterPage", () => {
     const RegisterPage = (await import("@/app/(auth)/register/page")).default;
     render(<RegisterPage />);
 
-    expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /create account/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders OAuth buttons", async () => {
@@ -72,7 +74,10 @@ describe("RegisterPage", () => {
     await user.type(screen.getByLabelText(/name/i), "Test User");
     await user.type(screen.getByLabelText(/email/i), "test@example.com");
     await user.type(screen.getByLabelText(/^password$/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "differentpassword");
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      "differentpassword",
+    );
     await user.click(screen.getByRole("button", { name: /create account/i }));
 
     expect(screen.getByText("Passwords do not match")).toBeInTheDocument();
@@ -89,7 +94,9 @@ describe("RegisterPage", () => {
     await user.type(screen.getByLabelText(/confirm password/i), "short");
     await user.click(screen.getByRole("button", { name: /create account/i }));
 
-    expect(screen.getByText("Password must be at least 8 characters")).toBeInTheDocument();
+    expect(
+      screen.getByText("Password must be at least 8 characters"),
+    ).toBeInTheDocument();
   });
 
   it("submits form and redirects on successful registration", async () => {
@@ -97,7 +104,10 @@ describe("RegisterPage", () => {
     const { signUp } = await import("@/lib/auth-client");
     const { trackEvent } = await import("@/lib/tracking");
 
-    vi.mocked(signUp.email).mockResolvedValueOnce({ data: { user: {} }, error: null } as never);
+    vi.mocked(signUp.email).mockResolvedValueOnce({
+      data: { user: {} },
+      error: null,
+    } as never);
 
     const RegisterPage = (await import("@/app/(auth)/register/page")).default;
     render(<RegisterPage />);
@@ -165,7 +175,9 @@ describe("RegisterPage", () => {
       provider: "google",
       callbackURL: "/recipes",
     });
-    expect(trackEvent).toHaveBeenCalledWith("register_attempt", { provider: "google" });
+    expect(trackEvent).toHaveBeenCalledWith("register_attempt", {
+      provider: "google",
+    });
   });
 
   it("tracks register_view event on mount", async () => {

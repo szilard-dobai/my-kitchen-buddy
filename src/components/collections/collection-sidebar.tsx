@@ -65,8 +65,9 @@ export function CollectionSidebar({
 }: CollectionSidebarProps) {
   const isCollapsed = useCollapsedState();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editingCollection, setEditingCollection] =
-    useState<Collection | null>(null);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(
+    null,
+  );
   const [deletingCollection, setDeletingCollection] =
     useState<Collection | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -206,7 +207,9 @@ export function CollectionSidebar({
       >
         <FolderOpen className="size-4 text-foreground/70 dark:text-foreground/80" />
         <span className="flex-1">All Recipes</span>
-        <span className="text-xs text-muted-foreground">{totalRecipeCount}</span>
+        <span className="text-xs text-muted-foreground">
+          {totalRecipeCount}
+        </span>
       </button>
 
       {collections.map((collection) => (
@@ -234,7 +237,9 @@ export function CollectionSidebar({
           </span>
           <Popover
             open={openMenuId === collection._id}
-            onOpenChange={(open) => setOpenMenuId(open ? collection._id! : null)}
+            onOpenChange={(open) =>
+              setOpenMenuId(open ? collection._id! : null)
+            }
           >
             <PopoverTrigger asChild>
               <Button

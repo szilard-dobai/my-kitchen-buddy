@@ -34,7 +34,8 @@ describe("/api/telegram-link", () => {
 
     it("returns linked:false when no link exists", async () => {
       const { getSession } = await import("@/lib/session");
-      const { getTelegramLinkByUserId } = await import("@/models/telegram-link");
+      const { getTelegramLinkByUserId } =
+        await import("@/models/telegram-link");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getTelegramLinkByUserId).mockResolvedValueOnce(null);
@@ -49,10 +50,13 @@ describe("/api/telegram-link", () => {
 
     it("returns linked:true with details when link exists", async () => {
       const { getSession } = await import("@/lib/session");
-      const { getTelegramLinkByUserId } = await import("@/models/telegram-link");
+      const { getTelegramLinkByUserId } =
+        await import("@/models/telegram-link");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getTelegramLinkByUserId).mockResolvedValueOnce(mockTelegramLink);
+      vi.mocked(getTelegramLinkByUserId).mockResolvedValueOnce(
+        mockTelegramLink,
+      );
 
       const { GET } = await import("@/app/api/telegram-link/route");
       const response = await GET();
@@ -81,10 +85,13 @@ describe("/api/telegram-link", () => {
 
     it("returns 400 when user already linked", async () => {
       const { getSession } = await import("@/lib/session");
-      const { getTelegramLinkByUserId } = await import("@/models/telegram-link");
+      const { getTelegramLinkByUserId } =
+        await import("@/models/telegram-link");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getTelegramLinkByUserId).mockResolvedValueOnce(mockTelegramLink);
+      vi.mocked(getTelegramLinkByUserId).mockResolvedValueOnce(
+        mockTelegramLink,
+      );
 
       const { POST } = await import("@/app/api/telegram-link/route");
       const response = await POST();
@@ -96,7 +103,8 @@ describe("/api/telegram-link", () => {
 
     it("returns deepLink and token for unlinked user", async () => {
       const { getSession } = await import("@/lib/session");
-      const { getTelegramLinkByUserId } = await import("@/models/telegram-link");
+      const { getTelegramLinkByUserId } =
+        await import("@/models/telegram-link");
       const { signLinkToken } = await import("@/lib/telegram");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);

@@ -49,7 +49,10 @@ export async function POST(request: Request) {
       }
     } else {
       return NextResponse.json(
-        { error: "Avatar refresh is only supported for Instagram, TikTok, and YouTube" },
+        {
+          error:
+            "Avatar refresh is only supported for Instagram, TikTok, and YouTube",
+        },
         { status: 400 },
       );
     }

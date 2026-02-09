@@ -71,9 +71,8 @@ describe("/api/collections/[id]/recipes", () => {
     it("returns recipe IDs in collection", async () => {
       const { getSession } = await import("@/lib/session");
       const { getCollectionById } = await import("@/models/collection");
-      const { getRecipeIdsInCollection } = await import(
-        "@/models/recipe-collection"
-      );
+      const { getRecipeIdsInCollection } =
+        await import("@/models/recipe-collection");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getCollectionById).mockResolvedValueOnce(mockCollection);
@@ -108,9 +107,8 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
       const { getSession } = await import("@/lib/session");
       vi.mocked(getSession).mockResolvedValueOnce(null);
 
-      const { POST } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { POST } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/recipe-123",
         { method: "POST" },
@@ -131,9 +129,8 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getCollectionById).mockResolvedValueOnce(null);
 
-      const { POST } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { POST } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/nonexistent/recipes/recipe-123",
         { method: "POST" },
@@ -156,9 +153,8 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
       vi.mocked(getCollectionById).mockResolvedValueOnce(mockCollection);
       vi.mocked(getRecipeById).mockResolvedValueOnce(null);
 
-      const { POST } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { POST } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/nonexistent",
         { method: "POST" },
@@ -182,9 +178,8 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
         userId: "other-user",
       });
 
-      const { POST } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { POST } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/recipe-123",
         { method: "POST" },
@@ -210,9 +205,8 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
         userId: "other-user",
       });
 
-      const { POST } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { POST } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/recipe-123",
         { method: "POST" },
@@ -230,18 +224,18 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
       const { getSession } = await import("@/lib/session");
       const { getCollectionById } = await import("@/models/collection");
       const { getRecipeById } = await import("@/models/recipe");
-      const { addRecipeToCollection } = await import(
-        "@/models/recipe-collection"
-      );
+      const { addRecipeToCollection } =
+        await import("@/models/recipe-collection");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getCollectionById).mockResolvedValueOnce(mockCollection);
       vi.mocked(getRecipeById).mockResolvedValueOnce(mockRecipe);
-      vi.mocked(addRecipeToCollection).mockResolvedValueOnce(mockRecipeCollection);
-
-      const { POST } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
+      vi.mocked(addRecipeToCollection).mockResolvedValueOnce(
+        mockRecipeCollection,
       );
+
+      const { POST } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/recipe-123",
         { method: "POST" },
@@ -263,17 +257,15 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
     it("returns 404 if recipe not in collection", async () => {
       const { getSession } = await import("@/lib/session");
       const { getCollectionById } = await import("@/models/collection");
-      const { isRecipeInCollection } = await import(
-        "@/models/recipe-collection"
-      );
+      const { isRecipeInCollection } =
+        await import("@/models/recipe-collection");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getCollectionById).mockResolvedValueOnce(mockCollection);
       vi.mocked(isRecipeInCollection).mockResolvedValueOnce(false);
 
-      const { DELETE } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { DELETE } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/recipe-123",
         { method: "DELETE" },
@@ -290,18 +282,16 @@ describe("/api/collections/[id]/recipes/[recipeId]", () => {
     it("removes recipe from collection", async () => {
       const { getSession } = await import("@/lib/session");
       const { getCollectionById } = await import("@/models/collection");
-      const { isRecipeInCollection, removeRecipeFromCollection } = await import(
-        "@/models/recipe-collection"
-      );
+      const { isRecipeInCollection, removeRecipeFromCollection } =
+        await import("@/models/recipe-collection");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(getCollectionById).mockResolvedValueOnce(mockCollection);
       vi.mocked(isRecipeInCollection).mockResolvedValueOnce(true);
       vi.mocked(removeRecipeFromCollection).mockResolvedValueOnce(true);
 
-      const { DELETE } = await import(
-        "@/app/api/collections/[id]/recipes/[recipeId]/route"
-      );
+      const { DELETE } =
+        await import("@/app/api/collections/[id]/recipes/[recipeId]/route");
       const request = new Request(
         "http://localhost/api/collections/col-123/recipes/recipe-123",
         { method: "DELETE" },

@@ -34,7 +34,9 @@ export async function createCollection(
   };
 }
 
-export async function getCollectionById(id: string): Promise<Collection | null> {
+export async function getCollectionById(
+  id: string,
+): Promise<Collection | null> {
   const db = await getDb();
 
   try {

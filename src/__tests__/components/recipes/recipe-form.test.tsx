@@ -31,7 +31,9 @@ describe("RecipeForm", () => {
     render(<RecipeForm recipe={mockRecipe} />);
 
     expect(screen.getByText("Basic Info")).toBeInTheDocument();
-    expect(screen.getByText("Nutrition Information (Optional)")).toBeInTheDocument();
+    expect(
+      screen.getByText("Nutrition Information (Optional)"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Ingredients")).toBeInTheDocument();
     expect(screen.getByText("Instructions")).toBeInTheDocument();
     expect(screen.getByText("Equipment")).toBeInTheDocument();
@@ -43,7 +45,9 @@ describe("RecipeForm", () => {
     render(<RecipeForm recipe={mockRecipe} />);
 
     expect(screen.getByLabelText("Title *")).toHaveValue("Test Pasta Recipe");
-    expect(screen.getByLabelText("Description")).toHaveValue(mockRecipe.description);
+    expect(screen.getByLabelText("Description")).toHaveValue(
+      mockRecipe.description,
+    );
     expect(screen.getByLabelText("Cuisine")).toHaveValue("Italian");
     expect(screen.getByLabelText("Total Time")).toHaveValue("30 minutes");
     expect(screen.getByLabelText("Prep Time")).toHaveValue("10 minutes");
@@ -55,8 +59,12 @@ describe("RecipeForm", () => {
     const { RecipeForm } = await import("@/components/recipes/recipe-form");
     render(<RecipeForm recipe={mockRecipeWithNutrition} />);
 
-    expect(screen.getByLabelText("Calories", { selector: "#caloriesPerServing" })).toHaveValue(350);
-    expect(screen.getByLabelText("Protein (g)", { selector: "#proteinPerServing" })).toHaveValue(25);
+    expect(
+      screen.getByLabelText("Calories", { selector: "#caloriesPerServing" }),
+    ).toHaveValue(350);
+    expect(
+      screen.getByLabelText("Protein (g)", { selector: "#proteinPerServing" }),
+    ).toHaveValue(25);
   });
 
   it("updates title on input change", async () => {
@@ -76,12 +84,14 @@ describe("RecipeForm", () => {
     const { RecipeForm } = await import("@/components/recipes/recipe-form");
     render(<RecipeForm recipe={mockRecipe} />);
 
-    const initialIngredientInputs = screen.getAllByPlaceholderText("Ingredient name");
+    const initialIngredientInputs =
+      screen.getAllByPlaceholderText("Ingredient name");
     const addButton = screen.getByRole("button", { name: /add ingredient/i });
 
     await user.click(addButton);
 
-    const newIngredientInputs = screen.getAllByPlaceholderText("Ingredient name");
+    const newIngredientInputs =
+      screen.getAllByPlaceholderText("Ingredient name");
     expect(newIngredientInputs.length).toBe(initialIngredientInputs.length + 1);
   });
 
@@ -96,7 +106,8 @@ describe("RecipeForm", () => {
     const removeButtons = screen.getAllByRole("button", { name: "×" });
     await user.click(removeButtons[0]);
 
-    const updatedIngredientInputs = screen.getAllByPlaceholderText("Ingredient name");
+    const updatedIngredientInputs =
+      screen.getAllByPlaceholderText("Ingredient name");
     expect(updatedIngredientInputs.length).toBe(initialCount - 1);
   });
 
@@ -105,7 +116,9 @@ describe("RecipeForm", () => {
     const { RecipeForm } = await import("@/components/recipes/recipe-form");
     render(<RecipeForm recipe={mockRecipe} />);
 
-    const initialSteps = screen.getAllByPlaceholderText("Describe this step...");
+    const initialSteps = screen.getAllByPlaceholderText(
+      "Describe this step...",
+    );
     const addButton = screen.getByRole("button", { name: /add step/i });
 
     await user.click(addButton);
@@ -168,7 +181,9 @@ describe("RecipeForm", () => {
       expect(mockPush).toHaveBeenCalledWith(`/recipes/${mockRecipe._id}`);
     });
 
-    expect(trackEvent).toHaveBeenCalledWith("recipe_edited", { recipeId: mockRecipe._id });
+    expect(trackEvent).toHaveBeenCalledWith("recipe_edited", {
+      recipeId: mockRecipe._id,
+    });
     expect((capturedBody as { title: string }).title).toBe("New Title");
   });
 
@@ -197,7 +212,10 @@ describe("RecipeForm", () => {
 
     server.use(
       http.put(`/api/recipes/${mockRecipe._id}`, () => {
-        return HttpResponse.json({ error: "Failed to update recipe" }, { status: 500 });
+        return HttpResponse.json(
+          { error: "Failed to update recipe" },
+          { status: 500 },
+        );
       }),
     );
 

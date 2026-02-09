@@ -13,6 +13,7 @@
 ## Task 1: Add milestone helper functions to upgrade-prompts.ts
 
 **Files:**
+
 - Modify: `src/lib/upgrade-prompts.ts`
 - Create: `src/__tests__/lib/upgrade-prompts.test.ts`
 
@@ -22,10 +23,7 @@ Create `src/__tests__/lib/upgrade-prompts.test.ts`:
 
 ```typescript
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  getUnseenMilestone,
-  markMilestoneSeen,
-} from "@/lib/upgrade-prompts";
+import { getUnseenMilestone, markMilestoneSeen } from "@/lib/upgrade-prompts";
 
 describe("milestone prompts", () => {
   beforeEach(() => {
@@ -175,6 +173,7 @@ git commit -m "feat(milestones): add milestone tracking helper functions"
 ## Task 2: Add milestone feature types and configs to UpgradePrompt
 
 **Files:**
+
 - Modify: `src/lib/upgrade-prompts.ts`
 - Modify: `src/components/upgrade/upgrade-prompt.tsx`
 
@@ -273,6 +272,7 @@ git commit -m "feat(milestones): add milestone configs to UpgradePrompt"
 ## Task 3: Create MilestonePromptTrigger component
 
 **Files:**
+
 - Create: `src/components/upgrade/milestone-prompt-trigger.tsx`
 - Create: `src/__tests__/components/upgrade/milestone-prompt-trigger.test.tsx`
 
@@ -448,6 +448,7 @@ git commit -m "feat(milestones): add MilestonePromptTrigger component"
 ## Task 4: Integrate MilestonePromptTrigger into RecipeLibrary
 
 **Files:**
+
 - Modify: `src/components/recipes/recipe-library.tsx`
 - Modify: `src/__tests__/components/recipes/recipe-library.test.tsx`
 
@@ -497,11 +498,13 @@ Expected: FAIL - milestone prompt not shown
 In `src/components/recipes/recipe-library.tsx`:
 
 Add import:
+
 ```typescript
 import { MilestonePromptTrigger } from "@/components/upgrade/milestone-prompt-trigger";
 ```
 
 Add component inside the return, after the opening `<div>`:
+
 ```typescript
 return (
   <div className="flex gap-6">

@@ -56,10 +56,7 @@ export async function PATCH(request: NextRequest) {
     });
 
     if (!signInResult) {
-      return NextResponse.json(
-        { error: "Invalid password" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
     const updated = await updateUserEmail(session.user.id, email);

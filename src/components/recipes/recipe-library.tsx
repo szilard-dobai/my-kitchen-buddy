@@ -83,7 +83,10 @@ export function RecipeLibrary({
     );
   };
 
-  const handleAuthorAvatarRefresh = (authorId: string, newAvatarUrl: string) => {
+  const handleAuthorAvatarRefresh = (
+    authorId: string,
+    newAvatarUrl: string,
+  ) => {
     setRecipes((prev) =>
       prev.map((recipe) => {
         if (recipe.source.authorId !== authorId) return recipe;
@@ -142,7 +145,10 @@ export function RecipeLibrary({
 
   return (
     <div className="flex gap-6">
-      <MilestonePromptTrigger recipeCount={recipes.length} planTier={planTier} />
+      <MilestonePromptTrigger
+        recipeCount={recipes.length}
+        planTier={planTier}
+      />
       <aside
         className={`hidden lg:block shrink-0 transition-[width] duration-200 ${
           isSidebarCollapsed ? "w-10" : "w-[180px]"
@@ -211,7 +217,11 @@ export function RecipeLibrary({
           </div>
         </div>
 
-        <ActiveFilterChips filters={filters} onChange={setFilters} tags={tags} />
+        <ActiveFilterChips
+          filters={filters}
+          onChange={setFilters}
+          tags={tags}
+        />
 
         <div className="text-muted-foreground text-sm">
           {selectedCollection && (
@@ -222,7 +232,8 @@ export function RecipeLibrary({
           {filters.search ? (
             <span>
               {filteredRecipes.length} result
-              {filteredRecipes.length !== 1 ? "s" : ""} for &quot;{filters.search}
+              {filteredRecipes.length !== 1 ? "s" : ""} for &quot;
+              {filters.search}
               &quot;
             </span>
           ) : (
@@ -251,7 +262,11 @@ export function RecipeLibrary({
               <>
                 <p className="mb-4">No recipes match your search.</p>
                 <p>Try different keywords or clear some filters.</p>
-                <Button variant="outline" onClick={handleReset} className="mt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleReset}
+                  className="mt-4"
+                >
                   Clear all filters
                 </Button>
               </>

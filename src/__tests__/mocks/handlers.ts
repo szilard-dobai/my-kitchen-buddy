@@ -150,7 +150,9 @@ export const proUsageHandler = http.get("/api/billing/usage", () => {
     used: 25,
     limit: 100,
     planTier: "pro",
-    currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    currentPeriodEnd: new Date(
+      Date.now() + 30 * 24 * 60 * 60 * 1000,
+    ).toISOString(),
   });
 });
 
@@ -167,6 +169,9 @@ export const errorHandlers = {
     return HttpResponse.json({ error: "Unauthorized" }, { status: 401 });
   }),
   serverError: http.all("*", () => {
-    return HttpResponse.json({ error: "Internal server error" }, { status: 500 });
+    return HttpResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }),
 };

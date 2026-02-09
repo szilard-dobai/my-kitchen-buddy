@@ -46,7 +46,9 @@ describe("/api/billing/portal", () => {
       const { getOrCreateSubscription } = await import("@/models/subscription");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockFreeSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockFreeSubscription,
+      );
 
       const { POST } = await import("@/app/api/billing/portal/route");
       const response = await POST();
@@ -62,7 +64,9 @@ describe("/api/billing/portal", () => {
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(stripe.billingPortal.sessions.create).mockResolvedValueOnce({
         url: "https://billing.stripe.com/portal_session",
       } as never);
@@ -85,7 +89,9 @@ describe("/api/billing/portal", () => {
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(stripe.billingPortal.sessions.create).mockRejectedValueOnce(
         new Error("Stripe error"),
       );

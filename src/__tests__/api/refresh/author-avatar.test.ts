@@ -37,10 +37,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(getSession).mockResolvedValueOnce(null);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-123" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-123" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -54,10 +57,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({}),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({}),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -74,10 +80,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(findAuthorById).mockResolvedValueOnce(null);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "nonexistent" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "nonexistent" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -88,11 +97,12 @@ describe("/api/refresh-author-avatar", () => {
 
     it("refreshes YouTube author avatar successfully", async () => {
       const { getSession } = await import("@/lib/session");
-      const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
-      const { findRecipeSourceUrlByAuthorId, updateRecipesByAuthorId } = await import("@/models/recipe");
-      const { getYouTubeAuthorAvatar } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { findAuthorById, updateAuthorAvatar } =
+        await import("@/models/author");
+      const { findRecipeSourceUrlByAuthorId, updateRecipesByAuthorId } =
+        await import("@/models/recipe");
+      const { getYouTubeAuthorAvatar } =
+        await import("@/services/extraction/platform-detector");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(findAuthorById).mockResolvedValueOnce(mockYouTubeAuthor);
@@ -106,10 +116,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(1);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-789" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-789" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -141,10 +154,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(findRecipeSourceUrlByAuthorId).mockResolvedValueOnce(null);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-789" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-789" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -155,11 +171,11 @@ describe("/api/refresh-author-avatar", () => {
 
     it("refreshes Instagram author avatar successfully", async () => {
       const { getSession } = await import("@/lib/session");
-      const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { findAuthorById, updateAuthorAvatar } =
+        await import("@/models/author");
       const { updateRecipesByAuthorId } = await import("@/models/recipe");
-      const { getInstagramAuthorAvatar } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { getInstagramAuthorAvatar } =
+        await import("@/services/extraction/platform-detector");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(findAuthorById).mockResolvedValueOnce(mockInstagramAuthor);
@@ -170,10 +186,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(3);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-456" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-456" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -196,11 +215,11 @@ describe("/api/refresh-author-avatar", () => {
 
     it("refreshes TikTok author avatar successfully", async () => {
       const { getSession } = await import("@/lib/session");
-      const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { findAuthorById, updateAuthorAvatar } =
+        await import("@/models/author");
       const { updateRecipesByAuthorId } = await import("@/models/recipe");
-      const { getTikTokAuthorAvatar } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { getTikTokAuthorAvatar } =
+        await import("@/services/extraction/platform-detector");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(findAuthorById).mockResolvedValueOnce(mockTikTokAuthor);
@@ -211,10 +230,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(2);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-123" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-123" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -237,11 +259,11 @@ describe("/api/refresh-author-avatar", () => {
 
     it("returns 500 when database update fails", async () => {
       const { getSession } = await import("@/lib/session");
-      const { findAuthorById, updateAuthorAvatar } = await import("@/models/author");
+      const { findAuthorById, updateAuthorAvatar } =
+        await import("@/models/author");
       const { updateRecipesByAuthorId } = await import("@/models/recipe");
-      const { getInstagramAuthorAvatar } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { getInstagramAuthorAvatar } =
+        await import("@/services/extraction/platform-detector");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(findAuthorById).mockResolvedValueOnce(mockInstagramAuthor);
@@ -252,10 +274,13 @@ describe("/api/refresh-author-avatar", () => {
       vi.mocked(updateRecipesByAuthorId).mockResolvedValueOnce(0);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-456" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-456" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -267,19 +292,21 @@ describe("/api/refresh-author-avatar", () => {
     it("returns 404 when avatar fetch fails (null returned)", async () => {
       const { getSession } = await import("@/lib/session");
       const { findAuthorById } = await import("@/models/author");
-      const { getInstagramAuthorAvatar } = await import(
-        "@/services/extraction/platform-detector"
-      );
+      const { getInstagramAuthorAvatar } =
+        await import("@/services/extraction/platform-detector");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
       vi.mocked(findAuthorById).mockResolvedValueOnce(mockInstagramAuthor);
       vi.mocked(getInstagramAuthorAvatar).mockResolvedValueOnce(null);
 
       const { POST } = await import("@/app/api/refresh-author-avatar/route");
-      const request = new Request("http://localhost/api/refresh-author-avatar", {
-        method: "POST",
-        body: JSON.stringify({ authorId: "author-456" }),
-      });
+      const request = new Request(
+        "http://localhost/api/refresh-author-avatar",
+        {
+          method: "POST",
+          body: JSON.stringify({ authorId: "author-456" }),
+        },
+      );
 
       const response = await POST(request);
       const data = await response.json();

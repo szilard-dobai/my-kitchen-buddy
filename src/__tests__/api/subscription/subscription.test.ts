@@ -37,7 +37,9 @@ describe("Subscription Model", () => {
       expect(result).toBeDefined();
       expect(result?.userId).toBe("user-123");
       expect(result?.planTier).toBe("free");
-      expect(mockCollection.findOne).toHaveBeenCalledWith({ userId: "user-123" });
+      expect(mockCollection.findOne).toHaveBeenCalledWith({
+        userId: "user-123",
+      });
     });
 
     it("returns null when subscription not found", async () => {
@@ -138,9 +140,12 @@ describe("Subscription Model", () => {
         extractionsUsed: 6,
         _id: { toString: () => mockFreeSubscription._id },
       };
-      mockCollection.findOneAndUpdate.mockResolvedValueOnce(updatedSubscription);
+      mockCollection.findOneAndUpdate.mockResolvedValueOnce(
+        updatedSubscription,
+      );
 
-      const { incrementExtractionCount } = await import("@/models/subscription");
+      const { incrementExtractionCount } =
+        await import("@/models/subscription");
       const result = await incrementExtractionCount("user-123");
 
       expect(result?.extractionsUsed).toBe(6);
@@ -156,7 +161,8 @@ describe("Subscription Model", () => {
     it("returns null for non-existent user", async () => {
       mockCollection.findOneAndUpdate.mockResolvedValueOnce(null);
 
-      const { incrementExtractionCount } = await import("@/models/subscription");
+      const { incrementExtractionCount } =
+        await import("@/models/subscription");
       const result = await incrementExtractionCount("nonexistent-user");
 
       expect(result).toBeNull();
@@ -186,9 +192,8 @@ describe("Subscription Model", () => {
         _id: { toString: () => mockProSubscription._id },
       });
 
-      const { findSubscriptionByStripeCustomerId } = await import(
-        "@/models/subscription"
-      );
+      const { findSubscriptionByStripeCustomerId } =
+        await import("@/models/subscription");
       const result = await findSubscriptionByStripeCustomerId("cus_test123");
 
       expect(result).toBeDefined();
@@ -201,10 +206,10 @@ describe("Subscription Model", () => {
     it("returns null when Stripe customer not found", async () => {
       mockCollection.findOne.mockResolvedValueOnce(null);
 
-      const { findSubscriptionByStripeCustomerId } = await import(
-        "@/models/subscription"
-      );
-      const result = await findSubscriptionByStripeCustomerId("cus_nonexistent");
+      const { findSubscriptionByStripeCustomerId } =
+        await import("@/models/subscription");
+      const result =
+        await findSubscriptionByStripeCustomerId("cus_nonexistent");
 
       expect(result).toBeNull();
     });

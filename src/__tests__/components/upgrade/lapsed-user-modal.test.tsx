@@ -32,9 +32,8 @@ describe("LapsedUserModal", () => {
   });
 
   it("renders modal when not previously shown", async () => {
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {
@@ -47,9 +46,8 @@ describe("LapsedUserModal", () => {
   it("does not render when modal was previously shown", async () => {
     localStorage.setItem(STORAGE_KEY, "true");
 
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {
@@ -62,9 +60,8 @@ describe("LapsedUserModal", () => {
   it("tracks lapsed_modal_shown event when displayed", async () => {
     const { trackEvent } = await import("@/lib/tracking");
 
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {
@@ -75,9 +72,8 @@ describe("LapsedUserModal", () => {
   it("closes modal and marks as seen when Continue on Free is clicked", async () => {
     const user = userEvent.setup();
 
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {
@@ -104,9 +100,8 @@ describe("LapsedUserModal", () => {
     const user = userEvent.setup();
     const { trackEvent } = await import("@/lib/tracking");
 
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {
@@ -125,9 +120,8 @@ describe("LapsedUserModal", () => {
   });
 
   it("links to billing settings", async () => {
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {
@@ -143,9 +137,8 @@ describe("LapsedUserModal", () => {
   });
 
   it("shows reassuring message about data safety", async () => {
-    const { LapsedUserModal } = await import(
-      "@/components/upgrade/lapsed-user-modal"
-    );
+    const { LapsedUserModal } =
+      await import("@/components/upgrade/lapsed-user-modal");
     render(<LapsedUserModal />);
 
     await waitFor(() => {

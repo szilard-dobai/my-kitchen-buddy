@@ -37,7 +37,9 @@ export function LapsedUserBanner() {
           <div className="flex items-center gap-3 min-w-0">
             <Crown className="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <p className="text-sm text-amber-800 dark:text-amber-200 truncate">
-              <span className="font-medium">Your Pro subscription has ended.</span>{" "}
+              <span className="font-medium">
+                Your Pro subscription has ended.
+              </span>{" "}
               <span className="hidden sm:inline">
                 Your data is safe, but some features are limited.
               </span>

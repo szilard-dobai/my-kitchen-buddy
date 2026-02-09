@@ -38,7 +38,8 @@ export function EditCollectionDialog({
   const updateMutation = useUpdateCollection();
 
   const hasChanges = name !== collection.name || color !== collection.color;
-  const canSave = name.trim().length > 0 && hasChanges && !updateMutation.isPending;
+  const canSave =
+    name.trim().length > 0 && hasChanges && !updateMutation.isPending;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -120,7 +121,9 @@ export function EditCollectionDialog({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={!canSave}>
-            {updateMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {updateMutation.isPending && (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            )}
             Save
           </Button>
         </DialogFooter>

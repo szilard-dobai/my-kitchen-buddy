@@ -94,7 +94,9 @@ describe("/api/billing/checkout", () => {
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(stripe.checkout.sessions.create).mockResolvedValueOnce({
         url: "https://checkout.stripe.com/session_monthly",
       } as never);
@@ -123,7 +125,9 @@ describe("/api/billing/checkout", () => {
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(stripe.checkout.sessions.create).mockResolvedValueOnce({
         url: "https://checkout.stripe.com/session_yearly",
       } as never);
@@ -148,13 +152,14 @@ describe("/api/billing/checkout", () => {
 
     it("creates new Stripe customer if none exists", async () => {
       const { getSession } = await import("@/lib/session");
-      const { getOrCreateSubscription, updateSubscription } = await import(
-        "@/models/subscription"
-      );
+      const { getOrCreateSubscription, updateSubscription } =
+        await import("@/models/subscription");
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockFreeSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockFreeSubscription,
+      );
       vi.mocked(stripe.customers.create).mockResolvedValueOnce({
         id: "cus_new_customer",
       } as never);
@@ -187,7 +192,9 @@ describe("/api/billing/checkout", () => {
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(stripe.checkout.sessions.create).mockResolvedValueOnce({
         url: "https://checkout.stripe.com/session",
       } as never);
@@ -215,7 +222,9 @@ describe("/api/billing/checkout", () => {
       const { stripe } = await import("@/lib/stripe");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(stripe.checkout.sessions.create).mockRejectedValueOnce(
         new Error("Stripe error"),
       );

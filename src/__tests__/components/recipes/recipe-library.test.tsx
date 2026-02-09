@@ -353,7 +353,9 @@ describe("RecipeLibrary", () => {
       />,
     );
 
-    expect(screen.getByText("You're building a collection!")).toBeInTheDocument();
+    expect(
+      screen.getByText("You're building a collection!"),
+    ).toBeInTheDocument();
   });
 
   it("does not show milestone prompt for pro user", () => {
@@ -368,6 +370,8 @@ describe("RecipeLibrary", () => {
       />,
     );
 
-    expect(screen.queryByText("You're building a collection!")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("You're building a collection!"),
+    ).not.toBeInTheDocument();
   });
 });

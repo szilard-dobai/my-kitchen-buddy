@@ -21,7 +21,7 @@ export const onRequestError = async (
     routeType: string;
     revalidateReason: string | undefined;
     renderSource: string;
-  }
+  },
 ) => {
   const Sentry = await import("@sentry/nextjs");
   Sentry.captureRequestError(error, request, context);

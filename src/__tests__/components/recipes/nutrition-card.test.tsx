@@ -57,8 +57,12 @@ describe("NutritionCard", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /per serving/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /per 100g/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /per serving/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /per 100g/i }),
+    ).toBeInTheDocument();
   });
 
   it("does not render tab switcher when only one data type exists", () => {
@@ -70,8 +74,12 @@ describe("NutritionCard", () => {
       />,
     );
 
-    expect(screen.queryByRole("button", { name: /per serving/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /per 100g/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /per serving/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /per 100g/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("switches to per 100g view on tab click", async () => {

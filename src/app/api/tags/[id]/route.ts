@@ -30,10 +30,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     return NextResponse.json(tag);
   } catch (error) {
     console.error("Error fetching tag:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tag" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch tag" }, { status: 500 });
   }
 }
 

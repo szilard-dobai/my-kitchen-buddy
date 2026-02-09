@@ -83,7 +83,9 @@ export function DeleteCollectionDialog({
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
           >
-            {deleteMutation.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {deleteMutation.isPending && (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            )}
             Delete
           </Button>
         </DialogFooter>

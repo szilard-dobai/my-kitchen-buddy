@@ -13,6 +13,7 @@
 ## Task 1: Add Types
 
 **Files:**
+
 - Modify: `src/types/recipe.ts`
 
 **Step 1: Add SimilarRecipe and SimilarRecipesResponse types**
@@ -52,6 +53,7 @@ git commit -m "feat(similar-recipes): add SimilarRecipe types"
 ## Task 2: Add Plan Tier Limits
 
 **Files:**
+
 - Modify: `src/types/subscription.ts`
 
 **Step 1: Add SIMILAR_RECIPES_LIMITS constant**
@@ -82,6 +84,7 @@ git commit -m "feat(similar-recipes): add plan tier limits"
 ## Task 3: Add Model Function - Write Test
 
 **Files:**
+
 - Create: `src/__tests__/models/similar-recipes.test.ts`
 
 **Step 1: Write the failing test**
@@ -169,7 +172,9 @@ describe("getSimilarRecipes", () => {
 
     expect(result.recipes).toHaveLength(2);
     expect(result.recipes[0].title).toBe("Similar Pasta");
-    expect(result.recipes[0].thumbnailUrl).toBe("https://example.com/thumb.jpg");
+    expect(result.recipes[0].thumbnailUrl).toBe(
+      "https://example.com/thumb.jpg",
+    );
     expect(result.totalSimilar).toBe(2);
     expect(result.hasMore).toBe(false);
   });
@@ -257,6 +262,7 @@ git commit -m "test(similar-recipes): add getSimilarRecipes tests (failing)"
 ## Task 4: Implement Model Function
 
 **Files:**
+
 - Modify: `src/models/recipe.ts`
 
 **Step 1: Add imports**
@@ -536,6 +542,7 @@ git commit -m "feat(similar-recipes): implement getSimilarRecipes model function
 ## Task 5: Add API Route - Write Test
 
 **Files:**
+
 - Create: `src/__tests__/api/recipes/similar.test.ts`
 
 **Step 1: Write the failing test**
@@ -636,7 +643,11 @@ describe("GET /api/recipes/[id]/similar", () => {
     expect(data.recipes).toHaveLength(1);
     expect(data.hasMore).toBe(true);
     expect(data.totalSimilar).toBe(5);
-    expect(getSimilarRecipes).toHaveBeenCalledWith("123", mockSession.user.id, 1);
+    expect(getSimilarRecipes).toHaveBeenCalledWith(
+      "123",
+      mockSession.user.id,
+      1,
+    );
   });
 
   it("returns up to 9 similar recipes for pro user", async () => {
@@ -666,7 +677,11 @@ describe("GET /api/recipes/[id]/similar", () => {
 
     expect(response.status).toBe(200);
     expect(data.recipes).toHaveLength(9);
-    expect(getSimilarRecipes).toHaveBeenCalledWith("123", mockSession.user.id, 9);
+    expect(getSimilarRecipes).toHaveBeenCalledWith(
+      "123",
+      mockSession.user.id,
+      9,
+    );
   });
 });
 ```
@@ -688,6 +703,7 @@ git commit -m "test(similar-recipes): add API route tests (failing)"
 ## Task 6: Implement API Route
 
 **Files:**
+
 - Create: `src/app/api/recipes/[id]/similar/route.ts`
 
 **Step 1: Create the API route**
@@ -748,6 +764,7 @@ git commit -m "feat(similar-recipes): add API route"
 ## Task 7: Create SimilarRecipeCard Component
 
 **Files:**
+
 - Create: `src/components/recipes/similar-recipe-card.tsx`
 
 **Step 1: Create the component**
@@ -834,6 +851,7 @@ git commit -m "feat(similar-recipes): add SimilarRecipeCard component"
 ## Task 8: Create SimilarRecipePlaceholder Component
 
 **Files:**
+
 - Create: `src/components/recipes/similar-recipe-placeholder.tsx`
 
 **Step 1: Create the component**
@@ -876,6 +894,7 @@ git commit -m "feat(similar-recipes): add SimilarRecipePlaceholder component"
 ## Task 9: Create SimilarRecipesSection Component
 
 **Files:**
+
 - Create: `src/components/recipes/similar-recipes-section.tsx`
 
 **Step 1: Create the component**
@@ -979,6 +998,7 @@ git commit -m "feat(similar-recipes): add SimilarRecipesSection component"
 ## Task 10: Integrate into Recipe Detail Page
 
 **Files:**
+
 - Modify: `src/app/(dashboard)/recipes/[id]/page.tsx`
 
 **Step 1: Add import**
@@ -992,12 +1012,14 @@ import { SimilarRecipesSection } from "@/components/recipes/similar-recipes-sect
 **Step 2: Add SimilarRecipesSection before the source attribution**
 
 Find:
+
 ```typescript
       {recipe.source.url && (
         <div className="mt-8 pt-6 border-t">
 ```
 
 Insert before it:
+
 ```typescript
       <SimilarRecipesSection
         recipeId={recipe._id!}

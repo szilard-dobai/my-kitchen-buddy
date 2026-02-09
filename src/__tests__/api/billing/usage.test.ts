@@ -46,7 +46,9 @@ describe("/api/billing/usage", () => {
       const { getTagCount } = await import("@/models/tag");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockFreeSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockFreeSubscription,
+      );
       vi.mocked(getCollectionCount).mockResolvedValueOnce(2);
       vi.mocked(getTagCount).mockResolvedValueOnce(3);
 
@@ -68,7 +70,9 @@ describe("/api/billing/usage", () => {
       const { getTagCount } = await import("@/models/tag");
 
       vi.mocked(getSession).mockResolvedValueOnce(mockSession);
-      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(getOrCreateSubscription).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(getCollectionCount).mockResolvedValueOnce(5);
       vi.mocked(getTagCount).mockResolvedValueOnce(10);
 

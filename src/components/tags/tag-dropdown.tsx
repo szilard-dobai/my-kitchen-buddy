@@ -1,6 +1,13 @@
 "use client";
 
-import { Loader2, MoreHorizontal, Pencil, Plus, Tag, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CreateTagDialog } from "@/components/tags/create-tag-dialog";
@@ -56,10 +63,7 @@ export function TagDropdown({
   const addMutation = useAddRecipeToTag();
   const removeMutation = useRemoveRecipeFromTag();
 
-  const existingTagIds = useMemo(
-    () => new Set(tags.map((t) => t._id)),
-    [tags],
-  );
+  const existingTagIds = useMemo(() => new Set(tags.map((t) => t._id)), [tags]);
 
   useEffect(() => {
     setLocalTagIds(tagIds);

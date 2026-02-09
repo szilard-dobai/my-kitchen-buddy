@@ -1,6 +1,10 @@
 "use client";
 
-import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import { toast } from "sonner";

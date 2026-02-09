@@ -4,9 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MilestonePromptTrigger } from "@/components/upgrade/milestone-prompt-trigger";
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
 }));
 
 describe("MilestonePromptTrigger", () => {
@@ -22,13 +26,17 @@ describe("MilestonePromptTrigger", () => {
   it("shows milestone prompt when user crosses threshold", () => {
     render(<MilestonePromptTrigger recipeCount={5} planTier="free" />);
 
-    expect(screen.getByText("You're building a collection!")).toBeInTheDocument();
+    expect(
+      screen.getByText("You're building a collection!"),
+    ).toBeInTheDocument();
   });
 
   it("does not show prompt for pro users", () => {
     render(<MilestonePromptTrigger recipeCount={5} planTier="pro" />);
 
-    expect(screen.queryByText("You're building a collection!")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("You're building a collection!"),
+    ).not.toBeInTheDocument();
   });
 
   it("does not show prompt when below milestone", () => {
@@ -42,7 +50,9 @@ describe("MilestonePromptTrigger", () => {
 
     render(<MilestonePromptTrigger recipeCount={5} planTier="free" />);
 
-    expect(screen.queryByText("You're building a collection!")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("You're building a collection!"),
+    ).not.toBeInTheDocument();
   });
 
   it("marks milestone as seen when dismissed", async () => {
@@ -69,6 +79,8 @@ describe("MilestonePromptTrigger", () => {
   it("shows lowest unseen milestone first", () => {
     render(<MilestonePromptTrigger recipeCount={30} planTier="free" />);
 
-    expect(screen.getByText("You're building a collection!")).toBeInTheDocument();
+    expect(
+      screen.getByText("You're building a collection!"),
+    ).toBeInTheDocument();
   });
 });

@@ -72,14 +72,23 @@ describe("/api/billing/webhook", () => {
             customer: "cus_test123",
             status: "active",
             items: {
-              data: [{ current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 }],
+              data: [
+                {
+                  current_period_end:
+                    Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+                },
+              ],
             },
           },
         },
       };
 
-      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as never);
-      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(
+        mockEvent as never,
+      );
+      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(updateSubscription).mockResolvedValueOnce(mockProSubscription);
 
       const { POST } = await import("@/app/api/billing/webhook/route");
@@ -125,8 +134,12 @@ describe("/api/billing/webhook", () => {
         },
       };
 
-      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as never);
-      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(
+        mockEvent as never,
+      );
+      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(updateSubscription).mockResolvedValueOnce(mockProSubscription);
 
       const { POST } = await import("@/app/api/billing/webhook/route");
@@ -165,8 +178,12 @@ describe("/api/billing/webhook", () => {
         },
       };
 
-      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as never);
-      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(
+        mockEvent as never,
+      );
+      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(
+        mockProSubscription,
+      );
       vi.mocked(updateSubscription).mockResolvedValueOnce(mockProSubscription);
 
       const { POST } = await import("@/app/api/billing/webhook/route");
@@ -209,9 +226,15 @@ describe("/api/billing/webhook", () => {
         },
       };
 
-      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as never);
-      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(mockProSubscription);
-      vi.mocked(resetExtractionCount).mockResolvedValueOnce(mockProSubscription);
+      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(
+        mockEvent as never,
+      );
+      vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(
+        mockProSubscription,
+      );
+      vi.mocked(resetExtractionCount).mockResolvedValueOnce(
+        mockProSubscription,
+      );
 
       const { POST } = await import("@/app/api/billing/webhook/route");
       const request = new Request("http://localhost/api/billing/webhook", {
@@ -227,7 +250,9 @@ describe("/api/billing/webhook", () => {
 
       expect(response.status).toBe(200);
       expect(data.received).toBe(true);
-      expect(resetExtractionCount).toHaveBeenCalledWith(mockProSubscription.userId);
+      expect(resetExtractionCount).toHaveBeenCalledWith(
+        mockProSubscription.userId,
+      );
     });
 
     it("ignores invoice.paid for non-subscription_cycle events", async () => {
@@ -244,7 +269,9 @@ describe("/api/billing/webhook", () => {
         },
       };
 
-      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as never);
+      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(
+        mockEvent as never,
+      );
 
       const { POST } = await import("@/app/api/billing/webhook/route");
       const request = new Request("http://localhost/api/billing/webhook", {
@@ -278,7 +305,9 @@ describe("/api/billing/webhook", () => {
         },
       };
 
-      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as never);
+      vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(
+        mockEvent as never,
+      );
       vi.mocked(findSubscriptionByStripeCustomerId).mockResolvedValueOnce(null);
 
       const { POST } = await import("@/app/api/billing/webhook/route");

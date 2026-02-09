@@ -60,7 +60,9 @@ export function SimilarRecipesSection({
           {planTier === "free" &&
             data.hasMore &&
             Array.from({ length: Math.min(placeholderCount, 3) }).map(
-              (_, index) => <SimilarRecipePlaceholder key={`placeholder-${index}`} />,
+              (_, index) => (
+                <SimilarRecipePlaceholder key={`placeholder-${index}`} />
+              ),
             )}
         </div>
         {planTier === "free" && data.hasMore && (

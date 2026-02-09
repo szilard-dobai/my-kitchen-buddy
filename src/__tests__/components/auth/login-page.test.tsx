@@ -40,7 +40,9 @@ describe("LoginPage", () => {
     const LoginPage = (await import("@/app/(auth)/login/page")).default;
     render(<LoginPage />);
 
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders Google and Apple OAuth buttons", async () => {
@@ -65,7 +67,10 @@ describe("LoginPage", () => {
     const { signIn } = await import("@/lib/auth-client");
     const { trackEvent } = await import("@/lib/tracking");
 
-    vi.mocked(signIn.email).mockResolvedValueOnce({ data: { user: {} }, error: null } as never);
+    vi.mocked(signIn.email).mockResolvedValueOnce({
+      data: { user: {} },
+      error: null,
+    } as never);
 
     const LoginPage = (await import("@/app/(auth)/login/page")).default;
     render(<LoginPage />);
@@ -126,7 +131,9 @@ describe("LoginPage", () => {
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("An unexpected error occurred")).toBeInTheDocument();
+      expect(
+        screen.getByText("An unexpected error occurred"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -135,7 +142,10 @@ describe("LoginPage", () => {
     const { signIn } = await import("@/lib/auth-client");
 
     vi.mocked(signIn.email).mockImplementationOnce(
-      () => new Promise((resolve) => setTimeout(() => resolve({ data: {}, error: null } as never), 100)),
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ data: {}, error: null } as never), 100),
+        ),
     );
 
     const LoginPage = (await import("@/app/(auth)/login/page")).default;
@@ -145,7 +155,9 @@ describe("LoginPage", () => {
     await user.type(screen.getByLabelText(/password/i), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    expect(screen.getByRole("button", { name: /signing in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /signing in/i }),
+    ).toBeInTheDocument();
   });
 
   it("triggers Google OAuth flow on button click", async () => {
@@ -164,7 +176,9 @@ describe("LoginPage", () => {
       provider: "google",
       callbackURL: "/recipes",
     });
-    expect(trackEvent).toHaveBeenCalledWith("login_attempt", { provider: "google" });
+    expect(trackEvent).toHaveBeenCalledWith("login_attempt", {
+      provider: "google",
+    });
   });
 
   it("triggers Apple OAuth flow on button click", async () => {
@@ -183,7 +197,9 @@ describe("LoginPage", () => {
       provider: "apple",
       callbackURL: "/recipes",
     });
-    expect(trackEvent).toHaveBeenCalledWith("login_attempt", { provider: "apple" });
+    expect(trackEvent).toHaveBeenCalledWith("login_attempt", {
+      provider: "apple",
+    });
   });
 
   it("tracks login_view event on mount", async () => {

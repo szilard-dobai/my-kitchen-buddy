@@ -37,9 +37,8 @@ describe("LapsedUserBanner", () => {
     const { isPromptDismissed } = await import("@/lib/upgrade-prompts");
     vi.mocked(isPromptDismissed).mockReturnValue(false);
 
-    const { LapsedUserBanner } = await import(
-      "@/components/upgrade/lapsed-user-banner"
-    );
+    const { LapsedUserBanner } =
+      await import("@/components/upgrade/lapsed-user-banner");
     render(<LapsedUserBanner />);
 
     expect(
@@ -54,9 +53,8 @@ describe("LapsedUserBanner", () => {
     const { isPromptDismissed } = await import("@/lib/upgrade-prompts");
     vi.mocked(isPromptDismissed).mockReturnValue(true);
 
-    const { LapsedUserBanner } = await import(
-      "@/components/upgrade/lapsed-user-banner"
-    );
+    const { LapsedUserBanner } =
+      await import("@/components/upgrade/lapsed-user-banner");
     render(<LapsedUserBanner />);
 
     expect(
@@ -70,9 +68,8 @@ describe("LapsedUserBanner", () => {
 
     vi.mocked(isPromptDismissed).mockReturnValue(false);
 
-    const { LapsedUserBanner } = await import(
-      "@/components/upgrade/lapsed-user-banner"
-    );
+    const { LapsedUserBanner } =
+      await import("@/components/upgrade/lapsed-user-banner");
     render(<LapsedUserBanner />);
 
     expect(trackEvent).toHaveBeenCalledWith("lapsed_banner_shown");
@@ -80,16 +77,14 @@ describe("LapsedUserBanner", () => {
 
   it("dismisses banner and tracks event on close", async () => {
     const user = userEvent.setup();
-    const { isPromptDismissed, dismissPrompt } = await import(
-      "@/lib/upgrade-prompts"
-    );
+    const { isPromptDismissed, dismissPrompt } =
+      await import("@/lib/upgrade-prompts");
     const { trackEvent } = await import("@/lib/tracking");
 
     vi.mocked(isPromptDismissed).mockReturnValue(false);
 
-    const { LapsedUserBanner } = await import(
-      "@/components/upgrade/lapsed-user-banner"
-    );
+    const { LapsedUserBanner } =
+      await import("@/components/upgrade/lapsed-user-banner");
     render(<LapsedUserBanner />);
 
     const dismissButton = screen.getByRole("button", { name: /dismiss/i });
@@ -106,9 +101,8 @@ describe("LapsedUserBanner", () => {
 
     vi.mocked(isPromptDismissed).mockReturnValue(false);
 
-    const { LapsedUserBanner } = await import(
-      "@/components/upgrade/lapsed-user-banner"
-    );
+    const { LapsedUserBanner } =
+      await import("@/components/upgrade/lapsed-user-banner");
     render(<LapsedUserBanner />);
 
     const resubscribeLink = screen.getByRole("link", { name: /re-subscribe/i });
@@ -121,9 +115,8 @@ describe("LapsedUserBanner", () => {
     const { isPromptDismissed } = await import("@/lib/upgrade-prompts");
     vi.mocked(isPromptDismissed).mockReturnValue(false);
 
-    const { LapsedUserBanner } = await import(
-      "@/components/upgrade/lapsed-user-banner"
-    );
+    const { LapsedUserBanner } =
+      await import("@/components/upgrade/lapsed-user-banner");
     render(<LapsedUserBanner />);
 
     const resubscribeLink = screen.getByRole("link", { name: /re-subscribe/i });

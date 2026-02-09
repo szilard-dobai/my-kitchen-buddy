@@ -1,6 +1,14 @@
 "use client";
 
-import { ChevronDown, Filter, FolderOpen, Plus, Search, Tag, X } from "lucide-react";
+import {
+  ChevronDown,
+  Filter,
+  FolderOpen,
+  Plus,
+  Search,
+  Tag,
+  X,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { AuthorAvatar } from "@/components/recipes/author-avatar";
@@ -136,7 +144,11 @@ function MultiSelectFilter({
             checked={selected.includes(option)}
             onCheckedChange={() => onToggle(option)}
           />
-          {renderOption ? renderOption(option) : <span className="text-sm">{option}</span>}
+          {renderOption ? (
+            renderOption(option)
+          ) : (
+            <span className="text-sm">{option}</span>
+          )}
         </label>
       ))}
     </div>
@@ -439,11 +451,11 @@ export function RecipeFiltersDesktop({
                 >
                   <Checkbox
                     checked={filters.tagIds.includes(tag._id!)}
-                    onCheckedChange={() => toggleArrayFilter("tagIds", tag._id!)}
+                    onCheckedChange={() =>
+                      toggleArrayFilter("tagIds", tag._id!)
+                    }
                   />
-                  <span className="truncate text-sm">
-                    #{tag.name}
-                  </span>
+                  <span className="truncate text-sm">#{tag.name}</span>
                 </label>
               ))}
               {planTier && (
@@ -680,11 +692,11 @@ export function RecipeFiltersMobile({
                     >
                       <Checkbox
                         checked={filters.tagIds.includes(tag._id!)}
-                        onCheckedChange={() => toggleArrayFilter("tagIds", tag._id!)}
+                        onCheckedChange={() =>
+                          toggleArrayFilter("tagIds", tag._id!)
+                        }
                       />
-                      <span className="truncate text-sm">
-                        #{tag.name}
-                      </span>
+                      <span className="truncate text-sm">#{tag.name}</span>
                     </label>
                   ))}
                   {planTier && (

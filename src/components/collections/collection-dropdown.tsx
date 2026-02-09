@@ -46,7 +46,8 @@ export function CollectionDropdown({
     null,
   );
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [localCollectionIds, setLocalCollectionIds] = useState<string[]>(collectionIds);
+  const [localCollectionIds, setLocalCollectionIds] =
+    useState<string[]>(collectionIds);
 
   const addMutation = useAddRecipeToCollection();
   const removeMutation = useRemoveRecipeFromCollection();
@@ -67,7 +68,10 @@ export function CollectionDropdown({
 
   const recipeCollectionIdsSet = new Set(validLocalCollectionIds);
 
-  const handleToggle = async (collectionId: string, isInCollection: boolean) => {
+  const handleToggle = async (
+    collectionId: string,
+    isInCollection: boolean,
+  ) => {
     setLoadingCollectionId(collectionId);
 
     // Optimistic update
@@ -92,7 +96,9 @@ export function CollectionDropdown({
       if (isInCollection) {
         setLocalCollectionIds((prev) => [...prev, collectionId]);
       } else {
-        setLocalCollectionIds((prev) => prev.filter((id) => id !== collectionId));
+        setLocalCollectionIds((prev) =>
+          prev.filter((id) => id !== collectionId),
+        );
       }
       toast.error("Failed to update collection");
     } finally {
@@ -110,7 +116,10 @@ export function CollectionDropdown({
             <Button variant="outline" size="sm" className="gap-2">
               <FolderPlus className="size-4" />
               {inCollectionCount > 0 ? (
-                <span>In {inCollectionCount} collection{inCollectionCount !== 1 ? "s" : ""}</span>
+                <span>
+                  In {inCollectionCount} collection
+                  {inCollectionCount !== 1 ? "s" : ""}
+                </span>
               ) : (
                 <span>Add to collection</span>
               )}
@@ -168,7 +177,9 @@ export function CollectionDropdown({
           ) : (
             <div className="space-y-1">
               {collections.map((collection) => {
-                const isInCollection = recipeCollectionIdsSet.has(collection._id!);
+                const isInCollection = recipeCollectionIdsSet.has(
+                  collection._id!,
+                );
                 const isLoadingThis = loadingCollectionId === collection._id;
 
                 return (

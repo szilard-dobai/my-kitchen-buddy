@@ -34,7 +34,8 @@ export async function GET() {
         extractions: {
           used: subscription.extractionsUsed,
           limit: subscription.extractionsLimit,
-          atLimit: subscription.extractionsUsed >= subscription.extractionsLimit,
+          atLimit:
+            subscription.extractionsUsed >= subscription.extractionsLimit,
         },
         collections: {
           used: collectionsUsed,

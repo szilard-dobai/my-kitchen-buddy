@@ -28,7 +28,8 @@ export function RecipeCollectionButton({
   onCollectionChange,
 }: RecipeCollectionButtonProps) {
   const { data: collections = [] } = useCollections();
-  const [localCollectionIds, setLocalCollectionIds] = useState<string[]>(collectionIds);
+  const [localCollectionIds, setLocalCollectionIds] =
+    useState<string[]>(collectionIds);
 
   useEffect(() => {
     setLocalCollectionIds(collectionIds);

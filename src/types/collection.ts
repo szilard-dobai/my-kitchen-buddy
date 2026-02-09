@@ -10,7 +10,6 @@ export interface Collection {
   updatedAt: Date;
 }
 
-
 export interface RecipeCollection {
   _id?: string;
   recipeId: string;

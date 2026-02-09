@@ -375,7 +375,9 @@ const CUISINE_GROUPS: Record<string, string[]> = {
 function getCuisineGroup(cuisine: string): string | null {
   const normalized = cuisine.toLowerCase().trim();
   for (const [group, cuisines] of Object.entries(CUISINE_GROUPS)) {
-    if (cuisines.some((c) => normalized.includes(c) || c.includes(normalized))) {
+    if (
+      cuisines.some((c) => normalized.includes(c) || c.includes(normalized))
+    ) {
       return group;
     }
   }
@@ -490,7 +492,9 @@ export async function getSimilarRecipes(
     const sourceIngredientsFull = (sourceRecipe.ingredients || []).map(
       (i: { name: string }) => i.name.toLowerCase().trim(),
     );
-    const sourceIngredientWords = extractKeyIngredientWords(sourceIngredientsFull);
+    const sourceIngredientWords = extractKeyIngredientWords(
+      sourceIngredientsFull,
+    );
     const sourceCuisine = sourceRecipe.cuisineType || "";
     const sourceCuisineGroup = getCuisineGroup(sourceCuisine);
     const sourceTitle = sourceRecipe.title || "";
@@ -515,7 +519,9 @@ export async function getSimilarRecipes(
         const recipeIngredientsFull = (recipe.ingredients || []).map(
           (i: { name: string }) => i.name.toLowerCase().trim(),
         );
-        const recipeIngredientWords = extractKeyIngredientWords(recipeIngredientsFull);
+        const recipeIngredientWords = extractKeyIngredientWords(
+          recipeIngredientsFull,
+        );
 
         const commonWords = sourceIngredientWords.filter((w) =>
           recipeIngredientWords.includes(w),
@@ -545,14 +551,17 @@ export async function getSimilarRecipes(
         const commonTitleWords = sourceTitleWords.filter((w) =>
           recipeTitleWords.includes(w),
         );
-        const unionTitleWords = new Set([...sourceTitleWords, ...recipeTitleWords]);
+        const unionTitleWords = new Set([
+          ...sourceTitleWords,
+          ...recipeTitleWords,
+        ]);
         const titleScore =
-          unionTitleWords.size > 0 ? commonTitleWords.length / unionTitleWords.size : 0;
+          unionTitleWords.size > 0
+            ? commonTitleWords.length / unionTitleWords.size
+            : 0;
 
         const similarityScore =
-          ingredientScore * 0.5 +
-          cuisineScore * 0.25 +
-          titleScore * 0.25;
+          ingredientScore * 0.5 + cuisineScore * 0.25 + titleScore * 0.25;
 
         return {
           _id: recipe._id.toString(),

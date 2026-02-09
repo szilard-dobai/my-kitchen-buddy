@@ -87,7 +87,11 @@ export async function POST(request: Request) {
         );
       }
 
-      await updateRecipeAuthorAvatar(recipeId, session.user.id, authorAvatarUrl);
+      await updateRecipeAuthorAvatar(
+        recipeId,
+        session.user.id,
+        authorAvatarUrl,
+      );
 
       return NextResponse.json({ authorAvatarUrl });
     }

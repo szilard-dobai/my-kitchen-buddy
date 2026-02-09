@@ -68,7 +68,9 @@ export function RecipeCard({
     <div className="group relative">
       <Link
         href={`/recipes/${recipe._id}`}
-        onClick={() => trackEvent("recipe_card_click", { recipeId: recipe._id })}
+        onClick={() =>
+          trackEvent("recipe_card_click", { recipeId: recipe._id })
+        }
       >
         <Card className="h-full card-shadow hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden">
           <div className="aspect-video bg-muted relative">
