@@ -116,8 +116,14 @@ export default function ExtractPage() {
 
         if (status.status === "failed") {
           if (!hasTrackedErrorRef.current) {
+            const errorMsg = status.error || "Extraction failed";
+            const isContentError =
+              errorMsg.includes("non-recipe") ||
+              errorMsg.includes("not contain recipe") ||
+              errorMsg.includes("no recipe");
             trackEvent("extraction_error", {
-              error: status.error || "Extraction failed",
+              error: errorMsg,
+              validationLayer: isContentError ? "content_analysis" : "unknown",
             });
             hasTrackedErrorRef.current = true;
           }
@@ -161,14 +167,6 @@ export default function ExtractPage() {
       .catch(console.error);
   }, []);
 
-  const detectPlatformFromUrl = (urlString: string): string => {
-    if (urlString.includes("tiktok.com")) return "tiktok";
-    if (urlString.includes("instagram.com")) return "instagram";
-    if (urlString.includes("youtube.com") || urlString.includes("youtu.be"))
-      return "youtube";
-    return "unknown";
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -179,8 +177,7 @@ export default function ExtractPage() {
     hasTrackedSuccessRef.current = false;
     hasTrackedErrorRef.current = false;
 
-    const platform = detectPlatformFromUrl(url);
-    trackEvent("extraction_attempt", { url, platform });
+    trackEvent("extraction_attempt", { url });
 
     try {
       const response = await fetch("/api/extract", {
@@ -213,7 +210,14 @@ export default function ExtractPage() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An unexpected error occurred";
-      trackEvent("extraction_error", { error: errorMessage });
+      const validationLayer =
+        err instanceof Error && err.message.includes("profile")
+          ? "schema"
+          : "unknown";
+      trackEvent("extraction_error", {
+        error: errorMessage,
+        validationLayer,
+      });
       setError(errorMessage);
       setLoading(false);
     }
