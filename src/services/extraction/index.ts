@@ -73,6 +73,7 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
 
     let cachedMetadata = await findMetadataCacheByUrl(normalizedUrl);
     let metadataDescription: string | undefined;
+    let videoDuration: number | undefined;
 
     if (cachedMetadata) {
       await updateExtractionJobStatus(
@@ -82,9 +83,11 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
         "Using cached metadata...",
       );
       metadataDescription = cachedMetadata.metadata.description;
+      videoDuration = cachedMetadata.metadata.media?.duration;
     } else {
       const metadataResult = await getMetadata(sourceUrl);
       metadataDescription = metadataResult.description;
+      videoDuration = metadataResult.media?.duration;
 
       if (!metadataResult.error) {
         let authorId: string | undefined;
@@ -135,6 +138,15 @@ export async function processExtraction(job: ExtractionJob): Promise<void> {
           authorId,
         );
       }
+    }
+
+    const MAX_VIDEO_DURATION = 300;
+    if (videoDuration && videoDuration > MAX_VIDEO_DURATION) {
+      const minutes = Math.floor(videoDuration / 60);
+      const errorMsg = `Video is too long (${minutes} minutes). Please use videos under 5 minutes for better recipe extraction.`;
+      await failExtractionJob(id, errorMsg);
+      if (telegramChatId) await sendError(telegramChatId, errorMsg);
+      return;
     }
 
     let transcriptLang: string | undefined;
