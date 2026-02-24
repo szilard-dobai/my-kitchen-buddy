@@ -73,8 +73,7 @@ function getStepStatus(
 export default function ExtractPage() {
   const router = useRouter();
   const [url, setUrl] = useState("");
-  const [targetLanguage, setTargetLanguage] =
-    useState<TargetLanguage>("original");
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("en");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
